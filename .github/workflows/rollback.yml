@@ -1,0 +1,46 @@
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: "Which site"
+        type: choice
+        options: [website, b, c]
+      tag:
+        description: "Image tag to roll back to (e.g. sha-1a2b3c4 — see Docker Hub or an earlier run)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    concurrency: { group: production-deploy, cancel-in-progress: false }
+    steps:
+      - name: Validate input
+        env: { TAG: "${{ github.event.inputs.tag }}" }
+        run: '[[ "$TAG" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::invalid tag"; exit 1; }'
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          KNOWN: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy; chmod 600 ~/.ssh/id_deploy
+          if [ -n "$KNOWN" ]; then printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts; else ssh-keyscan -T 15 -H "$SSH_HOST" > ~/.ssh/known_hosts; fi
+          printf 'Host target\n  HostName %s\n  User %s\n  IdentityFile ~/.ssh/id_deploy\n  IdentitiesOnly yes\n  StrictHostKeyChecking yes\n' "$SSH_HOST" "${SSH_USER:-ubuntu}" > ~/.ssh/config
+      - name: Roll back
+        env:
+          SITE: ${{ github.event.inputs.site }}
+          TAG: ${{ github.event.inputs.tag }}
+        run: |
+          case "$SITE" in website) var=TAG_MAIN;; b) var=TAG_B;; c) var=TAG_C;; esac
+          # shellcheck disable=SC2029  # TAG validated against ^[A-Za-z0-9._-]+$ in the first step
+          ssh target "bash /opt/tac/deploy.sh $var=$TAG"

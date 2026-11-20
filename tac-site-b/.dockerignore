@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+*.tsbuildinfo
+.env*
+*.pem
+server/data
+server/enquiries.jsonl
+README.md

@@ -1,0 +1,14 @@
+# secrets — never commit
+*.pem
+*.key
+.env
+.env.*
+!.env.example
+# build / deps / local data
+node_modules/
+dist/
+*.tsbuildinfo
+**/server/data/*
+!**/server/data/.gitignore
+**/server/enquiries.jsonl
+.DS_Store

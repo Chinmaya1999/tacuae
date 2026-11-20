@@ -1,0 +1,248 @@
+name: CI/CD
+
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+  workflow_dispatch:
+    inputs:
+      sites:
+        description: "Sites to build & deploy: all, or a comma list of: website,b,c"
+        default: all
+      bootstrap:
+        description: "First run only: install Docker and prepare the server"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cicd-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  DOCKERHUB_USER: ${{ vars.DOCKERHUB_USERNAME || 'awsmallick1999' }}
+
+jobs:
+  # ───────────────────────── decide which sites changed ─────────────────────────
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      any: ${{ steps.plan.outputs.any }}
+      infra: ${{ steps.plan.outputs.infra }}
+      tags: ${{ steps.plan.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          SHA: ${{ github.sha }}
+          BASE_REF: ${{ github.base_ref }}
+          SITES_INPUT: ${{ github.event.inputs.sites }}
+        run: |
+          set -euo pipefail
+          ALL='[{"key":"website","dir":"tac-website","image":"tac-website","tagvar":"TAG_MAIN"},{"key":"b","dir":"tac-site-b","image":"tac-site-b","tagvar":"TAG_B"},{"key":"c","dir":"tac-site-c","image":"tac-site-c","tagvar":"TAG_C"}]'
+          files=ALL
+          if [ "$EVENT" = pull_request ]; then
+            base=$(git merge-base "origin/$BASE_REF" HEAD); files=$(git diff --name-only "$base" HEAD)
+          elif [ "$EVENT" = push ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            files=$(git diff --name-only "$BEFORE" "$SHA" 2>/dev/null) || files=ALL
+          fi
+          sel='[]'; tags=""
+          while read -r row; do
+            key=$(jq -r .key <<<"$row"); dir=$(jq -r .dir <<<"$row"); tagvar=$(jq -r .tagvar <<<"$row"); want=0
+            if [ "$EVENT" = workflow_dispatch ]; then
+              case ",${SITES_INPUT:-all}," in *,all,*|*",$key,"*) want=1;; esac
+            elif [ "$files" = ALL ] || grep -q "^$dir/" <<<"$files"; then want=1; fi
+            if [ $want = 1 ]; then sel=$(jq -c ". + [$row]" <<<"$sel"); tags="$tags $tagvar=sha-${SHA::7}"; fi
+          done < <(jq -c '.[]' <<<"$ALL")
+          infra=false
+          if [ "$EVENT" = workflow_dispatch ] || [ "$files" = ALL ] || grep -qE '^(deploy/|\.github/workflows/)' <<<"$files"; then infra=true; fi
+          {
+            echo "matrix={\"include\":$sel}"
+            echo "any=$([ "$sel" != '[]' ] && echo true || echo false)"
+            echo "infra=$infra"
+            echo "tags=${tags# }"
+          } >> "$GITHUB_OUTPUT"
+          echo "Selected: $sel  | infra=$infra | tags=${tags# }"
+
+  # ───────────────────────── build + smoke-test every changed site ─────────────────────────
+  test:
+    needs: plan
+    if: needs.plan.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    defaults:
+      run: { working-directory: "${{ matrix.dir }}" }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: ${{ matrix.dir }}/package-lock.json
+      - run: npm ci
+      - name: Type-check, build, generate sitemap
+        run: npm run build
+      - name: Dependency audit (informational)
+        run: npm audit --omit=dev --audit-level=critical
+        continue-on-error: true
+      - name: Smoke-test the production server
+        run: |
+          set -euo pipefail
+          DATA_DIR="$(mktemp -d)"; export PORT=3100 DATA_DIR
+          node server/index.mjs > "$RUNNER_TEMP/server.log" 2>&1 & pid=$!
+          trap 'kill $pid 2>/dev/null || true' EXIT
+          for _ in $(seq 1 30); do curl -fs "localhost:$PORT/" >/dev/null && break; sleep 1; done
+          curl -fsS "localhost:$PORT/" | grep -qi "<title>"
+          curl -fsS "localhost:$PORT/sitemap.xml" | grep -q "<urlset"
+          curl -fsS "localhost:$PORT/robots.txt" | grep -qi "sitemap"
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "localhost:$PORT/api/enquiry" -H 'content-type: application/json' -d '{}')
+          [ "$code" -ge 400 ] && [ "$code" -lt 500 ] || { echo "empty enquiry should be rejected, got $code"; exit 1; }
+          echo "smoke test passed"
+
+  # ───────────────────────── build, scan and push Docker images ─────────────────────────
+  image:
+    needs: [plan, test]
+    if: needs.plan.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      # images are only pushed from main once the repo variable DEPLOY_ENABLED=true is set
+      PUSH: ${{ github.event_name != 'pull_request' && vars.DEPLOY_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Log in to Docker Hub
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKERHUB_USER }}/${{ matrix.image }}
+          tags: |
+            type=sha,format=short,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+      - name: Build image for testing
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.dir }}
+          load: true
+          tags: ci/${{ matrix.image }}:ci
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+      - name: Run the container (read-only, like production) and wait for healthy
+        run: |
+          set -euo pipefail
+          docker run -d --name smoke --read-only --tmpfs /tmp -v /data -v /app/server/data -p 3000:3000 ci/${{ matrix.image }}:ci
+          for _ in $(seq 1 30); do s=$(docker inspect -f '{{.State.Health.Status}}' smoke); [ "$s" = healthy ] && break; sleep 2; done
+          [ "$s" = healthy ] || { docker logs smoke; exit 1; }
+          curl -fsS localhost:3000/ >/dev/null
+          docker rm -f smoke
+      - name: Vulnerability scan (fixable CRITICAL issues fail the build)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ci/${{ matrix.image }}:ci
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+      - name: Push image
+        if: env.PUSH == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.dir }}
+          push: true
+          platforms: ${{ vars.DOCKER_PLATFORMS || 'linux/amd64' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+
+  # ───────────────────────── deploy to the server over SSH ─────────────────────────
+  deploy:
+    needs: [plan, test, image]
+    if: >-
+      ${{ !cancelled() && github.event_name != 'pull_request' && vars.DEPLOY_ENABLED == 'true'
+      && needs.plan.result == 'success'
+      && (needs.test.result == 'success' || needs.test.result == 'skipped')
+      && (needs.image.result == 'success' || needs.image.result == 'skipped')
+      && (needs.plan.outputs.any == 'true' || needs.plan.outputs.infra == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production   # add required reviewers in Settings → Environments for manual approval
+    concurrency: { group: production-deploy, cancel-in-progress: false }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          KNOWN: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          [ -n "$SSH_KEY" ] && [ -n "$SSH_HOST" ] || { echo "::error::Set secrets SSH_PRIVATE_KEY and SSH_HOST"; exit 1; }
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy; chmod 600 ~/.ssh/id_deploy
+          if [ -n "$KNOWN" ]; then printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
+          else echo "::warning::SSH_KNOWN_HOSTS not set — trusting the host key on first contact (set it to pin the server)"; ssh-keyscan -T 15 -H "$SSH_HOST" > ~/.ssh/known_hosts; fi
+          printf 'Host target\n  HostName %s\n  User %s\n  IdentityFile ~/.ssh/id_deploy\n  IdentitiesOnly yes\n  StrictHostKeyChecking yes\n  ServerAliveInterval 20\n' "$SSH_HOST" "${SSH_USER:-ubuntu}" > ~/.ssh/config
+      - name: Bootstrap server (first run)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.bootstrap == 'true'
+        run: |
+          scp deploy/bootstrap-server.sh target:/tmp/bootstrap-server.sh
+          ssh target 'sudo bash /tmp/bootstrap-server.sh "$(id -un)"'
+      - name: Upload deployment files
+        run: |
+          ssh target 'test -d /opt/tac' || { echo "::error::/opt/tac missing — run this workflow manually once with bootstrap=true"; exit 1; }
+          scp deploy/docker-compose.yml deploy/Caddyfile deploy/deploy.sh target:/opt/tac/
+          ssh target 'chmod +x /opt/tac/deploy.sh'
+      - name: Docker Hub login on server
+        env: { DOCKERHUB_TOKEN: "${{ secrets.DOCKERHUB_TOKEN }}" }
+        run: |
+          # shellcheck disable=SC2029  # value expanded client-side on purpose (a plain Docker Hub username)
+          printf '%s' "$DOCKERHUB_TOKEN" | ssh target "docker login -u '$DOCKERHUB_USER' --password-stdin"
+      - name: Deploy
+        env:
+          TAGS: ${{ needs.plan.outputs.tags }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          ENQUIRY_TO: ${{ vars.ENQUIRY_TO }}
+          MAIN_SITE: ${{ vars.MAIN_SITE }}
+          B_SITE: ${{ vars.B_SITE }}
+          C_SITE: ${{ vars.C_SITE }}
+        run: |
+          set -euo pipefail
+          payload=""
+          for k in ADMIN_PASSWORD SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASS SMTP_FROM ENQUIRY_TO MAIN_SITE B_SITE C_SITE; do
+            v="${!k:-}"; [ -n "$v" ] && payload+="$k=$v"$'\n'
+          done
+          # shellcheck disable=SC2029  # tags/user are generated by the plan job from fixed patterns
+          printf '%s' "$payload" | ssh target "bash /opt/tac/deploy.sh --env-stdin DOCKERHUB_USER=$DOCKERHUB_USER $TAGS"
+      - name: Smoke-test the live sites
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          URL_MAIN: ${{ vars.SMOKE_URL_MAIN }}
+          URL_B: ${{ vars.SMOKE_URL_B }}
+          URL_C: ${{ vars.SMOKE_URL_C }}
+        run: |
+          check() { for _ in $(seq 1 20); do curl -fsS -m 10 -o /dev/null "$1" && { echo "ok  $1"; return 0; }; sleep 3; done; echo "FAILED $1"; return 1; }
+          check "${URL_MAIN:-http://$SSH_HOST}"
+          check "${URL_B:-http://$SSH_HOST:8081}"
+          check "${URL_C:-http://$SSH_HOST:8082}"
