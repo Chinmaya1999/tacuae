@@ -137,7 +137,7 @@ jobs:
             type=sha,format=short,prefix=sha-
             type=raw,value=latest,enable={{is_default_branch}}
       - name: Build image for testing
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ matrix.dir }}
           load: true
@@ -161,7 +161,7 @@ jobs:
           exit-code: "1"
       - name: Push image
         if: env.PUSH == 'true'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ matrix.dir }}
           push: true
