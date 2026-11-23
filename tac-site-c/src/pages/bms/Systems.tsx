@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Crosshair } from 'lucide-react'
 import { fmtVal, levelName, moduleIcon, statusColor, statusLabel, type Catalog, type Equip, type Live, type Project } from '../../data/bms'
 import { Icon } from '../../components/dashboard/ui'
+import EquipImage from '../../components/bms/EquipImage'
 
 type Props = { project: Project; equipment: Equip[]; live: Live | null; catalog: Catalog; onLocate: (id: string) => void }
 
@@ -39,8 +40,8 @@ export default function Systems({ project, equipment, live, catalog, onLocate }:
             const d = defs[e.type], lv = live?.items[e.id], t = project.towers.find((x) => x.id === e.towerId), pr = d.readings.find((r) => r.primary) ?? d.readings[0], st = lv?.status ?? 'online'
             return (
               <tr key={e.id} className="border-t border-white/10">
-                <td className="p-3 pl-4"><div>{e.tag}</div><div className="text-xs text-slate">{e.name}</div></td>
-                <td className="text-silver">{t?.name} · {t ? levelName(e.level, t.floors) : ''}</td>
+                <td className="p-3 pl-4"><div className="flex items-center gap-3"><span className="shrink-0 overflow-hidden rounded-lg bg-[#13233a]"><EquipImage type={e.type} size={44} /></span><span><span className="block">{e.tag}</span><span className="block text-sm text-silver">{e.name}</span></span></div></td>
+                <td><span className="rounded-md bg-white/10 px-2.5 py-1 text-sm font-medium text-white">{t?.name} · {t ? levelName(e.level, t.floors) : ''}</span></td>
                 <td><span className="inline-flex items-center gap-2" style={{ color: statusColor[st] }}><span className="h-2 w-2 rounded-full" style={{ background: statusColor[st] }} />{statusLabel[st]}</span></td>
                 <td className="tabular-nums">{pr.label}: <b className="font-display font-normal">{fmtVal(lv?.values[pr.key], pr.unit)}</b></td>
                 <td className="pr-4 text-right"><button onClick={() => onLocate(e.id)} className="inline-flex items-center gap-1.5 text-cyan hover:underline"><Crosshair size={14} />Locate in 3D</button></td>

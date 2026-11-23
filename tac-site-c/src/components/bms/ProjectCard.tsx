@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { MapPin } from 'lucide-react'
 import { typeLabel, type Project } from '../../data/bms'
+import { useBuildingThumb } from './useBuildingThumb'
 
 /** Little skyline: one bar per tower, as tall as it has floors. */
 export function Skyline({ project }: { project: Project }) {
@@ -16,10 +17,10 @@ export function Skyline({ project }: { project: Project }) {
 }
 
 export default function ProjectCard({ p }: { p: Project }) {
-  const s = p.stats, pct = s && s.equipment ? Math.round((s.online / s.equipment) * 100) : 100
+  const pic = useBuildingThumb(p), s = p.stats, pct = s && s.equipment ? Math.round((s.online / s.equipment) * 100) : 100
   return (
     <li className="group relative flex flex-col rounded-2xl border border-white/10 bg-white/[.03] p-4 transition hover:border-cyan/40 hover:bg-white/[.05]">
-      <Skyline project={p} />
+      {pic ? <img src={pic} alt={`${p.name}: ${p.towers.length} tower${p.towers.length > 1 ? 's' : ''}, up to ${Math.max(...p.towers.map((t) => t.floors))} floors`} width={800} height={450} className="aspect-video w-full rounded-xl object-cover" draggable={false} /> : <Skyline project={p} />}
       <h3 className="mt-4 truncate font-display text-lg"><Link to={`/dashboard/projects/${p.id}`} className="after:absolute after:inset-0 after:rounded-2xl focus-visible:after:outline focus-visible:after:outline-2 focus-visible:after:outline-cyan">{p.name}</Link></h3>
       <p className="mt-0.5 flex items-center gap-1.5 truncate text-sm text-silver"><MapPin size={13} className="shrink-0" />{p.location || typeLabel(p.type)}</p>
       {s && <>

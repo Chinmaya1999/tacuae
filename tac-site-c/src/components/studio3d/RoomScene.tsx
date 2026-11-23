@@ -8,7 +8,7 @@ import { clamp, dims, mountFor, mountHeight, snapWall, toPct, type Wall } from '
 import { useStudioUI } from './store'
 
 export type MoveFn = (kind: 'device' | 'furniture', id: string, x: number, y: number) => void
-type Props = { room: Room; readOnly?: boolean; onBegin: () => void; onMove: MoveFn; onToggle: (id: string) => void; onCapture: (fn: () => string) => void }
+type Props = { resetKey: number; zoom: { n: number; dir: 1 | -1 }; room: Room; readOnly?: boolean; onBegin: () => void; onMove: MoveFn; onToggle: (id: string) => void; onCapture: (fn: () => string) => void }
 
 function Lights({ w, l, h }: { w: number; l: number; h: number }) {
   const night = useStudioUI((s) => s.night), r = Math.max(w, l)
@@ -53,7 +53,7 @@ function Shell({ room }: { room: Room }) {
   )
 }
 
-function Rig({ room, flat }: { room: Room; flat: boolean }) {
+function Rig({ room, flat, resetKey, zoom }: { room: Room; flat: boolean; resetKey: number; zoom: { n: number; dir: 1 | -1 } }) {
   const cam = useStudioUI((s) => s.cam), drag = useStudioUI((s) => s.drag), { camera } = useThree()
   const controls = useRef<ElementRef<typeof OrbitControls>>(null)
   const { w, l, h } = dims(room), keys = useRef<Record<string, boolean>>({})
@@ -66,7 +66,14 @@ function Rig({ room, flat }: { room: Room; flat: boolean }) {
     else if (cam === 'top') set([0, d * 1.15 + h, 0.001], [0, 0, 0])
     else if (cam === 'front') set([0, h * 0.55, l / 2 + d * 1.1], [0, h * 0.42, 0])
     else set([0, 1.6, l / 2 - 0.7], [0, 1.6, l / 2 - 0.71])
-  }, [cam, w, l, h, room.id, camera])
+  }, [cam, w, l, h, room.id, camera, resetKey])
+
+  useEffect(() => { // zoom buttons: dolly along the line to the target (not while walking)
+    const c = controls.current
+    if (!c || !zoom.n || cam === 'walk') return
+    const off = camera.position.clone().sub(c.target), len = Math.min(60, Math.max(2.5, off.length() * (zoom.dir > 0 ? 0.78 : 1.3)))
+    camera.position.copy(c.target).add(off.setLength(len)); c.update()
+  }, [zoom.n]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const typing = (e: KeyboardEvent) => ['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)
@@ -98,7 +105,7 @@ function Capture({ onCapture }: { onCapture: (fn: () => string) => void }) {
   return null
 }
 
-export default function RoomScene({ room, readOnly, onBegin, onMove, onToggle, onCapture }: Props) {
+export default function RoomScene({ resetKey, zoom, room, readOnly, onBegin, onMove, onToggle, onCapture }: Props) {
   const { sel, drag, select, setDrag } = useStudioUI()
   const { w, l } = dims(room), info = useRef<{ kind: 'device' | 'furniture'; id: string; moved: boolean; sx: number; sz: number } | null>(null)
 
@@ -133,7 +140,7 @@ export default function RoomScene({ room, readOnly, onBegin, onMove, onToggle, o
       {(room.furniture ?? []).map((f) => <FurnitureMesh key={f.id} f={f} room={room} selected={sel?.id === f.id} onDown={down('furniture', f.id, 0)} />)}
       {room.devices.map((d) => <DeviceMesh key={d.id} d={d} room={room} selected={sel?.id === d.id} onDown={down('device', d.id, Math.max(0.05, mountHeight(mountFor(d.cat), room.h ?? 2.8) - (mountFor(d.cat) === 'ceiling' ? 0.1 : 0)))} />)}
       {drag && <mesh position={[0, drag.height, 0]} rotation={[-Math.PI / 2, 0, 0]} onPointerMove={move}><planeGeometry args={[80, 80]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} /></mesh>}
-      <Rig room={room} flat={false} />
+      <Rig room={room} flat={false} resetKey={resetKey} zoom={zoom} />
       <Capture onCapture={onCapture} />
     </Canvas>
   )

@@ -20,9 +20,14 @@ export default function AlarmsList({ items, projects, onAck, onResolve, showProj
         <div className="flex flex-wrap items-start gap-3">
           <span className={`rounded-full border px-3 py-1 text-xs capitalize ${severityStyle[a.severity]}`}>{a.severity}</span>
           <div className="min-w-[200px] flex-1">
-            <div className="text-sm">{a.message}</div>
-            <div className="mt-1 text-xs text-slate">{a.tag} · {a.module} · {where(a)}{showProject && a.projectName ? <> · <Link to={`/dashboard/projects/${a.projectId}`} className="text-cyan hover:underline">{a.projectName}</Link></> : null} · raised {ago(a.raisedAt)}</div>
-            {a.ackBy && <div className="mt-1 text-xs text-slate">Acknowledged by {a.ackBy}{a.resolvedAt ? ` · resolved ${ago(a.resolvedAt)}` : ''}{a.note ? ` — “${a.note}”` : ''}</div>}
+            <div className="text-base text-white">{a.message}</div>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm">
+              <span className="rounded-md bg-white/10 px-2.5 py-1 font-medium text-white">{where(a)}</span>
+              <span className="text-silver">{a.tag} · <span className="capitalize">{a.module}</span></span>
+              {showProject && a.projectName && <Link to={`/dashboard/projects/${a.projectId}`} className="text-cyan hover:underline">{a.projectName}</Link>}
+              <span className="text-silver/80">raised {ago(a.raisedAt)}</span>
+            </div>
+            {a.ackBy && <div className="mt-2 text-sm text-silver">Acknowledged by {a.ackBy}{a.resolvedAt ? ` · resolved ${ago(a.resolvedAt)}` : ''}{a.note ? ` — “${a.note}”` : ''}</div>}
           </div>
           {a.state === 'active' && <button disabled={busy === a.id} onClick={() => run(a.id, () => onAck(a))} className="rounded-full border border-white/20 px-4 py-1.5 text-sm text-silver hover:border-cyan hover:text-cyan">Acknowledge</button>}
           {a.state !== 'resolved' && <button onClick={() => { setResolving(resolving === a.id ? null : a.id); setNote('') }} className="rounded-full border border-emerald-300/40 px-4 py-1.5 text-sm text-emerald-300 hover:bg-emerald-400/10">Resolve</button>}

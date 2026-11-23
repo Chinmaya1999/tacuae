@@ -92,11 +92,48 @@ export default function Designer3D({ design, onChange, readOnly }: Props) {
   const selDef = selDevice ? deviceById[selDevice.cat] : undefined, kind = selDef?.kind
   const dimmable = kind === 'light' || kind === 'fan'
 
+  const [full, setFull] = useState(false), [panels, setPanels] = useState(() => typeof window === 'undefined' || window.innerWidth >= 1024), [resetKey, setResetKey] = useState(0), [zoom, setZoom] = useState<{ n: number; dir: 1 | -1 }>({ n: 0, dir: 1 })
+  useEffect(() => { // full-screen designer: lock page scroll, Esc leaves it
+    if (!full) return
+    const prev = document.body.style.overflow; document.body.style.overflow = 'hidden'
+    const k = (e: KeyboardEvent) => e.key === 'Escape' && setFull(false)
+    window.addEventListener('keydown', k)
+    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', k) }
+  }, [full])
+  const side = panels && !readOnly
   return (
-    <div className={`grid gap-5 ${readOnly ? '' : 'xl:grid-cols-[270px_minmax(0,1fr)_300px]'}`}>
-      {/* ---------------- palette ---------------- */}
+    <div className={full ? 'fixed inset-0 z-50 bg-midnight' : `relative overflow-hidden rounded-3xl border border-white/10 bg-deep ${readOnly ? 'h-[580px]' : 'h-[calc(100vh-170px)] min-h-[640px]'}`}>
+      <div className="absolute inset-0 bg-deep" style={{ touchAction: 'none' }} onDoubleClick={(e) => { if (e.target instanceof HTMLCanvasElement) setResetKey((n) => n + 1) }}>
+        <RoomScene resetKey={resetKey} zoom={zoom} room={room} readOnly={readOnly} onBegin={begin} onMove={move} onToggle={toggle} onCapture={(fn) => { capture.current = fn }} />
+      </div>
+
+      <div className="pointer-events-none absolute left-3 top-3 z-20 flex max-w-[calc(100%-250px)] flex-col gap-2">
+        <div className="pointer-events-auto flex flex-nowrap items-center gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Rooms">
+          {rooms.map((r, i) => (
+            <button key={r.id} role="tab" aria-selected={i === ri} onClick={() => { setRi(i); select(null) }} className={`flex shrink-0 items-center gap-2 rounded-full border bg-midnight/80 px-4 py-2 text-sm backdrop-blur transition ${i === ri ? 'border-cyan bg-cyan/15 text-cyan' : 'border-white/15 text-silver hover:text-white'}`}>
+              <Icon name={roomTypeById[r.type]?.icon ?? 'Home'} size={15} />{r.name}{r.devices.length > 0 && <span className="rounded-full bg-white/10 px-1.5 text-[0.65rem]">{r.devices.length}</span>}</button>))}
+          {!readOnly && <button onClick={() => setAdding(!adding)} className="flex shrink-0 items-center gap-1.5 rounded-full border border-dashed border-white/25 bg-midnight/80 px-4 py-2 text-sm backdrop-blur text-silver hover:border-cyan hover:text-cyan"><L.Plus size={15} />Add room</button>}
+          <span className="pointer-events-none hidden self-start rounded-full border border-amber-300/40 bg-midnight/80 px-3 py-1 text-[0.7rem] text-amber-300 backdrop-blur sm:block">Simulation · not connected to real devices</span>
+      </div>
+
+        <div className="pointer-events-auto flex flex-wrap gap-1 rounded-2xl border border-white/10 bg-midnight/70 p-1 backdrop-blur" role="group" aria-label="Camera">{CAMS.map((c) => (
+              <button key={c.id} onClick={() => setCam(c.id)} aria-pressed={cam === c.id} title={c.label} className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs transition ${cam === c.id ? 'bg-cyan/20 text-cyan' : 'text-silver hover:text-white'}`}><Icon name={c.icon} size={14} /><span className="hidden sm:inline">{c.label}</span></button>))}</div>
+      </div>
+        {adding && !readOnly && (
+          <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[.03] p-3 sm:grid-cols-4">{roomTypes.map((t) => (
+            <button key={t.id} onClick={() => { const n = rooms.filter((r) => r.type === t.id).length + 1; begin(); apply({ ...design, rooms: [...rooms, newRoom(t.id, n)] }); setRi(rooms.length); setAdding(false); select(null) }} className="flex flex-col items-center gap-2 rounded-xl border border-white/10 p-3 text-xs text-silver transition hover:border-cyan hover:text-cyan"><Icon name={t.icon} size={20} />{t.label}</button>))}</div>)}
+
+
+      <div className="absolute right-3 top-3 z-20 flex gap-1 rounded-2xl border border-white/10 bg-midnight/80 p-1 backdrop-blur" role="group" aria-label="Designer tools">
+        {!readOnly && <><button onClick={undo} aria-label="Undo" title="Undo (Ctrl+Z)" className="rounded-xl p-2 text-silver hover:text-white"><L.Undo2 size={16} /></button><button onClick={redo} aria-label="Redo" title="Redo (Ctrl+Shift+Z)" className="rounded-xl p-2 text-silver hover:text-white"><L.Redo2 size={16} /></button></>}
+        <button onClick={() => setNight(!night)} aria-label={night ? 'Switch to day' : 'Switch to night'} aria-pressed={night} className="rounded-xl p-2 text-silver hover:text-white">{night ? <L.Moon size={16} /> : <L.Sun size={16} />}</button>
+        <button onClick={shot} aria-label="Save screenshot" title="Save screenshot" className="rounded-xl p-2 text-silver hover:text-white"><L.Camera size={16} /></button>
+        {!readOnly && <button onClick={() => setPanels(!panels)} aria-label="Panels" aria-pressed={panels} title="Show or hide the side panels" className={`rounded-xl p-2 ${panels ? 'bg-cyan/20 text-cyan' : 'text-silver hover:text-white'}`}><L.PanelLeft size={16} /></button>}
+        <button onClick={() => setFull(!full)} aria-label={full ? 'Exit full screen' : 'Full screen'} aria-pressed={full} title={full ? 'Exit full screen (Esc)' : 'Full screen'} className="rounded-xl p-2 text-silver hover:text-white">{full ? <L.Minimize2 size={16} /> : <L.Maximize2 size={16} />}</button>
+      </div>
+
       {!readOnly && (
-        <aside className="order-2 space-y-3 xl:order-1" aria-label="Build tools">
+        <aside className={`absolute bottom-3 left-3 z-20 w-[min(300px,86vw)] space-y-3 overflow-y-auto rounded-2xl border border-white/10 bg-midnight/85 p-3 backdrop-blur ${panels ? '' : 'hidden'}`} style={{ top: 150 }} aria-label="Build tools">
           <div className="flex gap-1.5">{(['devices', 'furniture', 'room'] as const).map((t) => <button key={t} onClick={() => setTab(t)} className={`flex-1 ${chip(tab === t)} capitalize`}>{t === 'room' ? 'Room style' : t === 'devices' ? 'Smart devices' : 'Furniture'}</button>)}</div>
           {tab === 'devices' && <>
             <div className="flex flex-wrap gap-1.5">{(['all', ...groups.map((g) => g.id)] as const).map((g) => <button key={g} onClick={() => setGroup(g)} className={chip(group === g)}>{g === 'all' ? 'All' : g}</button>)}</div>
@@ -118,44 +155,18 @@ export default function Designer3D({ design, onChange, readOnly }: Props) {
             </div>)}
         </aside>
       )}
+      {!readOnly && <aside className={`absolute bottom-3 right-3 z-20 w-[min(310px,86vw)] overflow-y-auto ${panels ? '' : 'hidden'}`} style={{ top: 64 }} aria-label="Estimate"><CostPanel e={estimate} /></aside>}
 
-      {/* ---------------- viewport ---------------- */}
-      <section className={`order-1 min-w-0 space-y-3 xl:order-2 `}>
-        <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Rooms">
-          {rooms.map((r, i) => (
-            <button key={r.id} role="tab" aria-selected={i === ri} onClick={() => { setRi(i); select(null) }} className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${i === ri ? 'border-cyan bg-cyan/15 text-cyan' : 'border-white/15 text-silver hover:text-white'}`}>
-              <Icon name={roomTypeById[r.type]?.icon ?? 'Home'} size={15} />{r.name}{r.devices.length > 0 && <span className="rounded-full bg-white/10 px-1.5 text-[0.65rem]">{r.devices.length}</span>}</button>))}
-          {!readOnly && <button onClick={() => setAdding(!adding)} className="flex items-center gap-1.5 rounded-full border border-dashed border-white/25 px-4 py-2 text-sm text-silver hover:border-cyan hover:text-cyan"><L.Plus size={15} />Add room</button>}
-        </div>
-        {adding && !readOnly && (
-          <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[.03] p-3 sm:grid-cols-4">{roomTypes.map((t) => (
-            <button key={t.id} onClick={() => { const n = rooms.filter((r) => r.type === t.id).length + 1; begin(); apply({ ...design, rooms: [...rooms, newRoom(t.id, n)] }); setRi(rooms.length); setAdding(false); select(null) }} className="flex flex-col items-center gap-2 rounded-xl border border-white/10 p-3 text-xs text-silver transition hover:border-cyan hover:text-cyan"><Icon name={t.icon} size={20} />{t.label}</button>))}</div>)}
+      <div className={`absolute bottom-16 z-20 flex flex-col gap-2 ${side ? 'right-[336px]' : 'right-3'}`} role="group" aria-label="Camera zoom">
+        {([['Zoom in', L.ZoomIn, () => setZoom((z) => ({ n: z.n + 1, dir: 1 }))], ['Zoom out', L.ZoomOut, () => setZoom((z) => ({ n: z.n + 1, dir: -1 }))], ['Reset view', L.RotateCcw, () => setResetKey((n) => n + 1)]] as const).map(([label, I, fn]) => (
+          <button key={label} onClick={fn} aria-label={label} title={label} className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-midnight/80 text-silver backdrop-blur transition hover:border-cyan hover:text-cyan"><I size={17} /></button>))}
+      </div>
 
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-deep shadow-2xl shadow-black/40">
-          <div className="h-[460px] w-full sm:h-[560px] xl:h-[620px]" style={{ touchAction: 'none' }}>
-            <RoomScene room={room} readOnly={readOnly} onBegin={begin} onMove={move} onToggle={toggle} onCapture={(fn) => { capture.current = fn }} />
-          </div>
-          <div className="pointer-events-none absolute inset-x-3 top-3 flex flex-wrap items-start justify-between gap-2">
-            <div className="pointer-events-auto flex flex-wrap gap-1 rounded-2xl border border-white/10 bg-midnight/70 p-1 backdrop-blur" role="group" aria-label="Camera">{CAMS.map((c) => (
-              <button key={c.id} onClick={() => setCam(c.id)} aria-pressed={cam === c.id} title={c.label} className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs transition ${cam === c.id ? 'bg-cyan/20 text-cyan' : 'text-silver hover:text-white'}`}><Icon name={c.icon} size={14} /><span className="hidden sm:inline">{c.label}</span></button>))}</div>
-            <span className="rounded-full border border-amber-300/40 bg-midnight/70 px-3 py-1.5 text-[0.7rem] text-amber-300 backdrop-blur">Simulation · not connected to real devices</span>
-          </div>
-          <div className="pointer-events-none absolute inset-x-3 bottom-3 flex flex-wrap items-end justify-between gap-2">
-            <p className="rounded-lg bg-midnight/70 px-3 py-1.5 text-[0.7rem] text-silver backdrop-blur">{cam === 'walk' ? 'W A S D / arrows to walk · drag to look around' : readOnly ? 'Drag to orbit · click a device to try it' : 'Click a device to switch it · drag to move · drag the background to orbit'}</p>
-            <div className="pointer-events-auto flex gap-1 rounded-2xl border border-white/10 bg-midnight/70 p-1 backdrop-blur">
-              {!readOnly && <><button onClick={undo} aria-label="Undo" title="Undo (Ctrl+Z)" className="rounded-xl p-2 text-silver hover:text-white"><L.Undo2 size={16} /></button><button onClick={redo} aria-label="Redo" title="Redo (Ctrl+Shift+Z)" className="rounded-xl p-2 text-silver hover:text-white"><L.Redo2 size={16} /></button></>}
-              <button onClick={() => setNight(!night)} aria-label={night ? 'Switch to day' : 'Switch to night'} aria-pressed={night} className="rounded-xl p-2 text-silver hover:text-white">{night ? <L.Moon size={16} /> : <L.Sun size={16} />}</button>
-              <button onClick={shot} aria-label="Save screenshot" title="Save screenshot" className="rounded-xl p-2 text-silver hover:text-white"><L.Camera size={16} /></button>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Lighting scenes">{SCENES.map((s) => (
-          <button key={s.id} onClick={() => runScene(s.id)} disabled={!room.devices.length} className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-xs text-silver transition enabled:hover:border-cyan enabled:hover:text-cyan disabled:opacity-40"><Icon name={s.icon} size={14} />{s.label}</button>))}</div>
-
+      <div className={`pointer-events-none absolute bottom-3 z-20 flex flex-col gap-2 ${side ? 'left-[324px] right-[392px]' : 'left-3 right-16'}`}>
+        <p className="pointer-events-none hidden self-start rounded-lg bg-midnight/80 px-3 py-1.5 text-[0.7rem] text-silver backdrop-blur sm:block">{cam === 'walk' ? 'W A S D / arrows to walk · drag to look around' : readOnly ? 'Drag to orbit · click a device to try it · double-click to reset' : 'Click a device to switch it · drag to move · drag the background to orbit · double-click to reset'}</p>
         {/* inspector */}
         {(selDevice || selFurn) && (
-          <div className="rounded-2xl border border-white/10 bg-white/[.04] p-4">
+          <div className="pointer-events-auto max-h-[42vh] overflow-y-auto rounded-2xl border border-white/15 bg-midnight/92 p-4 backdrop-blur">
             {selDevice && selDef && <div className="grid gap-4 md:grid-cols-[1fr_minmax(0,1.3fr)]">
               <div className="flex items-start gap-3"><span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl" style={{ background: `${groupColor[selDef.group]}22`, color: groupColor[selDef.group] }}><Icon name={selDef.icon} size={24} /></span>
                 <div><div className="font-display">{selDef.name}</div><p className="text-sm text-silver">{selDef.desc}</p>
@@ -174,11 +185,13 @@ export default function Designer3D({ design, onChange, readOnly }: Props) {
             {selFurn && <div className="flex flex-wrap items-center gap-3"><span className="font-display">{furnitureTypes.find((f) => f.id === selFurn.type)?.label}</span><span className="text-sm text-slate">Design item · not priced</span>
               {!readOnly && <div className="ml-auto flex gap-2"><button onClick={rotate} className="flex items-center gap-1.5 rounded-full border border-white/20 px-4 py-1.5 text-sm text-silver hover:text-white"><L.RotateCw size={14} />Rotate (R)</button><button onClick={duplicate} className="flex items-center gap-1.5 rounded-full border border-white/20 px-4 py-1.5 text-sm text-silver hover:text-white"><L.Copy size={14} />Duplicate</button><button onClick={removeSel} className="flex items-center gap-1.5 rounded-full border border-red-400/40 px-4 py-1.5 text-sm text-red-300 hover:bg-red-500/10"><L.Trash2 size={14} />Remove</button></div>}</div>}
           </div>)}
-        {!readOnly && rooms.length > 1 && <button onClick={() => { begin(); apply({ ...design, rooms: rooms.filter((r) => r.id !== room.id) }); setRi(0); select(null) }} className="text-xs text-slate hover:text-red-300">Remove “{room.name}” from this design</button>}
-      </section>
 
-      {/* ---------------- estimate ---------------- */}
-      {!readOnly && <aside className="order-3 space-y-5" aria-label="Estimate"><CostPanel e={estimate} /></aside>}
+        <div className="pointer-events-auto flex flex-wrap gap-2" role="group" aria-label="Lighting scenes">{SCENES.map((s) => (
+          <button key={s.id} onClick={() => runScene(s.id)} disabled={!room.devices.length} className="flex items-center gap-2 rounded-full border border-white/20 bg-midnight/80 px-4 py-2 text-xs text-silver backdrop-blur transition enabled:hover:border-cyan enabled:hover:text-cyan disabled:opacity-40"><Icon name={s.icon} size={14} />{s.label}</button>))}</div>
+
+
+        {!readOnly && rooms.length > 1 && <button onClick={() => { begin(); apply({ ...design, rooms: rooms.filter((r) => r.id !== room.id) }); setRi(0); select(null) }} className="pointer-events-auto self-start rounded-full bg-midnight/80 px-3 py-1.5 text-xs text-silver backdrop-blur hover:text-red-300">Remove “{room.name}” from this design</button>}
+      </div>
     </div>
   )
 }

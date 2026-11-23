@@ -4,6 +4,7 @@ import { api } from '../../lib/api'
 import { fmtVal, levelName, statusColor, statusLabel, type Catalog, type Equip, type Live, type Project } from '../../data/bms'
 import { Meter, TrendChart } from './charts'
 import { Icon } from '../dashboard/ui'
+import EquipImage from './EquipImage'
 import { moduleIcon } from '../../data/bms'
 
 type Pt = { t: number; v: number }
@@ -27,12 +28,13 @@ export default function EquipPanel({ project, equip, catalog, live, editable, on
     <aside aria-label={`${equip.tag} details`} className="space-y-4 rounded-2xl border border-white/10 bg-white/[.03] p-5">
       <div className="flex items-start gap-3">
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl" style={{ background: `${mod?.color}22`, color: mod?.color }}><Icon name={moduleIcon[def.module] ?? 'Gauge'} size={20} /></span>
-        <div className="min-w-0 flex-1"><div className="font-display leading-tight">{equip.name}</div><div className="text-xs text-slate">{equip.tag} · {mod?.label}</div></div>
+        <div className="min-w-0 flex-1"><div className="font-display leading-tight">{equip.name}</div><div className="text-sm text-silver">{equip.tag} · {mod?.label}</div></div>
         <button onClick={onClose} aria-label="Close details" className="rounded-full p-1.5 text-slate hover:bg-white/5 hover:text-white"><X size={16} /></button>
       </div>
+      <div className="rounded-xl bg-gradient-to-b from-[#1a2b44] to-[#0e1a2b] py-2"><EquipImage type={equip.type} size={170} className="mx-auto" fallback={moduleIcon[def.module]} /></div>
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <span className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs" style={{ borderColor: `${statusColor[st]}88`, color: statusColor[st], background: `${statusColor[st]}18` }}><span className="h-2 w-2 rounded-full" style={{ background: statusColor[st] }} />{statusLabel[st]}</span>
-        <span className="text-xs text-slate">{tower?.name} · {tower ? levelName(equip.level, tower.floors) : ''}</span>
+        <span className="rounded-md bg-white/10 px-2.5 py-1 text-sm font-medium text-white">{tower?.name} · {tower ? levelName(equip.level, tower.floors) : ''}</span>
       </div>
       {def.safety && <p className="rounded-lg border border-amber-300/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">Status only. This system stays under its certified controller; the platform reads status and alarms but never sends commands.</p>}
       <ul className="space-y-3">{def.readings.map((r) => { const v = lv?.values[r.key] ?? null; return (
