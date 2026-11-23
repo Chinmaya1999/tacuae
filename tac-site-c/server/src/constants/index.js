@@ -15,4 +15,4 @@ export const CSRF_HEADER = 'x-requested-with'
 export const CSRF_VALUE = 'tac-admin'
 
 // MongoDB collections. Prefixed "tac_" because the database may be shared with other apps.
-export const COLLECTIONS = { users: 'tac_users', designs: 'tac_designs', products: 'tac_products' }
+export const COLLECTIONS = { users: 'tac_users', designs: 'tac_designs', products: 'tac_products', projects: 'tac_projects', equipment: 'tac_equipment', alarms: 'tac_alarms' }

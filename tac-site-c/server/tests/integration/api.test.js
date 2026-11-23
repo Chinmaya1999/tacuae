@@ -41,6 +41,11 @@ test('protected routes reject anonymous users and missing CSRF header', async ()
   const noHeader = await fetch(`${base}/api/account/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
   assert.equal(noHeader.status, 403)
 })
+test('building-management API requires a signed-in builder or admin', async () => {
+  for (const path of ['/api/bms/catalog', '/api/bms/overview', '/api/bms/alarms', '/api/bms/projects/abc/live']) assert.equal((await fetch(`${base}${path}`)).status, 401, path)
+  const post = await fetch(`${base}/api/bms/projects`, { method: 'POST', headers: json, body: JSON.stringify({ name: 'X', towers: [{}] }) })
+  assert.equal(post.status, 401)
+})
 test('login without a database answers 503 as JSON, not a stack trace', async () => {
   const r = await fetch(`${base}/api/account/login`, { method: 'POST', headers: json, body: JSON.stringify({ email: 'a@b.co', password: 'password1' }) })
   assert.equal(r.status, 503)

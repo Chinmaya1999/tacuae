@@ -1,15 +1,16 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { ExternalLink, LayoutGrid, LogOut, Mail, Phone, Plus, ReceiptText, Home } from 'lucide-react'
+import { Building2, ExternalLink, LayoutGrid, LogOut, Mail, Phone, Plus, ReceiptText, Home, Siren } from 'lucide-react'
 import { useAuth } from '../../lib/auth'
 import { company } from '../../data/content'
 import { useDesigns } from '../../pages/dashboard/useDesigns'
+import { useAlarmCount } from '../../lib/bms'
 
 const link = ({ isActive }: { isActive: boolean }) => `flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition ${isActive ? 'bg-cyan/15 text-cyan' : 'text-silver hover:bg-white/5 hover:text-white'}`
 
 /** App frame: sidebar on desktop, bottom tab bar on phones. */
 export default function Shell({ builder }: { builder: boolean }) {
   const { user, logout } = useAuth(), { items } = useDesigns()
-  const waiting = (items ?? []).filter((d) => d.status === 'quoted').length
+  const waiting = (items ?? []).filter((d) => d.status === 'quoted').length, alarms = useAlarmCount(builder)
   const initials = (user?.name ?? '?').split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase()
   const Quotes = <>{<ReceiptText size={18} />}Quotes{waiting > 0 && <span className="ml-auto rounded-full bg-cyan px-2 py-0.5 text-[0.7rem] font-medium text-midnight">{waiting}</span>}</>
 
@@ -17,11 +18,19 @@ export default function Shell({ builder }: { builder: boolean }) {
     <div className="min-h-screen bg-midnight text-white lg:grid lg:grid-cols-[272px_1fr]">
       <aside className="hidden border-r border-white/10 bg-deep lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col">
         <div className="px-6 pb-4 pt-7"><Link to="/dashboard"><img src="/images/site/logo-dark.png" alt="TAC — dashboard home" className="h-9 w-auto" /></Link></div>
-        <div className="px-4"><Link to="/dashboard/design/new" className="btn btn-primary w-full justify-center"><Plus size={18} />New design</Link></div>
+        <div className="px-4"><Link to={builder ? '/dashboard/projects/new' : '/dashboard/design/new'} className="btn btn-primary w-full justify-center"><Plus size={18} />{builder ? 'New building' : 'New design'}</Link></div>
         <nav aria-label="Dashboard" className="mt-6 space-y-1 px-4">
-          <NavLink to="/dashboard" end className={link}><Home size={18} />Home</NavLink>
-          <NavLink to="/dashboard/designs" className={link}><LayoutGrid size={18} />{builder ? 'Client projects' : 'My designs'}</NavLink>
-          <NavLink to="/dashboard/quotes" className={link}>{Quotes}</NavLink>
+          <NavLink to="/dashboard" end className={link}><Home size={18} />{builder ? 'Overview' : 'Home'}</NavLink>
+          {builder ? <>
+            <NavLink to="/dashboard/projects" className={link}><Building2 size={18} />Projects</NavLink>
+            <NavLink to="/dashboard/alarms" className={link}><Siren size={18} />Alarms{alarms > 0 && <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-[0.7rem] font-medium text-white">{alarms}</span>}</NavLink>
+            <div className="px-4 pb-1 pt-5 text-[0.65rem] uppercase tracking-[0.18em] text-slate">Client home designs</div>
+            <NavLink to="/dashboard/designs" className={link}><LayoutGrid size={18} />Designs</NavLink>
+            <NavLink to="/dashboard/quotes" className={link}>{Quotes}</NavLink>
+          </> : <>
+            <NavLink to="/dashboard/designs" className={link}><LayoutGrid size={18} />My designs</NavLink>
+            <NavLink to="/dashboard/quotes" className={link}>{Quotes}</NavLink>
+          </>}
         </nav>
         <div className="mt-auto space-y-4 p-4">
           <div className="rounded-2xl border border-white/10 bg-white/[.03] p-4 text-sm">
@@ -48,12 +57,12 @@ export default function Shell({ builder }: { builder: boolean }) {
       </div>
 
       <nav aria-label="Dashboard" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-white/10 bg-deep/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
-        {[['/dashboard', 'Home', Home, true], ['/dashboard/designs', builder ? 'Projects' : 'Designs', LayoutGrid, false]].map(([to, label, I, end]) => {
-          const Ic = I as typeof Home
-          return <NavLink key={to as string} to={to as string} end={end as boolean} className={({ isActive }) => `flex flex-col items-center gap-1 py-2.5 text-[0.7rem] ${isActive ? 'text-cyan' : 'text-silver'}`}><Ic size={20} />{label as string}</NavLink>
-        })}
-        <NavLink to="/dashboard/design/new" className="flex flex-col items-center gap-1 py-2.5 text-[0.7rem] text-cyan"><span className="-mt-5 grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-cyan to-azure text-midnight shadow-lg shadow-cyan/30"><Plus size={22} /></span>New</NavLink>
-        <NavLink to="/dashboard/quotes" className={({ isActive }) => `relative flex flex-col items-center gap-1 py-2.5 text-[0.7rem] ${isActive ? 'text-cyan' : 'text-silver'}`}><ReceiptText size={20} />Quotes{waiting > 0 && <span className="absolute right-[28%] top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-cyan px-1 text-[0.6rem] font-medium text-midnight">{waiting}</span>}</NavLink>
+        <NavLink to="/dashboard" end className={({ isActive }) => `flex flex-col items-center gap-1 py-2.5 text-[0.7rem] ${isActive ? 'text-cyan' : 'text-silver'}`}><Home size={20} />{builder ? 'Overview' : 'Home'}</NavLink>
+        <NavLink to={builder ? '/dashboard/projects' : '/dashboard/designs'} className={({ isActive }) => `flex flex-col items-center gap-1 py-2.5 text-[0.7rem] ${isActive ? 'text-cyan' : 'text-silver'}`}>{builder ? <Building2 size={20} /> : <LayoutGrid size={20} />}{builder ? 'Projects' : 'Designs'}</NavLink>
+        <NavLink to={builder ? '/dashboard/projects/new' : '/dashboard/design/new'} className="flex flex-col items-center gap-1 py-2.5 text-[0.7rem] text-cyan"><span className="-mt-5 grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-cyan to-azure text-midnight shadow-lg shadow-cyan/30"><Plus size={22} /></span>New</NavLink>
+        {builder
+          ? <NavLink to="/dashboard/alarms" className={({ isActive }) => `relative flex flex-col items-center gap-1 py-2.5 text-[0.7rem] ${isActive ? 'text-cyan' : 'text-silver'}`}><Siren size={20} />Alarms{alarms > 0 && <span className="absolute right-[28%] top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[0.6rem] font-medium text-white">{alarms}</span>}</NavLink>
+          : <NavLink to="/dashboard/quotes" className={({ isActive }) => `relative flex flex-col items-center gap-1 py-2.5 text-[0.7rem] ${isActive ? 'text-cyan' : 'text-silver'}`}><ReceiptText size={20} />Quotes{waiting > 0 && <span className="absolute right-[28%] top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-cyan px-1 text-[0.6rem] font-medium text-midnight">{waiting}</span>}</NavLink>}
       </nav>
     </div>
   )

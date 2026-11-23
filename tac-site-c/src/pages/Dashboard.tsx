@@ -7,8 +7,13 @@ import { DesignsProvider } from './dashboard/useDesigns'
 import Home from './dashboard/Home'
 import Designs from './dashboard/Designs'
 import Studio from './dashboard/Studio'
+import BmsHome from './bms/BmsHome'
+import ProjectsList from './bms/ProjectsList'
+import ProjectWizard from './bms/ProjectWizard'
+import BuilderAlarms from './bms/BuilderAlarms'
+import ProjectPage from './bms/ProjectPage'
 
-/** Customer / builder area: /dashboard (home), /dashboard/designs, /dashboard/quotes, /dashboard/design/:id (studio). */
+/** Customer / builder area. Customers: home, designs, quotes, studio. Builders also get the building-management portal: projects, alarms, 3D digital twin. */
 export default function Dashboard() {
   const { user, loading } = useAuth()
   useEffect(() => {
@@ -24,10 +29,14 @@ export default function Dashboard() {
     <DesignsProvider>
       <Routes>
         <Route element={<Shell builder={builder} />}>
-          <Route index element={<Home builder={builder} />} />
+          <Route index element={builder ? <BmsHome /> : <Home builder={builder} />} />
+          {builder && <Route path="projects" element={<ProjectsList />} />}
+          {builder && <Route path="projects/new" element={<ProjectWizard />} />}
+          {builder && <Route path="alarms" element={<BuilderAlarms />} />}
           <Route path="designs" element={<Designs builder={builder} mode="all" />} />
           <Route path="quotes" element={<Designs builder={builder} mode="quotes" />} />
         </Route>
+        {builder && <Route path="projects/:id" element={<ProjectPage />} />}
         <Route path="design/:id" element={<Studio builder={builder} />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

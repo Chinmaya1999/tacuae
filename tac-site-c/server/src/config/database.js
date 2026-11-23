@@ -20,6 +20,10 @@ export function getDb() {
       d.collection(COLLECTIONS.designs).createIndex({ ownerId: 1, updatedAt: -1 }),
       d.collection(COLLECTIONS.designs).createIndex({ status: 1, updatedAt: -1 }),
       d.collection(COLLECTIONS.products).createIndex({ id: 1 }, { unique: true }),
+      d.collection(COLLECTIONS.projects).createIndex({ ownerId: 1, updatedAt: -1 }),
+      d.collection(COLLECTIONS.equipment).createIndex({ projectId: 1, towerId: 1, level: 1 }),
+      d.collection(COLLECTIONS.alarms).createIndex({ projectId: 1, state: 1, raisedAt: -1 }),
+      d.collection(COLLECTIONS.alarms).createIndex({ ownerId: 1, state: 1 }),
     ])
     return d
   })().catch((e) => { pending = null; throw e })
