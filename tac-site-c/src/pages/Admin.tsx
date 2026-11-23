@@ -1,72 +1,44 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
-import { BarChart3, Check, Download, FileText, Inbox, KeyRound, Loader2, LogOut, Search, Trash2 } from 'lucide-react'
+import { BarChart3, Boxes, Tags, Check, Download, FileText, Inbox, KeyRound, Loader2, LogOut, Search, Trash2, Users } from 'lucide-react'
+import { Navigate } from 'react-router-dom'
+import { api as rawApi } from '../lib/api'
+import { useAuth } from '../lib/auth'
+import DesignsAdmin from './AdminDesigns'
+import UsersAdmin from './AdminUsers'
+import ProductsAdmin from './AdminProducts'
 import { products, projects } from '../data/content'
 import type { Overrides } from '../lib/useContent'
 
 type Status = 'new' | 'contacted' | 'closed'
 type Enquiry = { id: string; at: string; name: string; company: string; email: string; phone: string; service: string; projectType: string; message: string; status: Status; note: string }
-type Stats = { total: number; new: number; contacted: number; closed: number; last7: number; daily: { date: string; count: number }[]; byService: { service: string; count: number }[]; mail: boolean }
+type Stats = { accounts?: boolean; customers?: number; builders?: number; designsSubmitted?: number; designsQuoted?: number; designsAccepted?: number; designsTotal?: number; total: number; new: number; contacted: number; closed: number; last7: number; daily: { date: string; count: number }[]; byService: { service: string; count: number }[]; mail: boolean }
 
-async function api<T = any>(path: string, opts: { method?: string; body?: unknown } = {}): Promise<T> {
-  const r = await fetch(`/api/admin${path}`, {
-    method: opts.method ?? 'GET', credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'tac-admin' },
-    body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
-  })
-  const data = await r.json().catch(() => ({}))
-  if (r.status === 401 && path !== '/login') window.dispatchEvent(new Event('tac-signout'))
-  if (!r.ok) throw new Error(data.error || 'Request failed')
-  return data
-}
+const api = <T = any>(path: string, opts: { method?: string; body?: unknown } = {}) => rawApi<T>(`/api/admin${path}`, opts)
 
 const STATUS_STYLE: Record<Status, string> = { new: 'bg-cyan/15 text-cyan border-cyan/40', contacted: 'bg-amber-400/10 text-amber-300 border-amber-300/40', closed: 'bg-white/5 text-silver border-white/20' }
 const fmtDate = (s: string) => new Date(s).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 const inputCls = 'w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base text-white outline-none transition placeholder:text-slate focus:border-cyan'
 
 export default function Admin() {
-  const [auth, setAuth] = useState<'loading' | 'out' | 'in'>('loading')
+  const { user, loading, logout } = useAuth()
   useEffect(() => {
     document.title = 'Admin | TAC UAE'
     let m = document.querySelector<HTMLMetaElement>('meta[name="robots"]')
     if (!m) { m = document.createElement('meta'); m.name = 'robots'; document.head.appendChild(m) }
     m.content = 'noindex, nofollow'
-    api('/me').then(() => setAuth('in')).catch(() => setAuth('out'))
-    const out = () => setAuth('out')
-    window.addEventListener('tac-signout', out)
-    return () => { window.removeEventListener('tac-signout', out); m?.remove() }
+    return () => m?.remove()
   }, [])
-  return (
-    <div className="min-h-screen bg-midnight text-white">
-      {auth === 'loading' ? <div className="grid min-h-screen place-items-center"><Loader2 className="animate-spin text-cyan" /></div>
-        : auth === 'out' ? <Login onDone={() => setAuth('in')} /> : <Dashboard onOut={() => setAuth('out')} />}
-    </div>
-  )
-}
-
-function Login({ onDone }: { onDone: () => void }) {
-  const [pw, setPw] = useState(''), [err, setErr] = useState(''), [busy, setBusy] = useState(false)
-  const submit = async (e: FormEvent) => {
-    e.preventDefault(); setBusy(true); setErr('')
-    try { await api('/login', { method: 'POST', body: { password: pw } }); onDone() } catch (x) { setErr((x as Error).message) } finally { setBusy(false) }
-  }
-  return (
-    <div className="relative grid min-h-screen place-items-center px-5">
-      <div className="absolute inset-0 grid-bg opacity-40" />
-      <form onSubmit={submit} className="glass relative w-full max-w-sm rounded-3xl border border-white/10 p-8">
-        <img src="/images/site/logo-dark.png" alt="TAC" className="mb-6 h-10 w-auto" />
-        <h1 className="font-display text-2xl">Admin dashboard</h1>
-        <p className="mt-1 text-sm text-silver">Sign in to manage enquiries and site content.</p>
-        <label htmlFor="pw" className="mb-2 mt-7 block text-xs uppercase tracking-[0.15em] text-silver">Password</label>
-        <input id="pw" type="password" autoComplete="current-password" autoFocus value={pw} onChange={(e) => setPw(e.target.value)} className={inputCls} aria-invalid={!!err} />
-        {err && <p role="alert" className="mt-3 text-sm text-red-400">{err}</p>}
-        <button className="btn btn-primary mt-6 w-full justify-center disabled:opacity-60" disabled={busy || !pw}>{busy ? 'Signing in…' : 'Sign in'}</button>
-      </form>
-    </div>
-  )
+  if (loading) return <div className="grid min-h-screen place-items-center bg-midnight"><Loader2 className="animate-spin text-cyan" /></div>
+  if (!user) return <Navigate to="/login?next=/admin" replace />
+  if (user.role !== 'admin') return <Navigate to="/dashboard" replace />
+  return <div className="min-h-screen bg-midnight text-white"><Dashboard onOut={logout} /></div>
 }
 
 const tabs = [
   { id: 'overview', label: 'Overview', icon: BarChart3 },
+  { id: 'designs', label: 'Room designs', icon: Boxes },
+  { id: 'products', label: 'Products & prices', icon: Tags },
+  { id: 'users', label: 'Users', icon: Users },
   { id: 'enquiries', label: 'Enquiries', icon: Inbox },
   { id: 'content', label: 'Content', icon: FileText },
   { id: 'security', label: 'Security', icon: KeyRound },
@@ -77,7 +49,7 @@ function Dashboard({ onOut }: { onOut: () => void }) {
   const [stats, setStats] = useState<Stats | null>(null)
   const loadStats = useCallback(() => api<Stats>('/stats').then(setStats).catch(() => {}), [])
   useEffect(() => { loadStats(); const t = setInterval(() => document.visibilityState === 'visible' && loadStats(), 30000); return () => clearInterval(t) }, [loadStats])
-  const logout = async () => { await api('/logout', { method: 'POST' }).catch(() => {}); onOut() }
+  const logout = () => { onOut() }
 
   return (
     <div className="lg:grid lg:grid-cols-[240px_1fr]">
@@ -91,6 +63,7 @@ function Dashboard({ onOut }: { onOut: () => void }) {
             <button key={t.id} onClick={() => setTab(t.id)} aria-current={tab === t.id ? 'page' : undefined}
               className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm transition lg:w-full ${tab === t.id ? 'bg-cyan/15 text-cyan' : 'text-silver hover:bg-white/5 hover:text-white'}`}>
               <t.icon size={17} />{t.label}
+              {t.id === 'designs' && !!stats?.designsSubmitted && <span className="ml-auto rounded-full bg-amber-300 px-2 py-0.5 text-[0.7rem] font-medium text-midnight">{stats.designsSubmitted}</span>}
               {t.id === 'enquiries' && !!stats?.new && <span className="ml-auto rounded-full bg-cyan px-2 py-0.5 text-[0.7rem] font-medium text-midnight">{stats.new}</span>}
             </button>
           ))}
@@ -99,6 +72,9 @@ function Dashboard({ onOut }: { onOut: () => void }) {
       </aside>
       <main className="min-w-0 px-5 py-8 lg:px-10">
         {tab === 'overview' && <Overview stats={stats} go={setTab} />}
+        {tab === 'designs' && <DesignsAdmin onChange={loadStats} />}
+        {tab === 'products' && <ProductsAdmin />}
+        {tab === 'users' && <UsersAdmin />}
         {tab === 'enquiries' && <Enquiries onChange={loadStats} />}
         {tab === 'content' && <Content />}
         {tab === 'security' && <Security />}
@@ -111,12 +87,15 @@ const Card = ({ label, value, accent }: { label: string; value: number | string;
   <div className="rounded-2xl border border-white/10 bg-white/[.03] p-5"><div className="text-xs uppercase tracking-[0.16em] text-silver">{label}</div><div className={`mt-2 font-display text-4xl font-light tabular-nums ${accent ? 'text-cyan' : ''}`}>{value}</div></div>
 )
 
-function Overview({ stats, go }: { stats: Stats | null; go: (t: 'enquiries') => void }) {
+function Overview({ stats, go }: { stats: Stats | null; go: (t: 'enquiries' | 'designs' | 'users' | 'products') => void }) {
   if (!stats) return <Loader2 className="animate-spin text-cyan" />
   const max = Math.max(1, ...stats.daily.map((d) => d.count))
   return (
     <div className="space-y-8">
       <h1 className="font-display text-3xl">Overview</h1>
+      {stats.accounts && <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <Card label="Designs awaiting quote" value={stats.designsSubmitted ?? 0} accent /><Card label="Quotes accepted" value={stats.designsAccepted ?? 0} /><Card label="Customers" value={stats.customers ?? 0} /><Card label="Builders" value={stats.builders ?? 0} />
+      </div>}
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
         <Card label="New enquiries" value={stats.new} accent /><Card label="Last 7 days" value={stats.last7} /><Card label="Total" value={stats.total} /><Card label="Closed" value={stats.closed} />
       </div>
@@ -139,7 +118,8 @@ function Overview({ stats, go }: { stats: Stats | null; go: (t: 'enquiries') => 
         </section>
       </div>
       <div className="flex flex-wrap items-center gap-4 text-sm">
-        <button className="btn btn-primary" onClick={() => go('enquiries')}>Open enquiries</button>
+        {stats.accounts && <button className="btn btn-primary" onClick={() => go('designs')}>Review room designs</button>}
+        <button className="btn btn-ghost" onClick={() => go('enquiries')}>Open enquiries</button>
         <span className={stats.mail ? 'text-emerald-300' : 'text-amber-300'}>{stats.mail ? '● Email notifications on' : '● Email notifications off — set SMTP_* env vars to also receive enquiries by email'}</span>
       </div>
     </div>
@@ -239,12 +219,12 @@ function ContentItem({ type, it, initial }: { type: string; it: { slug: string; 
 
 function Security() {
   const [cur, setCur] = useState(''), [nw, setNw] = useState(''), [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null)
-  const submit = async (e: FormEvent) => { e.preventDefault(); setMsg(null); try { await api('/password', { method: 'POST', body: { current: cur, next: nw } }); setMsg({ ok: true, t: 'Password updated. Other signed-in sessions have been signed out.' }); setCur(''); setNw('') } catch (x) { setMsg({ ok: false, t: (x as Error).message }) } }
+  const submit = async (e: FormEvent) => { e.preventDefault(); setMsg(null); try { await rawApi('/api/account/password', { method: 'POST', body: { current: cur, next: nw } }); setMsg({ ok: true, t: 'Password updated. Other signed-in sessions have been signed out.' }); setCur(''); setNw('') } catch (x) { setMsg({ ok: false, t: (x as Error).message }) } }
   return (
     <form onSubmit={submit} className="max-w-md space-y-5"><h1 className="font-display text-3xl">Security</h1>
       <div><label htmlFor="cp" className="mb-2 block text-xs uppercase tracking-wider text-silver">Current password</label><input id="cp" type="password" autoComplete="current-password" value={cur} onChange={(e) => setCur(e.target.value)} className={inputCls} /></div>
-      <div><label htmlFor="np" className="mb-2 block text-xs uppercase tracking-wider text-silver">New password (min 10 characters)</label><input id="np" type="password" autoComplete="new-password" value={nw} onChange={(e) => setNw(e.target.value)} className={inputCls} /></div>
+      <div><label htmlFor="np" className="mb-2 block text-xs uppercase tracking-wider text-silver">New password (min 8 characters)</label><input id="np" type="password" autoComplete="new-password" value={nw} onChange={(e) => setNw(e.target.value)} className={inputCls} /></div>
       {msg && <p role="alert" className={`text-sm ${msg.ok ? 'text-emerald-300' : 'text-red-400'}`}>{msg.t}</p>}
-      <button className="btn btn-primary disabled:opacity-60" disabled={!cur || nw.length < 10}>Change password</button></form>
+      <button className="btn btn-primary disabled:opacity-60" disabled={!cur || nw.length < 8}>Change password</button></form>
   )
 }

@@ -27,7 +27,8 @@ Secrets
 | `SSH_PRIVATE_KEY` | full contents of the `.pem` file (including BEGIN/END lines) |
 | `SSH_HOST` | server IP (`3.111.214.203`) |
 | `SSH_USER` | `ubuntu` (Ubuntu AMI) or `ec2-user` (Amazon Linux) |
-| `ADMIN_PASSWORD` | strong password for `tac-site-c` `/admin` (used on first start only) |
+| `MONGODB_URI` | MongoDB connection string for customer/builder/admin accounts and saved designs (use a **new** DB user — rotate the one shared in chat) |
+| `ADMIN_PASSWORD` | strong password for the first admin account of `tac-site-c` (used on first start only) |
 | `SSH_KNOWN_HOSTS` | *(recommended)* output of `ssh-keyscan -H 3.111.214.203` run from a trusted machine |
 | `SMTP_HOST` `SMTP_PORT` `SMTP_USER` `SMTP_PASS` `SMTP_FROM` | *(optional)* to email enquiries |
 
@@ -36,6 +37,7 @@ Variables
 |---|---|
 | `DOCKERHUB_USERNAME` | `awsmallick1999` |
 | `DOCKER_PLATFORMS` | `linux/amd64` (use `linux/arm64` if the server is a Graviton `t4g/c7g/m7g` instance) |
+| `ADMIN_EMAIL` | *(optional)* email of the first admin (default `admin@tacuae.com`). Sign in at `/login` |
 | `ENQUIRY_TO` | *(optional)* e-mail that receives enquiries (default `info@tacuae.com`) |
 | `MAIN_SITE` `B_SITE` `C_SITE` | *(when you have domains)* e.g. `tacuae.com, www.tacuae.com` → Caddy enables HTTPS automatically |
 | `SMOKE_URL_MAIN` `SMOKE_URL_B` `SMOKE_URL_C` | *(when you have domains)* e.g. `https://tacuae.com` |

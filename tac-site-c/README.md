@@ -19,10 +19,14 @@ All copy lives in `src/data/content.ts` and comes only from the original tacuae.
 - Product descriptions/specs, course schedule/certificate details and project descriptions were not on the original site — add them to content.ts when TAC supplies them.
 - Images are TAC's originals from the old site (some small, e.g. products 361px). Replace with higher-resolution photography.
 - Privacy / Terms pages are draft text; TAC must approve them. WhatsApp is omitted (no verified number).
-- Redirects for legacy Wix URLs (/asin-products-1/*) are in server/index.mjs; mirror them in your host if not using this server.
+- Redirects for legacy Wix URLs (/asin-products-1/*) are in server/src/routes/web.routes.js; mirror them in your host if not using this server.
 
 ## Version C — animation edition
 Adds: animated scene for every service (`ServiceScene.tsx`), an animated illustration for each of the 12 products
 (`ProductAnim.tsx`), photo⇄animation auto-crossfade (`MediaLoop`), an automatic 24-hour "day in a smart building"
 scene (`DayCycle.tsx`) and an animated network canvas in the hero (`NetworkCanvas.tsx`).
 Animations are illustrative concepts, labelled as such — they are not product photos or specifications.
+
+## Local development
+`npm run dev` starts **both** the API (http://localhost:8787, reads `.env`) and the Vite site (http://localhost:5173, which proxies `/api` to the API).
+Running only `npm run dev:web` gives `502 Bad Gateway` on `/api/*` (login, register, enquiries) because nothing is listening on 8787.

@@ -36,7 +36,7 @@ services:
   tac-c:
     <<: *site
     image: ${DOCKERHUB_USER}/tac-site-c:${TAG_C:-latest}
-    environment: { <<: *mail, ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}" }
+    environment: { <<: *mail, ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}", ADMIN_EMAIL: "${ADMIN_EMAIL:-admin@tacuae.com}", MONGODB_URI: "${MONGODB_URI:-}" }
     volumes: ["c_data:/data"]
 
   caddy:

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, Menu, X } from 'lucide-react'
+import { useAuth, homeFor } from '../lib/auth'
 import { company, nav, products, projects, services, serviceHref } from '../data/content'
 
 const sub: Record<string, { label: string; to: string }[]> = {
@@ -14,6 +15,8 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const loc = useLocation()
+  const { user } = useAuth()
+  const acct = user ? { to: homeFor(user.role), label: user.role === 'admin' ? 'Admin' : 'My dashboard' } : { to: '/login', label: 'Sign in' }
   useEffect(() => {
     const f = () => setScrolled(window.scrollY > 40)
     f(); window.addEventListener('scroll', f, { passive: true })
@@ -56,6 +59,7 @@ export default function Navbar() {
             </nav>
 
             <div className="flex items-center gap-3">
+              <Link to={acct.to} className="hidden text-sm text-white/85 hover:text-cyan md:inline">{acct.label}</Link>
               <Link to="/contact#enquiry" className="btn btn-primary hidden md:inline-flex !py-2.5">Get a Consultation</Link>
               <button className="lg:hidden p-2 -mr-2" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? 'Close menu' : 'Open menu'}>
                 {open ? <X /> : <Menu />}
@@ -81,6 +85,7 @@ export default function Navbar() {
                 ))}
               </ul>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="mt-8 flex flex-col gap-3">
+                <Link to={acct.to} className="btn btn-ghost justify-center">{acct.label}</Link>
                 <Link to="/contact#enquiry" className="btn btn-primary justify-center">Get a Consultation</Link>
                 <a href={company.phoneHref} className="btn btn-ghost justify-center">{company.phone}</a>
               </motion.div>
