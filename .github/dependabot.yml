@@ -1,7 +1,5 @@
 version: 2
 updates:
   - { package-ecosystem: github-actions, directory: "/", schedule: { interval: weekly } }
-  - { package-ecosystem: npm, directory: "/tac-website", schedule: { interval: weekly } }
-  - { package-ecosystem: npm, directory: "/tac-site-b", schedule: { interval: weekly } }
   - { package-ecosystem: npm, directory: "/tac-site-c", schedule: { interval: weekly } }
-  - { package-ecosystem: docker, directory: "/tac-website", schedule: { interval: weekly } }
+  - { package-ecosystem: docker, directory: "/tac-site-c", schedule: { interval: weekly } }

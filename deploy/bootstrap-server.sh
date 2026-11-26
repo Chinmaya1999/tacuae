@@ -26,9 +26,9 @@ fi
 docker compose version
 
 install -d -o "$DEPLOY_USER" -g "$DEPLOY_USER" -m 750 /opt/tac
-# small instances: add 1 GB swap so image pulls / three Node apps don't run out of memory
+# small instances: add 1 GB swap so image pulls / the app don't run out of memory
 if [ "$(awk '/MemTotal/{print int($2/1024)}' /proc/meminfo)" -lt 1800 ] && ! swapon --show | grep -q .; then
   fallocate -l 1G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
   grep -q '/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
 fi
-echo "bootstrap complete. Open ports 80, 443, 8081, 8082 (and 22) in the AWS security group."
+echo "bootstrap complete. Open ports 80, 443, 8082 (and 22) in the AWS security group."

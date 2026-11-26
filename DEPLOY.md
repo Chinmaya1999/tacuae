@@ -16,7 +16,7 @@
 (Docker Hub → Account settings → Personal access tokens → *Read & Write*). Keep the `.pem` outside the repo folder
 (`chmod 400`). Both are git-ignored, but never commit them.
 
-**1. AWS security group** (EC2 → Security groups → inbound): allow TCP **22**, **80**, **443**, **8081**, **8082**.
+**1. AWS security group** (EC2 → Security groups → inbound): allow TCP **22**, **80**, **443**, **8082**.
 
 **2. GitHub → repo → Settings → Secrets and variables → Actions**
 
@@ -39,8 +39,8 @@ Variables
 | `DOCKER_PLATFORMS` | `linux/amd64` (use `linux/arm64` if the server is a Graviton `t4g/c7g/m7g` instance) |
 | `ADMIN_EMAIL` | *(optional)* email of the first admin (default `admin@tacuae.com`). Sign in at `/login` |
 | `ENQUIRY_TO` | *(optional)* e-mail that receives enquiries (default `info@tacuae.com`) |
-| `MAIN_SITE` `B_SITE` `C_SITE` | *(when you have domains)* e.g. `tacuae.com, www.tacuae.com` → Caddy enables HTTPS automatically |
-| `SMOKE_URL_MAIN` `SMOKE_URL_B` `SMOKE_URL_C` | *(when you have domains)* e.g. `https://tacuae.com` |
+| `C_SITE` | *(when you have a domain)* e.g. `tacuae.com, www.tacuae.com` → Caddy enables HTTPS automatically |
+| `SMOKE_URL_C` | *(when you have a domain)* e.g. `https://tacuae.com` |
 | `DEPLOY_ENABLED` | **`true`** — turn this on last; until then pushes only build and test |
 
 **3. Environment protection (recommended):** Settings → Environments → `production` → *Required reviewers*, so every
@@ -57,7 +57,7 @@ Run it once. Then push to `main` (or run the workflow with `sites = all`) to dep
   `docker run --rm -v tac_c_data:/d -v "$PWD":/b alpine tar czf /b/c-data.tgz -C /d .`
 
 ## Addresses
-Without domains (HTTP on the IP): site A `http://<ip>`, B `http://<ip>:8081`, C `http://<ip>:8082` (dashboard `/admin`).
+Without a domain (HTTP on the IP): `http://<ip>:8082` (dashboard `/admin`).
 **Use a domain + HTTPS before using the admin dashboard in production** — over plain HTTP the password travels
 unencrypted (until then, reach it through an SSH tunnel: `ssh -L 8082:localhost:8082 target`). Point DNS A records at the
-server, set `MAIN_SITE` / `B_SITE` / `C_SITE`, and redeploy.
+server, set `C_SITE`, and redeploy.

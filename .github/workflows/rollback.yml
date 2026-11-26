@@ -6,7 +6,7 @@ on:
       site:
         description: "Which site"
         type: choice
-        options: [website, b, c]
+        options: [c]
       tag:
         description: "Image tag to roll back to (e.g. sha-1a2b3c4 — see Docker Hub or an earlier run)"
         required: true
@@ -41,6 +41,6 @@ jobs:
           SITE: ${{ github.event.inputs.site }}
           TAG: ${{ github.event.inputs.tag }}
         run: |
-          case "$SITE" in website) var=TAG_MAIN;; b) var=TAG_B;; c) var=TAG_C;; esac
+          case "$SITE" in c) var=TAG_C;; *) exit 1;; esac
           # shellcheck disable=SC2029  # TAG validated against ^[A-Za-z0-9._-]+$ in the first step
           ssh target "bash /opt/tac/deploy.sh $var=$TAG"

@@ -1,6 +1,5 @@
-# Default (no domain yet): plain HTTP on the server IP — site A :80, site B :8081, site C :8082.
-# With domains: set MAIN_SITE / B_SITE / C_SITE in /opt/tac/.env (e.g. MAIN_SITE="tacuae.com, www.tacuae.com")
-# and Caddy obtains HTTPS certificates automatically.
+# Default (no domain yet): plain HTTP on the server IP, port 8082.
+# With a domain: set C_SITE in /opt/tac/.env (e.g. C_SITE="tacuae.com, www.tacuae.com") and Caddy obtains HTTPS automatically.
 (common) {
 	encode zstd gzip
 	header {
@@ -10,14 +9,6 @@
 	}
 }
 
-{$MAIN_SITE:http://:80} {
-	import common
-	reverse_proxy tac-main:3000
-}
-{$B_SITE:http://:8081} {
-	import common
-	reverse_proxy tac-b:3000
-}
 {$C_SITE:http://:8082} {
 	import common
 	reverse_proxy tac-c:3000
