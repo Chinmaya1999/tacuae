@@ -28,5 +28,9 @@ scene (`DayCycle.tsx`) and an animated network canvas in the hero (`NetworkCanva
 Animations are illustrative concepts, labelled as such — they are not product photos or specifications.
 
 ## Local development
+**One local mode:** `npm run dev` and `npm run demo` both run with demo features on and a local demo database in
+`~/.tac-demo` (sample accounts, password `Demo@12345`). `npm run dev:real` uses the database in `.env` with demo
+features off. Production (`npm start`) is unchanged.
+
 `npm run dev` starts **both** the API (http://localhost:8787, reads `.env`) and the Vite site (http://localhost:5173, which proxies `/api` to the API).
 Running only `npm run dev:web` gives `502 Bad Gateway` on `/api/*` (login, register, enquiries) because nothing is listening on 8787.
