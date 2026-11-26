@@ -61,7 +61,7 @@ export default function Assistant() {
   const [msgs, setMsgs] = useState<Msg[]>([{ text: 'Hello! Ask me about your smart-home design. مرحباً!' }])
   const end = useRef<HTMLDivElement>(null)
   useEffect(() => { end.current?.scrollIntoView({ block: 'nearest' }) }, [msgs, open])
-  if (!demo || /^\/(admin|q|proposal)(\/|$)/.test(pathname)) return null
+  if (!demo || /^\/(admin|q|proposal|login|register)(\/|$)/.test(pathname)) return null
   const ask = async (q: string) => {
     if (!q.trim() || busy) return
     setMsgs((m) => [...m, { me: true, text: q }]); setText(''); setBusy(true)

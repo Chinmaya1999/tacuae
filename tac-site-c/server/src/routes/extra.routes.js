@@ -20,7 +20,7 @@ const signIn = (fn) => async (req, res) => {
   ApiResponse.send(res, { user: publicUser(user) })
 }
 const signedIn = requireRole(...ROLES), staff = requireRole('sales', 'admin')
-const strict = rateLimit({ max: 20, windowMs: 3600_000 })
+const strict = rateLimit({ max: 200, windowMs: 3600_000 }) // these routes only act in demo mode; presentations repeat them often
 
 const r = Router()
 r.get('/demo/config', (_q, res) => ApiResponse.send(res, { demo: env.demoMode }))
