@@ -10,8 +10,10 @@ const list = (v) => String(v ?? '').split(',').map((s) => s.trim()).filter(Boole
 
 export const env = Object.freeze({
   nodeEnv: e.NODE_ENV || 'development',
-  // Client demonstrations only: switches on SIMULATED sign-in, payments, messaging and team invites. Never set in production.
-  demoMode: e.DEMO_MODE === 'true',
+  // Client demonstrations only: switches on SIMULATED sign-in, payments, messaging and team invites.
+  // Safety: it stays OFF unless the database is a demo database (its name contains "demo"), so it can never
+  // run against real data.
+  demoMode: e.DEMO_MODE === 'true' && (!e.MONGODB_URI || /\/[^/?]*demo[^/?]*(\?|$)/i.test(e.MONGODB_URI)),
   port: Number(e.PORT) || 8787,
   distDir: path.join(projectRoot, 'dist'),
   dataDir: e.DATA_DIR || path.join(serverRoot, 'data'),

@@ -49,6 +49,13 @@ deploy needs a click of approval.
 **4. Prepare the server:** Actions → **CI/CD** → *Run workflow* → tick **bootstrap** (installs Docker, creates `/opt/tac`).
 Run it once. Then push to `main` (or run the workflow with `sites = all`) to deploy.
 
+## Demonstration mode on the server
+`DEMO_MODE=true` (repository **variable**) makes the public site behave like `npm run demo`: sample accounts and prices,
+and **simulated** Google/Apple/OTP sign-in, payments, messaging, assistant and Arabic preview.
+It needs the secrets `DEMO_MONGODB_URI` (database name must contain `demo`) and `DEMO_PASSWORD`; it uses its own data
+folder, so real accounts, quotations and enquiries are not shown or changed.
+Switch back to the real site: `gh variable set DEMO_MODE --body false && gh workflow run CI/CD`.
+
 ## Day to day
 * Merge to `main` → changed sites deploy automatically.
 * **Rollback:** Actions → **Rollback** → choose site and an older `sha-…` tag.

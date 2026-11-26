@@ -14,6 +14,7 @@ export function createApp() {
     res.setHeader('X-Content-Type-Options', 'nosniff')
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
     res.setHeader('X-Frame-Options', 'SAMEORIGIN')
+    if (env.demoMode) res.setHeader('X-Robots-Tag', 'noindex, nofollow') // sample data must not appear in search
     next()
   })
   app.use(cors())

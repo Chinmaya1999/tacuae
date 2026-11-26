@@ -16,11 +16,13 @@ const Pricing = await import('../src/models/pricing.model.js')
 const Product = await import('../src/models/product.model.js')
 
 const db = await getDb()
-if (!process.argv.includes('--reset') && (await db.collection('tac_users').countDocuments())) { await closeDb(); process.exit(0) }
-await db.dropDatabase(); await closeDb(); await getDb()
+// already seeded? (the server may have created the first admin on its own, so look for a sample customer)
+if (!process.argv.includes('--reset') && (await db.collection('tac_users').findOne({ email: 'customer@demo.tac' }))) { await closeDb(); process.exit(0) }
+// empty this app's collections (works with a read/write database user; indexes are kept)
+for (const { name } of await db.listCollections().toArray()) if (name.startsWith('tac_')) await db.collection(name).deleteMany({})
 await ensureProducts(); await ensurePricing()
 
-const PASSWORD = 'Demo@12345'
+const PASSWORD = process.env.DEMO_PASSWORD || 'Demo@12345' // set DEMO_PASSWORD for a demo that is online
 const account = async (name, email, role, extra = {}) => {
   const u = await register({ name, email, password: PASSWORD, role: role === 'builder' ? 'builder' : 'customer', company: extra.company || '', phone: extra.phone || '+971500000000', business: extra.business || null })
   const set = { role, demo: true, ...extra.set }
