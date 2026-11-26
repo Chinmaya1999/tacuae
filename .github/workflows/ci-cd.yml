@@ -34,7 +34,7 @@ jobs:
       infra: ${{ steps.plan.outputs.infra }}
       tags: ${{ steps.plan.outputs.tags }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - id: plan
         env:
@@ -82,7 +82,7 @@ jobs:
     defaults:
       run: { working-directory: "${{ matrix.dir }}" }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -121,7 +121,7 @@ jobs:
       # images are only pushed from main once the repo variable DEPLOY_ENABLED=true is set
       PUSH: ${{ github.event_name != 'pull_request' && vars.DEPLOY_ENABLED == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v3
       - name: Log in to Docker Hub
         if: env.PUSH == 'true'
@@ -184,7 +184,7 @@ jobs:
     environment: production   # add required reviewers in Settings → Environments for manual approval
     concurrency: { group: production-deploy, cancel-in-progress: false }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Configure SSH
         env:
           SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
