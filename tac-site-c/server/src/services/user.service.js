@@ -1,5 +1,6 @@
 import * as User from '../models/user.model.js'
 import * as Design from '../models/design.model.js'
+import * as Audit from '../models/pricing.model.js'
 import { mongoEnabled } from '../config/database.js'
 import { publicUser } from './auth.service.js'
 import ApiError from '../utils/ApiError.js'
@@ -13,6 +14,7 @@ export async function updateUser(actor, id, patch) {
   if (String(id) === String(actor._id)) throw new ApiError(400, 'You cannot change your own account here.')
   const r = await User.setFields(id, patch)
   if (!r.matchedCount) throw new ApiError(404, 'User not found.')
+  await Audit.log(actor, 'user.update', String(id), patch)
 }
 
 export async function accountStats() {

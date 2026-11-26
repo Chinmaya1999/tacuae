@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
-import { BarChart3, Boxes, Tags, Check, Download, FileText, Inbox, KeyRound, Loader2, LogOut, Search, Trash2, Users } from 'lucide-react'
+import { BarChart3, Boxes, CalendarDays, Plug, TrendingUp, Calculator, ReceiptText, Tags, Check, Download, FileText, Inbox, KeyRound, Loader2, LogOut, Search, Trash2, Users } from 'lucide-react'
 import { Navigate } from 'react-router-dom'
 import { api as rawApi } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import DesignsAdmin from './AdminDesigns'
 import UsersAdmin from './AdminUsers'
 import ProductsAdmin from './AdminProducts'
+import QuotationsAdmin from './AdminQuotations'
+import PricingAdmin from './AdminPricing'
+import { Analytics, Bookings, Integrations } from './AdminExtras'
+import NotificationBell from '../components/demo/NotificationBell'
 import { products, projects } from '../data/content'
 import type { Overrides } from '../lib/useContent'
 
@@ -30,36 +34,43 @@ export default function Admin() {
   }, [])
   if (loading) return <div className="grid min-h-screen place-items-center bg-midnight"><Loader2 className="animate-spin text-cyan" /></div>
   if (!user) return <Navigate to="/login?next=/admin" replace />
-  if (user.role !== 'admin') return <Navigate to="/dashboard" replace />
-  return <div className="min-h-screen bg-midnight text-white"><Dashboard onOut={logout} /></div>
+  if (user.role !== 'admin' && user.role !== 'sales') return <Navigate to="/dashboard" replace />
+  return <div className="min-h-screen bg-midnight text-white"><Dashboard onOut={logout} sales={user.role === 'sales'} /></div>
 }
 
 const tabs = [
   { id: 'overview', label: 'Overview', icon: BarChart3 },
+  { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+  { id: 'quotations', label: 'Quotations', icon: ReceiptText },
+  { id: 'bookings', label: 'Bookings', icon: CalendarDays },
   { id: 'designs', label: 'Room designs', icon: Boxes },
   { id: 'products', label: 'Products & prices', icon: Tags },
+  { id: 'pricing', label: 'Pricing & packages', icon: Calculator },
   { id: 'users', label: 'Users', icon: Users },
   { id: 'enquiries', label: 'Enquiries', icon: Inbox },
   { id: 'content', label: 'Content', icon: FileText },
+  { id: 'integrations', label: 'Integrations', icon: Plug },
   { id: 'security', label: 'Security', icon: KeyRound },
 ] as const
 
-function Dashboard({ onOut }: { onOut: () => void }) {
-  const [tab, setTab] = useState<(typeof tabs)[number]['id']>('overview')
+function Dashboard({ onOut, sales }: { onOut: () => void; sales: boolean }) {
+  // sales users see only the quotation console and their own password; the server enforces the same rule
+  const visible = sales ? tabs.filter((t) => t.id === 'quotations' || t.id === 'bookings' || t.id === 'security') : tabs
+  const [tab, setTab] = useState<(typeof tabs)[number]['id']>(sales ? 'quotations' : 'overview')
   const [stats, setStats] = useState<Stats | null>(null)
-  const loadStats = useCallback(() => api<Stats>('/stats').then(setStats).catch(() => {}), [])
+  const loadStats = useCallback(() => (sales ? Promise.resolve() : api<Stats>('/stats').then(setStats).catch(() => {})), [sales])
   useEffect(() => { loadStats(); const t = setInterval(() => document.visibilityState === 'visible' && loadStats(), 30000); return () => clearInterval(t) }, [loadStats])
   const logout = () => { onOut() }
 
   return (
     <div className="lg:grid lg:grid-cols-[240px_1fr]">
-      <aside className="border-b border-white/10 bg-deep lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
+      <aside className="no-print border-b border-white/10 bg-deep lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between px-5 py-4 lg:block lg:py-7">
           <img src="/images/site/logo-dark.png" alt="TAC" className="h-9 w-auto" />
           <button onClick={logout} className="flex items-center gap-2 text-sm text-silver hover:text-cyan lg:mt-8"><LogOut size={16} />Sign out</button>
         </div>
         <nav aria-label="Admin" className="flex gap-1 overflow-x-auto px-3 pb-3 lg:block lg:space-y-1 lg:px-4">
-          {tabs.map((t) => (
+          {visible.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)} aria-current={tab === t.id ? 'page' : undefined}
               className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm transition lg:w-full ${tab === t.id ? 'bg-cyan/15 text-cyan' : 'text-silver hover:bg-white/5 hover:text-white'}`}>
               <t.icon size={17} />{t.label}
@@ -72,6 +83,12 @@ function Dashboard({ onOut }: { onOut: () => void }) {
       </aside>
       <main className="min-w-0 px-5 py-8 lg:px-10">
         {tab === 'overview' && <Overview stats={stats} go={setTab} />}
+        <NotificationBell />
+        {tab === 'analytics' && <Analytics />}
+        {tab === 'bookings' && <Bookings />}
+        {tab === 'integrations' && <Integrations />}
+        {tab === 'quotations' && <QuotationsAdmin />}
+        {tab === 'pricing' && <PricingAdmin />}
         {tab === 'designs' && <DesignsAdmin onChange={loadStats} />}
         {tab === 'products' && <ProductsAdmin />}
         {tab === 'users' && <UsersAdmin />}

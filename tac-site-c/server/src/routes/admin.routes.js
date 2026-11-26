@@ -8,6 +8,7 @@ import { adminDesignRoutes } from './design.routes.js'
 import { adminEnquiryRoutes } from './enquiry.routes.js'
 import { adminContentRoutes } from './content.routes.js'
 import { adminProductRoutes } from './product.routes.js'
+import { adminPricingRoutes } from './quote.routes.js'
 
 const r = Router()
 r.use(csrfGuard, requireRole('admin'))
@@ -19,4 +20,5 @@ r.get('/enquiries.csv', exportCsv)
 r.use('/enquiries', adminEnquiryRoutes)
 r.use('/content', adminContentRoutes)
 r.use('/products', adminProductRoutes)
+r.use('/pricing', adminPricingRoutes)
 export default r

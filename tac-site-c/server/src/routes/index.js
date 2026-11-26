@@ -6,13 +6,20 @@ import contentRoutes from './content.routes.js'
 import adminRoutes from './admin.routes.js'
 import productRoutes from './product.routes.js'
 import bmsRoutes from './bms.routes.js'
+import extraRoutes from './extra.routes.js'
+import { configuratorRoutes, quoteRoutes, salesRoutes, sharedRoutes } from './quote.routes.js'
 
 const api = Router()
+api.use(extraRoutes)
 api.use('/enquiry', enquiryRoutes)
 api.use('/content', contentRoutes)
 api.use('/account', authRoutes)
 api.use('/designs', designRoutes)
 api.use('/products', productRoutes)
 api.use('/bms', bmsRoutes)
+api.use('/configurator', configuratorRoutes)
+api.use('/quotations', quoteRoutes)
+api.use('/shared', sharedRoutes)
+api.use('/sales', salesRoutes)
 api.use('/admin', adminRoutes)
 export default api

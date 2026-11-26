@@ -11,6 +11,12 @@ export default function Footer() {
         <defs><pattern id="fp" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#00D5FF" strokeWidth=".6" className="draw-line" /></pattern></defs>
         <rect width="100%" height="100%" fill="url(#fp)" />
       </svg>
+      <div className="container-x relative mb-14 flex flex-wrap gap-3 border-b border-white/10 pb-12">
+        <Link to="/design-my-home" className="btn btn-primary">Design my smart home</Link>
+        <Link to="/project-quote" className="btn btn-ghost">Get a project quote</Link>
+        <Link to="/book" className="btn btn-ghost">Talk to an expert</Link>
+        <Link to="/simulation" className="btn btn-ghost">Try the 3D studio</Link>
+      </div>
       <div className="container-x relative grid gap-12 md:grid-cols-2 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <img src={company.logoDark} alt="TAC" className="h-12 w-auto" />

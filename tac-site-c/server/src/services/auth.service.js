@@ -17,11 +17,12 @@ export async function verifyPassword(pw, stored) {
   return a.length === b.length && crypto.timingSafeEqual(a, b)
 }
 
-export const publicUser = (u) => ({ id: String(u._id), name: u.name, email: u.email, role: u.role, company: u.company || '', phone: u.phone || '', active: u.active !== false, createdAt: u.createdAt })
+export const publicUser = (u) => ({ id: String(u._id), name: u.name, email: u.email, role: u.role, company: u.company || '', phone: u.phone || '', active: u.active !== false, createdAt: u.createdAt,
+  business: u.business || null, verified: u.verified === true, priceTier: u.priceTier || 'retail', teamRole: u.teamRole || '' })
 
-export async function register({ name, email, password, role, company, phone }) {
+export async function register({ name, email, password, role, company, phone, business }) {
   const now = new Date().toISOString()
-  const doc = { name, email, role, company, phone, active: true, hash: await hashPassword(password), pwChangedAt: now, createdAt: now }
+  const doc = { name, email, role, company, phone, ...(role === 'builder' ? { business, verified: false, priceTier: 'retail' } : {}), active: true, hash: await hashPassword(password), pwChangedAt: now, createdAt: now }
   try { return await User.insert(doc) } catch (e) {
     if (e.code === 11000) throw new ApiError(409, 'An account with this email already exists.')
     throw e

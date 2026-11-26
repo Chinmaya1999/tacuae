@@ -1,4 +1,5 @@
 import { Component, lazy, Suspense, type ReactNode } from 'react'
+import { hasWebGL } from '../../lib/webgl'
 import { Loader2 } from 'lucide-react'
 import Designer from '../studio/Designer'
 import type { Design } from '../../data/catalog'
@@ -7,7 +8,6 @@ import type { Design } from '../../data/catalog'
 const Designer3D = lazy(() => import('./Designer3D'))
 type Props = { design: Design; onChange?: (d: Design) => void; readOnly?: boolean }
 
-const hasWebGL = () => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')) } catch { return false } }
 
 class Boundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
   state = { failed: false }

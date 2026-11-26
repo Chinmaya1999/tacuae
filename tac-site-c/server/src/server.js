@@ -4,6 +4,7 @@ import { env } from './config/env.js'
 import { closeDb, mongoEnabled } from './config/database.js'
 import { ensureAdmin } from './services/auth.service.js'
 import { ensureProducts } from './services/product.service.js'
+import { ensurePricing } from './services/pricing.service.js'
 import { mailEnabled } from './integrations/email/mailer.js'
 import { startJobs } from './jobs/cron.jobs.js'
 
@@ -24,6 +25,8 @@ server.on('error', (e) => {
     if (initial) console.log(`\n  ADMIN ACCOUNT CREATED: ${initial.email}${initial.password ? `\n  FIRST-RUN PASSWORD: ${initial.password}\n  (shown once — sign in at /login, then change it under Security)` : '  (password = ADMIN_PASSWORD)'}\n`)
     const seeded = await ensureProducts()
     if (seeded) console.log(`  Seeded ${seeded} starter products with PLACEHOLDER prices — set real prices in Admin → Products.`)
+    const rules = await ensurePricing()
+    if (rules) console.log(`  Seeded ${rules} STARTER pricing rules — review them in Admin → Pricing before showing prices to guests.`)
     if (mongoEnabled) console.log('  MongoDB connected.')
   } catch (e) { console.error('Could not reach MongoDB (accounts will retry on the next request):', e.message) }
 })()

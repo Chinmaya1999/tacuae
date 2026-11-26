@@ -14,7 +14,7 @@ r.get('/about', (_q, s) => s.redirect(301, '/about-us'))
 
 r.use(express.static(dist, { maxAge: '7d', index: false, redirect: false, setHeaders: (res, p) => { if (p.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache') } }))
 r.get('/{*splat}', (req, res) => {
-  if (/^\/(admin|dashboard|login|register)(\/|$)/.test(req.path)) { // private app pages: never indexed or cached
+  if (/^\/(admin|dashboard|login|register|q|proposal)(\/|$)/.test(req.path)) { // private app pages: never indexed or cached
     res.setHeader('X-Robots-Tag', 'noindex, nofollow'); res.setHeader('Cache-Control', 'no-store')
     return res.sendFile(path.join(dist, 'index.html'))
   }

@@ -3,7 +3,15 @@ import Layout from './components/Layout'
 import Home from './pages/Home'
 import { lazy, Suspense, type ComponentType } from 'react'
 import { AuthProvider } from './lib/auth'
+import DemoBar from './components/demo/DemoBar'
 
+const Configurator = lazy(() => import('./pages/Configurator'))
+const ProjectQuote = lazy(() => import('./pages/ProjectQuote'))
+const SharedQuote = lazy(() => import('./pages/SharedQuote'))
+const Simulation = lazy(() => import('./pages/Simulation'))
+const Booking = lazy(() => import('./pages/Booking'))
+const Proposal = lazy(() => import('./pages/Proposal'))
+const Assistant = lazy(() => import('./components/demo/Assistant'))
 const L = (k: string) => lazy(() => import('./pages/Inner').then((m) => ({ default: (m as unknown as Record<string, ComponentType<any>>)[k] })))
 const Admin = lazy(() => import('./pages/Admin'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
@@ -23,8 +31,15 @@ export default function App() {
       <Route path="dashboard/*" element={<Dashboard />} />
       <Route path="login" element={<Login />} />
       <Route path="register" element={<Register />} />
+      <Route path="q/:token" element={<SharedQuote />} />
+      <Route path="q/:token/proposal" element={<Proposal />} />
+      <Route path="proposal/:id" element={<Proposal />} />
       <Route element={<Layout />}>
         <Route index element={<Home />} />
+        <Route path="simulation" element={<Simulation />} />
+        <Route path="book" element={<Booking />} />
+        <Route path="design-my-home" element={<Configurator />} />
+        <Route path="project-quote" element={<ProjectQuote />} />
         <Route path="about-us" element={<P.About />} />
         <Route path="about" element={<Navigate to="/about-us" replace />} />
         <Route path="services" element={<P.Services />} />
@@ -43,6 +58,8 @@ export default function App() {
       </Route>
     </Routes>
     </Suspense>
+    <Suspense fallback={null}><Assistant /></Suspense>
+    <DemoBar />
     </AuthProvider>
   )
 }

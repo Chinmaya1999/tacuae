@@ -56,3 +56,10 @@ test('unknown API routes return JSON 404; malformed JSON returns 400', async () 
   const r = await fetch(`${base}/api/enquiry`, { method: 'POST', headers: json, body: '{bad' })
   assert.equal(r.status, 400)
 })
+test('simulated sign-in does not exist unless the server runs in demo mode', async () => {
+  for (const [url, body] of [['/api/demo/social', { provider: 'google' }], ['/api/demo/otp/request', { phone: '0501234567' }], ['/api/demo/otp/verify', { phone: '0501234567', code: '123456' }]]) {
+    const r = await fetch(`${base}${url}`, { method: 'POST', headers: json, body: JSON.stringify(body) })
+    assert.equal(r.status, 404, url)
+  }
+  assert.equal((await (await fetch(`${base}/api/demo/config`)).json()).demo, false)
+})

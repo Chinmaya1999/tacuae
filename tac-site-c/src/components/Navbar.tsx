@@ -16,7 +16,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const loc = useLocation()
   const { user } = useAuth()
-  const acct = user ? { to: homeFor(user.role), label: user.role === 'admin' ? 'Admin' : 'My dashboard' } : { to: '/login', label: 'Sign in' }
+  const acct = user ? { to: homeFor(user.role), label: user.role === 'admin' ? 'Admin' : user.role === 'sales' ? 'Sales console' : 'My dashboard' } : { to: '/login', label: 'Sign in' }
   useEffect(() => {
     const f = () => setScrolled(window.scrollY > 40)
     f(); window.addEventListener('scroll', f, { passive: true })
@@ -39,7 +39,7 @@ export default function Navbar() {
               <img src={company.logoDark} alt="TAC — Total Automation" className="h-10 md:h-12 w-auto" />
             </Link>
 
-            <nav aria-label="Primary" className="hidden lg:flex items-center gap-8 text-sm">
+            <nav aria-label="Primary" className="hidden xl:flex items-center gap-6 whitespace-nowrap text-sm">
               {nav.map((n) => (
                 <div key={n.to} className="relative group">
                   <NavLink to={n.to} end={n.to === '/'} className="link-u py-2 inline-flex items-center gap-1 text-white/85 hover:text-white aria-[current=page]:text-white">
@@ -58,10 +58,10 @@ export default function Navbar() {
               ))}
             </nav>
 
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-3 whitespace-nowrap">
               <Link to={acct.to} className="hidden text-sm text-white/85 hover:text-cyan md:inline">{acct.label}</Link>
-              <Link to="/contact#enquiry" className="btn btn-primary hidden md:inline-flex !py-2.5">Get a Consultation</Link>
-              <button className="lg:hidden p-2 -mr-2" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? 'Close menu' : 'Open menu'}>
+              <Link to="/design-my-home" className="btn btn-primary hidden md:inline-flex !py-2.5">Design my smart home</Link>
+              <button className="xl:hidden p-2 -mr-2" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? 'Close menu' : 'Open menu'}>
                 {open ? <X /> : <Menu />}
               </button>
             </div>
@@ -86,7 +86,9 @@ export default function Navbar() {
               </ul>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="mt-8 flex flex-col gap-3">
                 <Link to={acct.to} className="btn btn-ghost justify-center">{acct.label}</Link>
-                <Link to="/contact#enquiry" className="btn btn-primary justify-center">Get a Consultation</Link>
+                <Link to="/design-my-home" className="btn btn-primary justify-center">Design my smart home</Link>
+                <Link to="/project-quote" className="btn btn-ghost justify-center">Get a project quote</Link>
+                <Link to="/book" className="btn btn-ghost justify-center">Talk to an expert</Link>
                 <a href={company.phoneHref} className="btn btn-ghost justify-center">{company.phone}</a>
               </motion.div>
             </nav>

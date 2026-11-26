@@ -17,6 +17,8 @@ export function createApp() {
     next()
   })
   app.use(cors())
+  // project configurations (many unit templates) are larger than ordinary forms
+  app.use(['/api/configurator', '/api/quotations'], express.json({ limit: '250kb' }))
   app.use(express.json({ limit: '30kb' }))
 
   app.use('/api', apiRoutes)

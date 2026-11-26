@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { HardHat, Home, Loader2 } from 'lucide-react'
 import { homeFor, useAuth } from '../lib/auth'
+import DemoSignIn from '../components/demo/DemoSignIn'
 
 const inputCls = 'w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base text-white outline-none transition placeholder:text-slate focus:border-cyan'
 const label = 'mb-2 block text-xs uppercase tracking-[0.15em] text-silver'
@@ -47,6 +48,7 @@ export function Login() {
         {err && <p role="alert" className="text-sm text-red-400">{err}</p>}
         <button className="btn btn-primary w-full justify-center disabled:opacity-60" disabled={busy || !email || !pw}>{busy ? 'Signing in…' : 'Sign in'}</button>
       </form>
+      <DemoSignIn />
       <p className="mt-6 text-center text-sm text-silver">New here? <Link to="/register" className="text-cyan hover:underline">Create an account</Link></p>
     </Shell>
   )
@@ -54,16 +56,16 @@ export function Login() {
 
 export function Register() {
   useNoIndex('Create account')
-  const { user, loading, register } = useAuth(), nav = useNavigate()
-  const [role, setRole] = useState<'customer' | 'builder'>('customer')
-  const [f, setF] = useState({ name: '', email: '', password: '', company: '', phone: '', website: '' })
+  const { user, loading, register } = useAuth(), nav = useNavigate(), [q] = useSearchParams()
+  const [role, setRole] = useState<'customer' | 'builder'>(q.get('type') === 'builder' ? 'builder' : 'customer')
+  const [f, setF] = useState({ name: '', email: '', password: '', company: '', phone: '', website: '', tradeLicence: '', trn: '', sector: 'developer' })
   const [err, setErr] = useState(''), [busy, setBusy] = useState(false)
   if (loading) return <div className="grid min-h-screen place-items-center bg-midnight"><Loader2 className="animate-spin text-cyan" /></div>
-  if (user) return <Navigate to={homeFor(user.role)} replace />
+  if (user) return <Navigate to={safeNext(q.get('next'), homeFor(user.role))} replace />
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value })
   const submit = async (e: FormEvent) => {
     e.preventDefault(); setBusy(true); setErr('')
-    try { const u = await register({ ...f, role }); nav(homeFor(u.role), { replace: true }) } catch (x) { setErr((x as Error).message) } finally { setBusy(false) }
+    try { const u = await register({ ...f, role }); nav(safeNext(q.get('next'), homeFor(u.role)), { replace: true }) } catch (x) { setErr((x as Error).message) } finally { setBusy(false) }
   }
   const Opt = ({ id, icon: I, t, d }: { id: 'customer' | 'builder'; icon: typeof Home; t: string; d: string }) => (
     <button type="button" onClick={() => setRole(id)} aria-pressed={role === id} className={`rounded-xl border p-4 text-left transition ${role === id ? 'border-cyan bg-cyan/10' : 'border-white/15 hover:border-white/40'}`}>
@@ -80,11 +82,17 @@ export function Register() {
           <div><label htmlFor="p" className={label}>Phone</label><input id="p" type="tel" autoComplete="tel" value={f.phone} onChange={set('phone')} className={inputCls} /></div>
         </div>
         <div><label htmlFor="pw" className={label}>Password (min 8 characters)</label><input id="pw" type="password" autoComplete="new-password" required minLength={8} value={f.password} onChange={set('password')} className={inputCls} /></div>
+        {role === 'builder' && <div className="grid gap-4 sm:grid-cols-2">
+          <div><label htmlFor="tl" className={label}>Trade licence no.</label><input id="tl" maxLength={60} value={f.tradeLicence} onChange={set('tradeLicence')} className={inputCls} /></div>
+          <div><label htmlFor="trn" className={label}>TRN (15 digits)</label><input id="trn" inputMode="numeric" maxLength={20} value={f.trn} onChange={set('trn')} className={inputCls} /></div>
+          <div className="sm:col-span-2"><label htmlFor="sec" className={label}>Business sector</label><select id="sec" value={f.sector} onChange={set('sector')} className={`${inputCls} [&>option]:bg-deep`}>{['developer', 'contractor', 'fit-out', 'consultant', 'interior-design', 'reseller', 'hospitality', 'office', 'facility-management', 'other'].map((x) => <option key={x} value={x}>{x.replace('-', ' ')}</option>)}</select></div>
+          <p className="text-xs text-slate sm:col-span-2">TAC verifies business accounts before trade or partner pricing applies.</p>
+        </div>}
         <input tabIndex={-1} autoComplete="off" aria-hidden className="hidden" value={f.website} onChange={set('website')} name="website" />
         {err && <p role="alert" className="text-sm text-red-400">{err}</p>}
         <button className="btn btn-primary w-full justify-center disabled:opacity-60" disabled={busy || f.password.length < 8 || f.name.trim().length < 2 || !f.email}>{busy ? 'Creating…' : 'Create account'}</button>
       </form>
-      <p className="mt-6 text-center text-sm text-silver">Already registered? <Link to="/login" className="text-cyan hover:underline">Sign in</Link></p>
+      <p className="mt-6 text-center text-sm text-silver">Already registered? <Link to={q.get('next') ? `/login?next=${encodeURIComponent(q.get('next')!)}` : '/login'} className="text-cyan hover:underline">Sign in</Link></p>
     </Shell>
   )
 }

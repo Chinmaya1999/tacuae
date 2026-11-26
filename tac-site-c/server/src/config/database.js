@@ -24,6 +24,15 @@ export function getDb() {
       d.collection(COLLECTIONS.equipment).createIndex({ projectId: 1, towerId: 1, level: 1 }),
       d.collection(COLLECTIONS.alarms).createIndex({ projectId: 1, state: 1, raisedAt: -1 }),
       d.collection(COLLECTIONS.alarms).createIndex({ ownerId: 1, state: 1 }),
+      d.collection(COLLECTIONS.quotes).createIndex({ ownerId: 1, updatedAt: -1 }),
+      d.collection(COLLECTIONS.quotes).createIndex({ released: 1, status: 1, updatedAt: -1 }),
+      d.collection(COLLECTIONS.quotes).createIndex({ shareHash: 1 }, { unique: true, partialFilterExpression: { shareHash: { $type: 'string' } } }),
+      d.collection(COLLECTIONS.quotes).createIndex({ ref: 1 }, { unique: true }),
+      d.collection(COLLECTIONS.pricingRules).createIndex({ key: 1 }, { unique: true }),
+      d.collection(COLLECTIONS.audit).createIndex({ at: -1 }),
+      d.collection(COLLECTIONS.notifications).createIndex({ to: 1, at: -1 }),
+      d.collection(COLLECTIONS.outbox).createIndex({ at: -1 }),
+      d.collection(COLLECTIONS.appointments).createIndex({ userId: 1, date: 1 }),
     ])
     return d
   })().catch((e) => { pending = null; throw e })

@@ -144,3 +144,30 @@ a, button { -webkit-tap-highlight-color: transparent; touch-action: manipulation
 
 /* compact buttons on phones so hero CTAs share a row */
 @media (max-width: 639px) { .btn { padding: 0.8rem 1.2rem; font-size: 0.85rem; gap: 0.45rem; } }
+
+/* printing a quotation ("Save as PDF"): paper colours, no controls */
+@media print {
+  .no-print { display: none !important; }
+  html, body, #root, #root div, #root section, #root aside, #root table, #root li { background: #fff !important; }
+  #root * { color: #111 !important; border-color: #ccc !important; box-shadow: none !important; background-image: none !important; }
+  .lg\:grid { display: block !important; }
+}
+
+/* right-to-left: mirror the physical utility classes used across the app */
+[dir='rtl'] body { letter-spacing: 0; }
+[dir='rtl'] * { letter-spacing: 0 !important; }
+[dir='rtl'] .text-left { text-align: right; }
+[dir='rtl'] .text-right { text-align: left; }
+[dir='rtl'] .ml-auto { margin-left: 0; margin-right: auto; }
+[dir='rtl'] .mr-1 { margin-right: 0; margin-left: .25rem; }
+[dir='rtl'] .mr-1\.5 { margin-right: 0; margin-left: .375rem; }
+[dir='rtl'] .mr-2 { margin-right: 0; margin-left: .5rem; }
+[dir='rtl'] .ml-2 { margin-left: 0; margin-right: .5rem; }
+[dir='rtl'] .pr-14 { padding-right: 0; padding-left: 3.5rem; }
+[dir='rtl'] .pl-5 { padding-left: 0; padding-right: 1.25rem; }
+[dir='rtl'] .lg\:border-r { border-right-width: 0; border-left-width: 1px; }
+[dir='rtl'] .lucide-arrow-left, [dir='rtl'] .lucide-arrow-right { transform: scaleX(-1); }
+/* canvases, charts and decorative art keep their own coordinates */
+[dir='rtl'] canvas { direction: ltr; }
+
+@media print { .proposal * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }

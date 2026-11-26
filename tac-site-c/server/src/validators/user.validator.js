@@ -1,4 +1,4 @@
-import { ROLES } from '../constants/index.js'
+import { PRICE_TIERS, ROLES } from '../constants/index.js'
 import { toObjectId } from '../config/database.js'
 import ApiError from '../utils/ApiError.js'
 
@@ -12,5 +12,7 @@ export function validateUserPatch(req) {
   const b = req.body || {}, set = {}
   if (b.active !== undefined) set.active = Boolean(b.active)
   if (b.role !== undefined) { if (!ROLES.includes(b.role)) throw new ApiError(400, 'Invalid role.'); set.role = b.role }
+  if (b.verified !== undefined) set.verified = b.verified === true
+  if (b.priceTier !== undefined) { if (!PRICE_TIERS.includes(b.priceTier)) throw new ApiError(400, 'Invalid price tier.'); set.priceTier = b.priceTier }
   return { id: validateIdParam(req), set }
 }

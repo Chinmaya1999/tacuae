@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { hasWebGL } from '../../lib/webgl'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Box, Eye, Loader2, MapPin, Maximize2, Minimize2, Moon, PanelLeft, Pencil, Plus, RotateCcw, Siren, Sun, Table2, ZoomIn, ZoomOut } from 'lucide-react'
 import { api } from '../../lib/api'
@@ -13,7 +14,6 @@ import Systems from './Systems'
 import AlarmsList from './AlarmsList'
 
 const Twin3D = lazy(() => import('../../components/bms/Twin3D')) // three.js loads only when a project is opened
-const hasWebGL = () => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')) } catch { return false } }
 type Tab = 'twin' | 'systems' | 'alarms'
 const MODULE_PIC: Record<string, string> = { power: 'lt-panel', hvac: 'ahu', access: 'access-door', pumping: 'pump', elevator: 'elevator', lighting: 'lighting-zone', security: 'cctv', fire: 'fire-panel', water: 'tank', parking: 'ev-charger' }
 const Kpi = ({ label, value, tone, slim }: { label: string; value: string | number; tone?: 'bad' | 'good'; slim?: boolean }) => slim ? (

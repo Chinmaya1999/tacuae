@@ -36,7 +36,7 @@ export const devices: Device[] = [
 export const deviceById = Object.fromEntries(devices.map((d) => [d.id, d])) as Record<string, Device>
 export const groupColor = Object.fromEntries(groups.map((g) => [g.id, g.color])) as Record<Group, string>
 
-export type RoomType = 'master' | 'bedroom' | 'kids' | 'guest' | 'bathroom' | 'kitchen' | 'living' | 'drawing' | 'dining' | 'hall' | 'balcony' | 'theatre' | 'study' | 'office' | 'garage' | 'other'
+export type RoomType = 'master' | 'bedroom' | 'kids' | 'guest' | 'bathroom' | 'kitchen' | 'living' | 'drawing' | 'dining' | 'hall' | 'balcony' | 'theatre' | 'study' | 'office' | 'garage' | 'majlis' | 'lobby' | 'exterior' | 'other'
 export const roomTypes: { id: RoomType; label: string; icon: string; suggest: string[]; size: [number, number]; furniture: FurnitureType[] }[] = [
   { id: 'master', label: 'Master bedroom', icon: 'Bed', suggest: ['dali-dimming', 'rgb-lighting', 'smart-ac', 'motor-curtain', 'glass-switch', 'voice-control'], size: [5.5, 4.5], furniture: ['bed', 'wardrobe', 'rug'] },
   { id: 'bedroom', label: 'Bedroom', icon: 'Bed', suggest: ['dali-dimming', 'smart-ac', 'motor-curtain', 'glass-switch', 'voice-control'], size: [4.5, 4], furniture: ['bed', 'wardrobe'] },
@@ -53,6 +53,9 @@ export const roomTypes: { id: RoomType; label: string; icon: string; suggest: st
   { id: 'study', label: 'Study room', icon: 'BookOpen', suggest: ['dali-dimming', 'smart-ac', 'smart-plug'], size: [3.5, 3.5], furniture: ['desk', 'chair'] },
   { id: 'office', label: 'Office room', icon: 'Laptop', suggest: ['dali-dimming', 'smart-ac', 'energy-meter', 'smart-plug'], size: [5, 4], furniture: ['desk', 'chair'] },
   { id: 'garage', label: 'Garage / Entrance', icon: 'Car', suggest: ['door-lock', 'camera', 'alarm', 'motion-timer'], size: [6, 3.5], furniture: [] },
+  { id: 'majlis', label: 'Majlis', icon: 'Armchair', suggest: ['dali-dimming', 'rgb-lighting', 'smart-ac', 'motor-curtain', 'speaker'], size: [7, 5.5], furniture: ['sofa', 'sofa', 'coffee-table', 'rug', 'plant'] },
+  { id: 'lobby', label: 'Lobby', icon: 'DoorOpen', suggest: ['dali-dimming', 'camera', 'door-lock', 'central-panel'], size: [8, 6], furniture: ['sofa', 'coffee-table', 'plant', 'plant', 'desk'] },
+  { id: 'exterior', label: 'Villa exterior', icon: 'Trees', suggest: ['motion-timer', 'camera', 'alarm', 'door-lock'], size: [8, 6], furniture: [] },
   { id: 'other', label: 'Custom room', icon: 'Home', suggest: ['ceiling-light', 'glass-switch'], size: [4, 4], furniture: [] },
 ]
 export const roomTypeById = Object.fromEntries(roomTypes.map((r) => [r.id, r])) as Record<RoomType, (typeof roomTypes)[number]>

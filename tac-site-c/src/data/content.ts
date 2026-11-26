@@ -128,6 +128,7 @@ export const nav = [
   { label: 'Home', to: '/' },
   { label: 'About Us', to: '/about-us' },
   { label: 'Services', to: '/services' },
+  { label: '3D Studio', to: '/simulation' },
   { label: 'Products', to: '/products' },
   { label: 'Projects', to: '/projects' },
   { label: 'KNX Training', to: '/training' },
@@ -135,6 +136,10 @@ export const nav = [
 ]
 
 export const routes = [
+  { path: '/simulation', title: '3D Smart Simulation Studio | Total Automation UAE', desc: 'Try lighting, climate, curtain and security scenes in interactive 3D rooms and compare automation packages.' },
+  { path: '/book', title: 'Talk to an Expert | Total Automation UAE', desc: 'Book a callback, video consultation, showroom visit or site survey.' },
+  { path: '/design-my-home', title: 'Design My Smart Home | Total Automation UAE', desc: 'Choose your rooms and automation level and see an indicative smart-home design and price from Total Automation.' },
+  { path: '/project-quote', title: 'Get a Project Quote | Total Automation UAE', desc: 'Automation quotes for towers, villa communities, offices, hotels and retail projects in the UAE.' },
   { path: '/', title: 'Smart Automation | Total Automation Co LLC (TAC) | Dubai', desc: 'Home and building automation, BMS, GRMS, KNX and lighting control since 1998. Total Automation Co. LLC, Dubai, UAE.' },
   { path: '/about-us', title: 'About Us | Total Automation UAE', desc: 'Over 23 years of experience and 600+ projects in the Middle East. KNX distributor, manufacturer and certified training center.' },
   { path: '/services', title: 'Services | Total Automation UAE', desc: 'Building Management System, Smart Home Automation, GRMS, Lighting & Dimming Control, KNX Automation and training.' },
