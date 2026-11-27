@@ -52,7 +52,7 @@ export function Counter({ to, suffix = '', label }: { to: number; suffix?: strin
   }, [inView, to])
   return (
     <div>
-      <div className="font-display text-4xl md:text-6xl font-light text-white tabular-nums">
+      <div className="bg-gradient-to-b from-white to-ice bg-clip-text font-display text-4xl font-bold tracking-tight tabular-nums text-transparent md:text-6xl">
         <span ref={ref}>{v}</span>{suffix}
       </div>
       <div className="mt-2 text-xs uppercase tracking-[0.2em] text-silver">{label}</div>
@@ -84,10 +84,11 @@ export function Magnetic({ to, href, children, variant = 'primary', onClick }:
 
 export function PageHero({ eyebrow, title, text, image }: { eyebrow: string; title: string; text?: string; image?: string }) {
   return (
-    <section className="relative isolate overflow-hidden pt-40 pb-20 md:pt-52 md:pb-28">
+    <section className="relative isolate overflow-hidden pt-36 pb-16 md:pt-48 md:pb-24">
       {image && <img src={image} alt="" className="absolute inset-0 -z-20 h-full w-full object-cover opacity-35" />}
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-midnight/60 via-midnight/80 to-midnight" />
       <div className="absolute inset-0 -z-10 grid-bg opacity-60" />
+      <div aria-hidden className="aurora absolute inset-0 -z-10" />
       <div className="container-x">
         <span className="eyebrow">{eyebrow}</span>
         <Words as="h1" text={title} className="display mt-6 max-w-5xl" />
@@ -102,7 +103,7 @@ export function Breadcrumb({ items }: { items: { label: string; to?: string }[] 
     <nav aria-label="Breadcrumb" className="text-xs uppercase tracking-[0.18em] text-slate flex gap-2 flex-wrap">
       {items.map((it, i) => (
         <span key={i} className="flex gap-2">
-          {it.to ? <Link className="hover:text-cyan" to={it.to}>{it.label}</Link> : <span className="text-silver">{it.label}</span>}
+          {it.to ? <Link className="hover:text-accent" to={it.to}>{it.label}</Link> : <span className="text-silver">{it.label}</span>}
           {i < items.length - 1 && <span aria-hidden>/</span>}
         </span>
       ))}

@@ -9,7 +9,7 @@ type V3 = [number, number, number]
 const Box = ({ s, p = [0, 0, 0], c, rough = 0.7, metal = 0.05, shadow = true }: { s: V3; p?: V3; c: string; rough?: number; metal?: number; shadow?: boolean }) => (
   <mesh position={p} castShadow={shadow} receiveShadow><boxGeometry args={s} /><meshStandardMaterial color={c} roughness={rough} metalness={metal} /></mesh>
 )
-const Led = ({ on, color = '#00d5ff', p, r = 0.022 }: { on: boolean; color?: string; p: V3; r?: number }) => (
+const Led = ({ on, color = '#8b93ff', p, r = 0.022 }: { on: boolean; color?: string; p: V3; r?: number }) => (
   <mesh position={p}><sphereGeometry args={[r, 12, 12]} /><meshStandardMaterial color={on ? color : '#222'} emissive={on ? color : '#000'} emissiveIntensity={on ? 3 : 0} /></mesh>
 )
 
@@ -38,7 +38,7 @@ export function FurnitureMesh({ f, room, selected, onDown }: { f: PlacedFurnitur
       <FurnitureBody type={f.type} />
       <mesh position={[0, Math.max(sh, 0.05) / 2, 0]} onPointerDown={onDown}>
         <boxGeometry args={[sw, Math.max(sh, 0.05), sd]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
-        {selected && <Edges color="#00d5ff" />}
+        {selected && <Edges color="#8b93ff" />}
       </mesh>
     </group>
   )
@@ -105,15 +105,15 @@ function DeviceBody({ d, room }: { d: PlacedDevice; room: Room }) {
       </group>)
     case 'ac': return (
       <group>
-        <Box s={[1.0, 0.28, 0.2]} p={[0, 0, 0.1]} c="#f4f6fa" rough={0.4} /><Box s={[0.9, 0.025, 0.02]} p={[0, -0.08, 0.205]} c={on ? '#6fd6ff' : '#9aa3b2'} shadow={false} />
-        {on && <mesh position={[0, -0.7, 0.75]} rotation={[-0.75, 0, 0]}><coneGeometry args={[0.5, 1.5, 20, 1, true]} /><meshBasicMaterial color="#6fd6ff" transparent opacity={0.13} depthWrite={false} side={2} /></mesh>}
-        <Led on={on} color="#6fd6ff" p={[0.4, 0.06, 0.205]} />
+        <Box s={[1.0, 0.28, 0.2]} p={[0, 0, 0.1]} c="#f4f6fa" rough={0.4} /><Box s={[0.9, 0.025, 0.02]} p={[0, -0.08, 0.205]} c={on ? '#a5b4fc' : '#9aa3b2'} shadow={false} />
+        {on && <mesh position={[0, -0.7, 0.75]} rotation={[-0.75, 0, 0]}><coneGeometry args={[0.5, 1.5, 20, 1, true]} /><meshBasicMaterial color="#a5b4fc" transparent opacity={0.13} depthWrite={false} side={2} /></mesh>}
+        <Led on={on} color="#a5b4fc" p={[0.4, 0.06, 0.205]} />
       </group>)
     case 'alarm': return <group><Box s={[0.14, 0.14, 0.07]} p={[0, 0, 0.035]} c="#e4e7ee" /><Blink on={on} /></group>
     case 'curtain': return <Curtain open={on ? level / 100 : 0} W={2.2} H={Math.max(1.2, h - 0.35)} />
     case 'lock': return <group><Box s={[0.07, 0.22, 0.03]} p={[0, 0, 0.015]} c="#20242c" metal={0.6} /><Led on={true} color={on ? '#35e07c' : '#ff4545'} p={[0, 0.07, 0.035]} r={0.012} /></group>
-    case 'switch': return <group><Box s={[0.09, 0.09, 0.012]} p={[0, 0, 0.006]} c="#101419" rough={0.1} metal={0.5} /><Box s={[0.075, 0.075, 0.004]} p={[0, 0, 0.014]} c={on ? '#00d5ff' : '#1a1f27'} shadow={false} /></group>
-    case 'panel': return <group><Box s={[0.36, 0.23, 0.02]} p={[0, 0, 0.01]} c="#0d1016" rough={0.2} /><mesh position={[0, 0, 0.022]}><planeGeometry args={[0.32, 0.19]} /><meshStandardMaterial color={on ? '#0a2a3a' : '#050608'} emissive={on ? '#00d5ff' : '#000'} emissiveIntensity={on ? 1.2 : 0} /></mesh></group>
+    case 'switch': return <group><Box s={[0.09, 0.09, 0.012]} p={[0, 0, 0.006]} c="#101419" rough={0.1} metal={0.5} /><Box s={[0.075, 0.075, 0.004]} p={[0, 0, 0.014]} c={on ? '#8b93ff' : '#1a1f27'} shadow={false} /></group>
+    case 'panel': return <group><Box s={[0.36, 0.23, 0.02]} p={[0, 0, 0.01]} c="#0d1016" rough={0.2} /><mesh position={[0, 0, 0.022]}><planeGeometry args={[0.32, 0.19]} /><meshStandardMaterial color={on ? '#0a2a3a' : '#050608'} emissive={on ? '#8b93ff' : '#000'} emissiveIntensity={on ? 1.2 : 0} /></mesh></group>
     case 'meter': return <group><Box s={[0.14, 0.18, 0.05]} p={[0, 0, 0.025]} c="#dfe3ea" /><Led on={on} color="#35e07c" p={[0, 0.05, 0.055]} r={0.014} /></group>
     case 'plug': return <group><Box s={[0.09, 0.09, 0.025]} p={[0, 0, 0.012]} c="#f1f3f7" /><Led on={on} color="#35e07c" p={[0.03, 0.03, 0.028]} r={0.008} /></group>
     case 'voice': return <group><mesh position={[0, -0.4, 0]}><cylinderGeometry args={[0.2, 0.2, 0.02, 20]} /><meshStandardMaterial color="#6e5a46" /></mesh><mesh position={[0, -0.2, 0]}><cylinderGeometry args={[0.012, 0.012, 0.4, 8]} /><meshStandardMaterial color="#555" /></mesh><mesh position={[0, 0.05, 0]} castShadow><cylinderGeometry args={[0.07, 0.08, 0.14, 20]} /><meshStandardMaterial color="#1b1f27" /></mesh><Pulse on={on} color="#6aa9ff"><group /></Pulse><Led on={on} color="#6aa9ff" p={[0, 0.125, 0]} r={0.02} /></group>
@@ -131,7 +131,7 @@ export function DeviceMesh({ d, room, selected, onDown }: { d: PlacedDevice; roo
       <mesh position={mount === 'ceiling' ? [0, -0.15, 0] : mount === 'floor' ? [0, 0.45, 0] : mount === 'table' ? [0, 0, 0] : [0, 0, 0.08]} onPointerDown={onDown}>
         <sphereGeometry args={[mount === 'floor' ? 0.5 : 0.32, 12, 12]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      {selected && <mesh position={mount === 'ceiling' ? [0, -0.15, 0] : mount === 'floor' ? [0, 0.45, 0] : [0, 0, 0.08]}><sphereGeometry args={[mount === 'floor' ? 0.55 : 0.34, 16, 12]} /><meshBasicMaterial color="#00d5ff" wireframe transparent opacity={0.45} /></mesh>}
+      {selected && <mesh position={mount === 'ceiling' ? [0, -0.15, 0] : mount === 'floor' ? [0, 0.45, 0] : [0, 0, 0.08]}><sphereGeometry args={[mount === 'floor' ? 0.55 : 0.34, 16, 12]} /><meshBasicMaterial color="#8b93ff" wireframe transparent opacity={0.45} /></mesh>}
     </group>
   )
 }

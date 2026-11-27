@@ -37,7 +37,7 @@ export function Window({ open, night }: { open: boolean | null; night: boolean }
 export function Effect({ kind }: { kind: string }) {
   const ring = (c: string, d = 0) => <motion.span className="absolute rounded-full border" style={{ borderColor: c, inset: 0 }} initial={{ scale: 0.6, opacity: 0.9 }} animate={{ scale: 3, opacity: 0 }} transition={{ duration: 2.2, repeat: Infinity, delay: d, ease: 'easeOut' }} />
   switch (kind) {
-    case 'ac': return <>{ring('#5ee1ff')}{ring('#5ee1ff', 0.7)}{ring('#5ee1ff', 1.4)}</>
+    case 'ac': return <>{ring('#a5b4fc')}{ring('#a5b4fc', 0.7)}{ring('#a5b4fc', 1.4)}</>
     case 'sensor': return <>{ring('#ffb35e')}{ring('#ffb35e', 1)}</>
     case 'alarm': return <>{ring('#ff5d5d')}{ring('#ff5d5d', 0.4)}</>
     case 'voice': case 'speaker': return <>{ring('#6aa9ff')}{ring('#6aa9ff', 0.6)}</>

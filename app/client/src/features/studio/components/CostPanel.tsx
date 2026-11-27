@@ -9,7 +9,7 @@ export default function CostPanel({ e, compact = false }: { e: Estimate | null; 
   return (
     <section aria-label="Cost estimate" className="rounded-2xl border border-white/10 bg-white/[.03] p-4">
       <div className="flex items-baseline justify-between"><h3 className="text-xs uppercase tracking-[0.16em] text-silver">Estimated cost</h3><span className="rounded-full border border-amber-300/40 px-2 py-0.5 text-[0.65rem] text-amber-300">Estimate</span></div>
-      <div className="mt-2 font-display text-3xl tabular-nums text-cyan">{aed(e.total)}</div>
+      <div className="mt-2 font-display text-3xl tabular-nums text-accent">{aed(e.total)}</div>
       <p className="text-xs text-slate">incl. {Math.round(e.vatRate * 100)}% VAT · final price is confirmed in TAC’s quotation</p>
       {!empty && <>
         <dl className="mt-3 space-y-1 text-sm">
@@ -19,7 +19,7 @@ export default function CostPanel({ e, compact = false }: { e: Estimate | null; 
         </dl>
         {!compact && <>
           <div className="mt-4 flex gap-1.5 text-xs">{([['items', 'Products'], ['rooms', 'By room'], ['cats', 'By category']] as const).map(([k, l]) => (
-            <button key={k} onClick={() => setTab(k)} className={`rounded-full border px-3 py-1 ${tab === k ? 'border-cyan bg-cyan/15 text-cyan' : 'border-white/15 text-silver'}`}>{l}</button>))}</div>
+            <button key={k} onClick={() => setTab(k)} className={`rounded-full border px-3 py-1 ${tab === k ? 'border-accent bg-accent/15 text-accent' : 'border-white/15 text-silver'}`}>{l}</button>))}</div>
           <ul className="mt-3 max-h-60 space-y-2 overflow-y-auto pr-1 text-sm">
             {tab === 'items' && e.items.map((i) => <li key={i.id} className="flex justify-between gap-3"><span className="min-w-0 truncate" style={{ color: groupColor[i.group as Group] }}>{i.name} <span className="text-slate">×{i.qty}</span></span><span className="shrink-0 whitespace-nowrap tabular-nums text-silver">{aed(i.subtotal + i.install)}</span></li>)}
             {tab === 'rooms' && e.byRoom.map((r) => <li key={r.id} className="flex justify-between gap-3"><span className="truncate">{r.room} <span className="text-slate">· {r.qty} items</span></span><span className="shrink-0 whitespace-nowrap tabular-nums text-silver">{aed(r.total)}</span></li>)}

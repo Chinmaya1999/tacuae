@@ -16,7 +16,7 @@ async function signIn(page, email) {
   await page.goto('/login')
   await page.getByLabel('Email', { exact: true }).fill(email)
   await page.getByLabel('Password', { exact: true }).fill('Demo@12345')
-  await page.getByRole('button', { name: 'Sign in' }).click()
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await expect(page).toHaveURL(/\/(dashboard|admin)/)
 }
 
@@ -60,6 +60,27 @@ test('a wrong password shows an error', async ({ page }) => {
   await page.goto('/login')
   await page.getByLabel('Email', { exact: true }).fill('customer@demo.tac')
   await page.getByLabel('Password', { exact: true }).fill('not-the-password')
-  await page.getByRole('button', { name: 'Sign in' }).click()
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('Incorrect email or password.')
+})
+
+test('sign-in validates input, switches to mobile and offers password help', async ({ page }) => {
+  await page.goto('/login')
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+  await expect(page.getByText('Enter your email address.')).toBeVisible()
+  await expect(page.getByText('Enter your password.')).toBeVisible()
+  await page.getByRole('button', { name: 'Forgot password?' }).click()
+  await expect(page.getByRole('link', { name: /^Email / })).toHaveAttribute('href', /^mailto:/)
+  await page.getByRole('tab', { name: 'Mobile' }).click()
+  await page.getByLabel('Mobile number').fill('50 123 4567')
+  await page.getByRole('button', { name: 'Send code' }).click()
+  await expect(page.getByText('Demo code')).toBeVisible()
+})
+
+test('pages fit a phone screen without sideways scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 780 })
+  for (const url of ['/', '/login', '/register', '/products', '/contact', '/design-my-home']) {
+    await opens(page, url)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth), url).toBeLessThanOrEqual(0)
+  }
 })

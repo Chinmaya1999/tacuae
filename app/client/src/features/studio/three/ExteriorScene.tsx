@@ -32,7 +32,7 @@ export default function ExteriorScene({ devices }: { devices: PlacedDevice[] }) 
       <Box s={[7.3, 0.18, 3.9]} p={[0, 2.5, -1.8]} c="#6b5b49" /><Box s={[4.5, 0.18, 3.5]} p={[-1.2, 4.5, -2]} c="#6b5b49" />
       <Box s={[1, 1.7, 0.1]} p={[0, 0.85, 0.03]} c={unlocked ? '#3fbf7f' : '#5a4331'} />
       {([[-2.4, 1.3, 0.05], [2.4, 1.3, 0.05], [-2.2, 3.4, -0.36], [-0.2, 3.4, -0.36]] as V3[]).map((p, i) => <group key={i}>
-        <Box s={[1.4, 1, 0.06]} p={p} c={night ? '#17233f' : '#bfe6ff'} glow={glow} />
+        <Box s={[1.4, 1, 0.06]} p={p} c={night ? '#17233f' : '#d5dbff'} glow={glow} />
         {!curtainsOpen && <Box s={[1.36, 0.96, 0.02]} p={[p[0], p[1], p[2] + 0.045]} c="#7a6c8f" />}</group>)}
       {[-3.5, -2, 2, 3.5].map((x) => <group key={x}><Box s={[0.08, 0.6, 0.08]} p={[x, 0.3, 2]} c="#333" /><mesh position={[x, 0.66, 2]}><sphereGeometry args={[0.12, 16, 16]} /><meshStandardMaterial color={glow ?? '#555'} emissive={glow ?? '#000'} emissiveIntensity={2} /></mesh>{glow && night && <pointLight position={[x, 0.8, 2]} intensity={2} distance={4} color={glow} />}</group>)}
       {[-3.3, 3.3].map((x) => <group key={x}><Box s={[0.3, 0.18, 0.35]} p={[x, 2.2, 0.15]} c="#222" /><mesh position={[x, 2.2, 0.34]}><sphereGeometry args={[0.05, 10, 10]} /><meshStandardMaterial color={on('camera') ? '#ff3b3b' : '#333'} emissive={on('camera') ? '#ff3b3b' : '#000'} emissiveIntensity={3} /></mesh></group>)}

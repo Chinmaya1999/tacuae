@@ -38,7 +38,7 @@ function facadeMats(pal: Palette, w: number, l: number, floors: number, seed: nu
 function build(project: Project) {
   const pal = paletteFor(project.type), scene = new THREE.Scene()
   scene.background = skyTexture(); scene.environment = env; scene.fog = new THREE.Fog('#dbe7f1', 240, 900)
-  scene.add(new THREE.HemisphereLight('#cfe3ff', '#6b7a5a', 0.8))
+  scene.add(new THREE.HemisphereLight('#dde1ff', '#6b7a5a', 0.8))
   const sun = new THREE.DirectionalLight('#fff0dc', 2.8); sun.position.set(130, 170, 100); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048)
   Object.assign(sun.shadow.camera, { left: -170, right: 170, top: 170, bottom: -170, far: 700 }); sun.shadow.bias = -0.0003; scene.add(sun)
 

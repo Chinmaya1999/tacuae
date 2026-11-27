@@ -22,7 +22,7 @@ export default function Booking() {
   return (
     <div className="container-x pb-24 pt-32">
       <h1 className="font-display text-3xl md:text-4xl">Talk to an expert</h1>
-      <p className="mt-2 text-sm text-silver">Or call us on <a className="text-cyan" href={company.phoneHref}>{company.phone}</a>.</p>
+      <p className="mt-2 text-sm text-silver">Or call us on <a className="text-accent" href={company.phoneHref}>{company.phone}</a>.</p>
       {done ? <div role="status" className={`${card} mt-8 max-w-xl`}><p className="font-display text-xl">Request received</p><p className="mt-2 text-silver">TAC will confirm your {f.type} on {f.date} at {f.slot}.</p></div> :
         <form onSubmit={submit} className={`${card} mt-8 max-w-2xl space-y-5`}>
           <div className="grid gap-2 sm:grid-cols-2">{BOOKING_TYPES.map((t) => <Choice key={t} on={f.type === t} onClick={() => setF({ ...f, type: t })}>{pretty(t)}</Choice>)}</div>

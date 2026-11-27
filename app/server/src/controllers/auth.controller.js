@@ -4,6 +4,7 @@ import { clearSessionCookie, generateToken, sessionCookie } from '../utils/gener
 import { isSecure } from '../utils/sanitize.js'
 import ApiResponse from '../utils/ApiResponse.js'
 import ApiError from '../utils/ApiError.js'
+import { REMEMBER_MS } from '../constants/index.js'
 import { env } from '../config/env.js'
 import { verifyIdToken } from '../integrations/google/idToken.js'
 import { verifyPhoneToken } from '../integrations/firebase/idToken.js'
@@ -17,7 +18,9 @@ export async function register(req, res) {
 }
 export async function login(req, res) {
   const user = await Auth.login(req.valid.email, req.valid.password)
-  startSession(req, res, user)
+  // remembered: kept for 30 days. Otherwise it ends when the browser closes (and after a few hours at most).
+  const token = generateToken(user, req.valid.remember ? REMEMBER_MS : undefined)
+  res.setHeader('Set-Cookie', sessionCookie(token, isSecure(req), req.valid.remember ? REMEMBER_MS : null))
   ApiResponse.send(res, { user: Auth.publicUser(user) })
 }
 export const googleConfig = (_req, res) => ApiResponse.send(res, { clientId: env.googleClientId || null })

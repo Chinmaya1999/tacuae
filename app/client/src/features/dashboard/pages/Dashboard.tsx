@@ -24,7 +24,7 @@ export default function Dashboard() {
     const m = document.createElement('meta'); m.name = 'robots'; m.content = 'noindex, nofollow'; document.head.appendChild(m)
     return () => m.remove()
   }, [])
-  if (loading) return <div className="grid min-h-screen place-items-center bg-midnight"><Loader2 className="animate-spin text-cyan" /></div>
+  if (loading) return <div className="grid min-h-screen place-items-center bg-midnight"><Loader2 className="animate-spin text-accent" /></div>
   if (!user) return <Navigate to="/login?next=/dashboard" replace />
   if (isStaffRole(user.role)) return <Navigate to={homeFor(user.role)} replace />
   const builder = user.role === 'builder'

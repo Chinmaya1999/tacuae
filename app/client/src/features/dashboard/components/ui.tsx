@@ -22,9 +22,9 @@ export function Steps({ status }: { status: string }) {
     <ol className="flex items-center gap-1.5" aria-label={`Progress: ${statusLabel[status] ?? status}`}>
       {STEPS.map(([k, label], i) => (
         <li key={k} className="flex flex-1 items-center gap-1.5 last:flex-none">
-          <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[0.6rem] ${i < at || (i === at && status === 'accepted') ? 'bg-cyan text-midnight' : i === at ? (status === 'rejected' ? 'bg-red-400 text-midnight' : 'border border-cyan text-cyan') : 'border border-white/20 text-slate'}`}>{i < at || (i === at && status === 'accepted') ? '✓' : i + 1}</span>
+          <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full text-[0.6rem] ${i < at || (i === at && status === 'accepted') ? 'bg-accent text-midnight' : i === at ? (status === 'rejected' ? 'bg-red-400 text-midnight' : 'border border-accent text-accent') : 'border border-white/20 text-slate'}`}>{i < at || (i === at && status === 'accepted') ? '✓' : i + 1}</span>
           <span className={`hidden text-[0.68rem] sm:inline ${i <= at ? 'text-silver' : 'text-slate'}`}>{status === 'rejected' && i === 2 ? 'Declined' : label}</span>
-          {i < STEPS.length - 1 && <span className={`h-px flex-1 ${i < at ? 'bg-cyan/60' : 'bg-white/15'}`} />}
+          {i < STEPS.length - 1 && <span className={`h-px flex-1 ${i < at ? 'bg-accent/60' : 'bg-white/15'}`} />}
         </li>))}
     </ol>
   )
@@ -35,7 +35,7 @@ export function PlanThumb({ design, className = '' }: { design: Pick<Design, 'ro
   const rooms = design.rooms.slice(0, 6), n = Math.max(1, rooms.length), cols = Math.ceil(Math.sqrt(n)), rows = Math.ceil(n / cols)
   const cw = 100 / cols, ch = 56 / rows
   return (
-    <svg viewBox="0 0 100 56" className={`w-full rounded-xl bg-[#0d1b2e] ${className}`} role="img" aria-label={`${design.rooms.length} room plan`}>
+    <svg viewBox="0 0 100 56" className={`w-full rounded-xl bg-[#131a2e] ${className}`} role="img" aria-label={`${design.rooms.length} room plan`}>
       {rooms.map((r, i) => {
         const w = r.w ?? 5, l = r.l ?? 4, s = Math.min((cw - 5) / w, (ch - 5) / l), rw = w * s, rl = l * s
         const ox = (i % cols) * cw + (cw - rw) / 2, oy = Math.floor(i / cols) * ch + (ch - rl) / 2
@@ -52,8 +52,8 @@ export function PlanThumb({ design, className = '' }: { design: Pick<Design, 'ro
 
 export function Stat({ icon, label, value, hint, to }: { icon: string; label: string; value: string | number; hint?: string; to?: string }) {
   const body = (
-    <div className="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/[.03] p-4 transition hover:border-cyan/40 hover:bg-white/[.05] sm:flex-row sm:items-start sm:gap-4 sm:p-5">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-cyan/10 text-cyan sm:h-11 sm:w-11"><Icon name={icon} size={20} /></span>
+    <div className="flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/[.03] p-4 transition hover:border-accent/40 hover:bg-white/[.05] sm:flex-row sm:items-start sm:gap-4 sm:p-5">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent sm:h-11 sm:w-11"><Icon name={icon} size={20} /></span>
       <div className="min-w-0"><div className="truncate text-xs uppercase tracking-[0.14em] text-silver">{label}</div><div className="mt-1 whitespace-nowrap font-display text-lg tabular-nums sm:text-xl">{value}</div>{hint && <div className="mt-0.5 text-xs text-slate">{hint}</div>}</div>
     </div>)
   return to ? <Link to={to} className="block">{body}</Link> : body

@@ -80,17 +80,17 @@ export default function Designer({ design, onChange, readOnly }: Props) {
           <h3 className="font-display text-sm uppercase tracking-[0.16em] text-silver">Add features</h3>
           <div className="flex flex-wrap gap-1.5">
             {(['all', ...groups.map((g) => g.id)] as const).map((g) => (
-              <button key={g} onClick={() => setGroup(g)} className={`rounded-full border px-3 py-1 text-xs transition ${group === g ? 'border-cyan bg-cyan/15 text-cyan' : 'border-white/15 text-silver hover:text-white'}`}>{g === 'all' ? 'All' : g}</button>
+              <button key={g} onClick={() => setGroup(g)} className={`rounded-full border px-3 py-1 text-xs transition ${group === g ? 'border-accent bg-accent/15 text-accent' : 'border-white/15 text-silver hover:text-white'}`}>{g === 'all' ? 'All' : g}</button>
             ))}
           </div>
           <ul className="max-h-[560px] space-y-2 overflow-y-auto pr-1">
             {shown.map((d) => (
               <li key={d.id}>
-                <button onClick={() => add(d)} className="group flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/[.03] p-3 text-left transition hover:border-cyan/50 hover:bg-white/[.07]">
+                <button onClick={() => add(d)} className="group flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/[.03] p-3 text-left transition hover:border-accent/50 hover:bg-white/[.07]">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg" style={{ background: `${groupColor[d.group]}22`, color: groupColor[d.group] }}><Icon name={d.icon} /></span>
                   <span className="min-w-0 flex-1"><span className="block text-sm leading-tight">{d.name}</span>
                     <span className="block truncate text-[0.7rem] text-slate">{suggested.includes(d.id) ? '★ Suggested for this room' : d.group}</span></span>
-                  <L.Plus size={16} className="text-slate transition group-hover:text-cyan" aria-hidden />
+                  <L.Plus size={16} className="text-slate transition group-hover:text-accent" aria-hidden />
                 </button>
               </li>
             ))}
@@ -103,12 +103,12 @@ export default function Designer({ design, onChange, readOnly }: Props) {
         <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Rooms">
           {rooms.map((r, i) => (
             <button key={r.id} role="tab" aria-selected={i === ri} onClick={() => { setRi(i); setSel(null) }}
-              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${i === ri ? 'border-cyan bg-cyan/15 text-cyan' : 'border-white/15 text-silver hover:text-white'}`}>
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${i === ri ? 'border-accent bg-accent/15 text-accent' : 'border-white/15 text-silver hover:text-white'}`}>
               <Icon name={roomTypeById[r.type].icon} size={15} />{r.name}
               {r.devices.length > 0 && <span className="rounded-full bg-white/10 px-1.5 text-[0.65rem]">{r.devices.length}</span>}
             </button>
           ))}
-          {!readOnly && <button onClick={() => setAdding(!adding)} className="flex items-center gap-1.5 rounded-full border border-dashed border-white/25 px-4 py-2 text-sm text-silver hover:border-cyan hover:text-cyan"><L.Plus size={15} />Add room</button>}
+          {!readOnly && <button onClick={() => setAdding(!adding)} className="flex items-center gap-1.5 rounded-full border border-dashed border-white/25 px-4 py-2 text-sm text-silver hover:border-accent hover:text-accent"><L.Plus size={15} />Add room</button>}
         </div>
 
         <AnimatePresence>
@@ -119,7 +119,7 @@ export default function Designer({ design, onChange, readOnly }: Props) {
                   <button key={t.id} onClick={() => {
                     const n = rooms.filter((r) => r.type === (t.id as RoomType)).length + 1
                     onChange?.({ ...design, rooms: [...rooms, newRoom(t.id, n)] }); setRi(rooms.length); setAdding(false); setSel(null)
-                  }} className="flex flex-col items-center gap-2 rounded-xl border border-white/10 p-3 text-xs text-silver transition hover:border-cyan hover:text-cyan"><Icon name={t.icon} size={22} />{t.label}</button>
+                  }} className="flex flex-col items-center gap-2 rounded-xl border border-white/10 p-3 text-xs text-silver transition hover:border-accent hover:text-accent"><Icon name={t.icon} size={22} />{t.label}</button>
                 ))}
               </div>
             </motion.div>
@@ -128,7 +128,7 @@ export default function Designer({ design, onChange, readOnly }: Props) {
 
         {/* the room */}
         <div className="rounded-3xl border border-white/10 bg-deep p-3 shadow-2xl shadow-black/40 sm:p-4">
-          <div ref={canvas} className="relative aspect-[100/62] w-full select-none overflow-hidden rounded-2xl border border-white/15 bg-[#10223a]" onClick={(e) => e.target === e.currentTarget && setSel(null)}>
+          <div ref={canvas} className="relative aspect-[100/62] w-full select-none overflow-hidden rounded-2xl border border-white/15 bg-[#19213c]" onClick={(e) => e.target === e.currentTarget && setSel(null)}>
             <div className="absolute inset-0 opacity-50" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px)', backgroundSize: '5% 8.06%' }} />
             <svg viewBox="0 0 100 62" className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none"><Furniture type={room.type} />
               <path d="M2 62 V54 A8 8 0 0 1 10 62" fill="none" stroke="rgba(255,255,255,.3)" strokeWidth=".35" /></svg>
@@ -137,7 +137,7 @@ export default function Designer({ design, onChange, readOnly }: Props) {
             <div className={`pointer-events-none absolute inset-0 bg-[#020611] transition-opacity duration-700 ${night ? 'opacity-70' : 'opacity-0'}`} />
             <AnimatePresence>
               {room.devices.map((p) => { const d = deviceById[p.cat]; return d?.kind === 'light' && p.on ? <Glow key={p.id} x={p.x} y={p.y} color={d.tint ?? '#ffe9a8'} night={night} /> : null })}
-              {room.devices.some((p) => p.on && deviceById[p.cat]?.kind === 'ac') && <motion.div key="cool" className="pointer-events-none absolute inset-0 bg-cyan-300/[.07]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />}
+              {room.devices.some((p) => p.on && deviceById[p.cat]?.kind === 'ac') && <motion.div key="cool" className="pointer-events-none absolute inset-0 bg-accent-300/[.07]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />}
             </AnimatePresence>
 
             <AnimatePresence>
@@ -151,7 +151,7 @@ export default function Designer({ design, onChange, readOnly }: Props) {
                     onPointerDown={(e) => down(e, p.id)} onPointerMove={move} onPointerUp={() => (readOnly ? tap(p.id) : up(p.id))} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(p.id) } if (e.key === 'Delete' && !readOnly) remove(p.id) }}>
                     {p.on && <Effect kind={d.kind} />}
                     <span className={`relative grid h-11 w-11 place-items-center rounded-full border-2 backdrop-blur transition ${active ? 'ring-2 ring-white/70' : ''}`}
-                      style={{ borderColor: p.on ? c : 'rgba(255,255,255,.25)', background: p.on ? `${c}33` : 'rgba(7,17,31,.75)', color: p.on ? c : '#8a98ad', boxShadow: p.on ? `0 0 22px ${c}77` : 'none' }}>
+                      style={{ borderColor: p.on ? c : 'rgba(255,255,255,.25)', background: p.on ? `${c}33` : 'rgba(11,16,32,.75)', color: p.on ? c : '#8a98ad', boxShadow: p.on ? `0 0 22px ${c}77` : 'none' }}>
                       {d.kind === 'fan' && p.on ? <motion.span animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}><Icon name={d.icon} /></motion.span>
                         : <Icon name={d.kind === 'lock' && !p.on ? 'LockOpen' : d.icon} />}
                     </span>
@@ -164,7 +164,7 @@ export default function Designer({ design, onChange, readOnly }: Props) {
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button onClick={() => setNight(!night)} className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-xs text-silver hover:text-white" aria-pressed={night}>{night ? <L.Moon size={14} /> : <L.Sun size={14} />}{night ? 'Night' : 'Day'}</button>
             {SCENES.map((s) => (
-              <button key={s.id} disabled={!room.devices.length || readOnly} onClick={() => scene(s.rule)} className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-xs text-silver transition enabled:hover:border-cyan enabled:hover:text-cyan disabled:opacity-40"><Icon name={s.icon} size={14} />{s.label}</button>
+              <button key={s.id} disabled={!room.devices.length || readOnly} onClick={() => scene(s.rule)} className="flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-xs text-silver transition enabled:hover:border-accent enabled:hover:text-accent disabled:opacity-40"><Icon name={s.icon} size={14} />{s.label}</button>
             ))}
             {!readOnly && room.devices.length > 0 && <span className="ml-auto hidden text-xs text-slate sm:inline">Tap = on/off · Drag = move</span>}
           </div>
@@ -176,7 +176,7 @@ export default function Designer({ design, onChange, readOnly }: Props) {
             <motion.div key={selected.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-wrap items-center gap-4 rounded-2xl border border-white/10 bg-white/[.04] p-4">
               <span className="grid h-12 w-12 place-items-center rounded-xl" style={{ background: `${groupColor[deviceById[selected.cat].group]}22`, color: groupColor[deviceById[selected.cat].group] }}><Icon name={deviceById[selected.cat].icon} size={24} /></span>
               <div className="min-w-0 flex-1"><div className="font-display">{deviceById[selected.cat].name}</div><p className="text-sm text-silver">{deviceById[selected.cat].desc}</p></div>
-              <button onClick={() => toggle(selected.id)} className="rounded-full border border-cyan/50 px-4 py-2 text-sm text-cyan hover:bg-cyan/10">{selected.on ? deviceById[selected.cat].on : deviceById[selected.cat].off}</button>
+              <button onClick={() => toggle(selected.id)} className="rounded-full border border-accent/50 px-4 py-2 text-sm text-accent hover:bg-accent/10">{selected.on ? deviceById[selected.cat].on : deviceById[selected.cat].off}</button>
               {!readOnly && <button onClick={() => remove(selected.id)} className="flex items-center gap-1.5 rounded-full border border-red-400/40 px-4 py-2 text-sm text-red-300 hover:bg-red-500/10"><L.Trash2 size={14} />Remove</button>}
             </motion.div>
           )}
@@ -187,10 +187,10 @@ export default function Designer({ design, onChange, readOnly }: Props) {
       {/* ---- score + selection ---- */}
       {!readOnly && (
         <aside className="order-3 space-y-5" aria-label="Your selection">
-          <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-cyan/10 to-transparent p-4">
+          <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-accent/10 to-transparent p-4">
             <div className="flex items-center justify-between"><span className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-silver"><L.Trophy size={15} className="text-amber-300" />Smart score</span><motion.span key={points} initial={{ scale: 1.5 }} animate={{ scale: 1 }} className="font-display text-2xl tabular-nums">{points}</motion.span></div>
-            <div className="mt-1 font-display text-cyan">{LEVELS[li].n}</div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10"><motion.div className="h-full rounded-full bg-gradient-to-r from-cyan to-azure" animate={{ width: `${pct}%` }} /></div>
+            <div className="mt-1 font-display text-accent">{LEVELS[li].n}</div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10"><motion.div className="h-full rounded-full bg-gradient-to-r from-accent to-brand" animate={{ width: `${pct}%` }} /></div>
             <p className="mt-2 text-xs text-slate">{next ? `${next.at - points} points to ${next.n}` : 'Top level reached!'}</p>
             <ul className="mt-4 grid grid-cols-3 gap-2">
               {groups.map((g) => { const got = usedGroups.has(g.id); return (

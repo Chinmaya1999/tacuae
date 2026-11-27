@@ -24,19 +24,19 @@ export default function AlarmsList({ items, projects, onAck, onResolve, showProj
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm">
               <span className="rounded-md bg-white/10 px-2.5 py-1 font-medium text-white">{where(a)}</span>
               <span className="text-silver">{a.tag} · <span className="capitalize">{a.module}</span></span>
-              {showProject && a.projectName && <Link to={`/dashboard/projects/${a.projectId}`} className="text-cyan hover:underline">{a.projectName}</Link>}
+              {showProject && a.projectName && <Link to={`/dashboard/projects/${a.projectId}`} className="text-accent hover:underline">{a.projectName}</Link>}
               <span className="text-silver/80">raised {ago(a.raisedAt)}</span>
             </div>
             {a.ackBy && <div className="mt-2 text-sm text-silver">Acknowledged by {a.ackBy}{a.resolvedAt ? ` · resolved ${ago(a.resolvedAt)}` : ''}{a.note ? ` — “${a.note}”` : ''}</div>}
           </div>
-          {a.state === 'active' && <button disabled={busy === a.id} onClick={() => run(a.id, () => onAck(a))} className="rounded-full border border-white/20 px-4 py-1.5 text-sm text-silver hover:border-cyan hover:text-cyan">Acknowledge</button>}
+          {a.state === 'active' && <button disabled={busy === a.id} onClick={() => run(a.id, () => onAck(a))} className="rounded-full border border-white/20 px-4 py-1.5 text-sm text-silver hover:border-accent hover:text-accent">Acknowledge</button>}
           {a.state !== 'resolved' && <button onClick={() => { setResolving(resolving === a.id ? null : a.id); setNote('') }} className="rounded-full border border-emerald-300/40 px-4 py-1.5 text-sm text-emerald-300 hover:bg-emerald-400/10">Resolve</button>}
           {a.state === 'resolved' && <span className="flex items-center gap-1.5 text-sm text-emerald-300"><Check size={14} />Resolved</span>}
         </div>
         {resolving === a.id && (
           <form className="mt-3 flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); run(a.id, async () => { await onResolve(a, note); setResolving(null) }) }}>
             <label className="sr-only" htmlFor={`n-${a.id}`}>Resolution note</label>
-            <input id={`n-${a.id}`} autoFocus maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} placeholder="What was done? (optional)" className="min-w-[200px] flex-1 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-base outline-none focus:border-cyan" />
+            <input id={`n-${a.id}`} autoFocus maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} placeholder="What was done? (optional)" className="min-w-[200px] flex-1 rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-base outline-none focus:border-accent" />
             <button className="btn btn-primary !px-5 !py-2" disabled={busy === a.id}>Mark resolved</button>
           </form>)}
       </li>))}</ul>

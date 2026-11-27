@@ -22,7 +22,7 @@ export default function Studio3D(p: Props) {
   if (!hasWebGL()) return flat
   return (
     <Boundary fallback={flat}>
-      <Suspense fallback={<div className="grid h-[460px] place-items-center rounded-3xl border border-white/10 bg-deep"><div className="text-center text-silver"><Loader2 className="mx-auto mb-3 animate-spin text-cyan" />Loading your virtual home…</div></div>}>
+      <Suspense fallback={<div className="grid h-[460px] place-items-center rounded-3xl border border-white/10 bg-deep"><div className="text-center text-silver"><Loader2 className="mx-auto mb-3 animate-spin text-accent" />Loading your virtual home…</div></div>}>
         <Designer3D {...p} />
       </Suspense>
     </Boundary>

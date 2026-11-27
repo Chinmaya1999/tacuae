@@ -20,7 +20,7 @@ export function validateRegister({ body: b = {} }) {
   const business = role === 'builder' ? { tradeLicence: clean(b.tradeLicence, 60), trn, sector: SECTORS.includes(b.sector) ? b.sector : 'other' } : null
   return { name, email, password: b.password, role, company: clean(b.company, 120), phone: clean(b.phone, 40), business }
 }
-export const validateLogin = ({ body: b = {} }) => ({ email: clean(b.email, 160).toLowerCase(), password: typeof b.password === 'string' ? b.password : '' })
+export const validateLogin = ({ body: b = {} }) => ({ email: clean(b.email, 160).toLowerCase(), password: typeof b.password === 'string' ? b.password : '', remember: b.remember === true })
 export function validateGoogle({ body: b = {} }) {
   if (typeof b.credential !== 'string' || !b.credential || b.credential.length > 4096) throw bad('Google sign-in failed. Please try again.')
   return { credential: b.credential, role: SELF_ROLES.includes(b.role) ? b.role : 'customer' }

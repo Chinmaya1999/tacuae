@@ -27,7 +27,7 @@ export function About() {
               ['Our Mission', 'To provide smart, energy-efficient solutions through innovation and the best quality, with staff trained in our quality policy and customer-focused, performance-driven products and services.'],
             ].map(([t, d], i) => (
               <Reveal key={t} delay={i * 0.05}>
-                <div className="border-l border-cyan/40 pl-6"><h2 className="font-display text-xl">{t}</h2><p className="mt-2 text-silver leading-relaxed">{d}</p></div>
+                <div className="border-l border-accent/40 pl-6"><h2 className="font-display text-xl">{t}</h2><p className="mt-2 text-silver leading-relaxed">{d}</p></div>
               </Reveal>
             ))}
           </div>
@@ -44,7 +44,7 @@ export function About() {
           <div className="group"><MaskImage src="/images/site/award.jpg" alt="Global Awards – Best Project – International – 2018" ratio="aspect-[4/3]" className="rounded-3xl" /></div>
           <div>
             <span className="eyebrow">Awards</span>
-            <Words text="GLOBAL AWARDS — BEST PROJECT, INTERNATIONAL, 2018." className="h2 mt-5 !text-3xl md:!text-4xl" />
+            <Words text="Global awards — Best Project, International, 2018." className="h2 mt-5 !text-3xl md:!text-4xl" />
             <p className="mt-6 text-slate leading-relaxed">Mr. Taj Kollara, Managing Director, ASIN, received the award for Best International KNX Project, for Dubai Parks and Resorts.</p>
           </div>
         </div>
@@ -63,10 +63,10 @@ export function Services() {
         <div className="container-x grid gap-6 md:grid-cols-2">
           {services.map((s, i) => (
             <Reveal key={s.slug} delay={(i % 2) * 0.08}>
-              <Link to={serviceHref(s)} className="group block overflow-hidden rounded-3xl border border-white/10 bg-deep transition-colors hover:border-cyan/50">
+              <Link to={serviceHref(s)} className="group block overflow-hidden rounded-3xl border border-white/10 bg-deep transition-colors hover:border-accent/50">
                 <div className="aspect-[16/9] overflow-hidden"><MediaLoop image={s.image} alt={s.title} slug={s.slug} /></div>
                 <div className="p-8"><h2 className="font-display text-2xl">{s.title}</h2><p className="mt-3 text-silver">{s.short}</p>
-                  <span className="mt-6 inline-flex items-center gap-2 text-sm text-cyan">Explore Solution <ArrowUpRight size={16} className="transition group-hover:-translate-y-1 group-hover:translate-x-1" /></span></div>
+                  <span className="mt-6 inline-flex items-center gap-2 text-sm text-accent">Explore Solution <ArrowUpRight size={16} className="transition group-hover:-translate-y-1 group-hover:translate-x-1" /></span></div>
               </Link>
             </Reveal>
           ))}
@@ -93,8 +93,8 @@ export function ServiceDetail() {
           <div className="lg:col-span-7">
             <Breadcrumb items={[{ label: 'Services', to: '/services' }, { label: s.title }]} />
             <p className="mt-8 text-xl leading-relaxed text-silver">{s.description}</p>
-            <h2 className="mt-12 font-display text-sm uppercase tracking-[0.2em] text-cyan">Capabilities</h2>
-            <ul className="mt-6 grid gap-3 sm:grid-cols-2">{s.capabilities.map((c) => <li key={c} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[.03] px-4 py-3"><Check size={16} className="text-cyan" />{c}</li>)}</ul>
+            <h2 className="mt-12 font-display text-sm uppercase tracking-[0.2em] text-accent">Capabilities</h2>
+            <ul className="mt-6 grid gap-3 sm:grid-cols-2">{s.capabilities.map((c) => <li key={c} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[.03] px-4 py-3"><Check size={16} className="text-accent" />{c}</li>)}</ul>
             <div className="mt-10"><Magnetic to="/contact#enquiry">Enquire about this service</Magnetic></div>
           </div>
           <div className="group space-y-5 lg:col-span-5"><div className="aspect-[16/10] overflow-hidden rounded-3xl border border-white/10"><ServiceScene slug={s.slug} /></div><div className="aspect-[4/3] overflow-hidden rounded-3xl"><img src={s.image} alt={s.title} className="h-full w-full object-cover" /></div><p className="text-xs text-slate">Top: illustrative animation. Bottom: photo.</p></div>
@@ -118,10 +118,10 @@ export function Products() {
       <section className="light-section py-20 md:py-28"><div className="container-x grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {products.map((p, i) => (
           <Reveal key={p.slug} delay={(i % 4) * 0.06}>
-            <Link to={`/products/${p.slug}`} className="group block overflow-hidden rounded-3xl bg-white shadow-[0_10px_40px_-20px_rgba(7,17,31,.35)] transition-shadow hover:shadow-[0_20px_50px_-15px_rgba(38,139,255,.45)]">
-              <div className="aspect-[4/3] overflow-hidden bg-[#dbeafb]"><MediaLoop image={p.image} alt={p.name} slug={p.slug} kind="product" /></div>
+            <Link to={`/products/${p.slug}`} className="group block overflow-hidden rounded-3xl bg-white shadow-[0_10px_40px_-20px_rgba(11,16,32,.35)] transition-shadow hover:shadow-[0_20px_50px_-15px_rgba(38,139,255,.45)]">
+              <div className="aspect-[4/3] overflow-hidden bg-[#e6e8fb]"><MediaLoop image={p.image} alt={p.name} slug={p.slug} kind="product" /></div>
               <div className="p-6"><h2 className="font-display text-lg font-medium leading-snug min-h-[3.2rem]">{p.name}</h2>
-                <span className="mt-3 inline-flex items-center gap-2 text-sm text-azure">View Product <ArrowRight size={15} className="transition group-hover:translate-x-1" /></span></div>
+                <span className="mt-3 inline-flex items-center gap-2 text-sm text-brand">View Product <ArrowRight size={15} className="transition group-hover:translate-x-1" /></span></div>
             </Link></Reveal>))}
       </div></section>
       <section className="bg-midnight py-20"><div className="container-x text-center">
@@ -142,14 +142,14 @@ export function ProductDetail() {
     <>
       <section className="bg-midnight pt-36 pb-20 md:pt-44">
         <div className="container-x grid items-center gap-12 lg:grid-cols-2">
-          <div className="space-y-4"><div className="overflow-hidden rounded-3xl bg-[#dbeafb]"><img src={p.image} alt={p.name} className="w-full object-cover" /></div><div className="aspect-[10/7] overflow-hidden rounded-3xl border border-white/10"><ProductAnim slug={p.slug} /></div><p className="text-xs text-slate">Illustrative animation of the product type’s function — not a specification.</p></div>
+          <div className="space-y-4"><div className="overflow-hidden rounded-3xl bg-[#e6e8fb]"><img src={p.image} alt={p.name} className="w-full object-cover" /></div><div className="aspect-[10/7] overflow-hidden rounded-3xl border border-white/10"><ProductAnim slug={p.slug} /></div><p className="text-xs text-slate">Illustrative animation of the product type’s function — not a specification.</p></div>
           <div>
             <Breadcrumb items={[{ label: 'Products', to: '/products' }, { label: p.name }]} />
             <h1 className="display mt-6 !text-4xl md:!text-5xl">{p.name}</h1>
             <p className="mt-6 text-silver leading-relaxed">{p.name} is part of the KNX range distributed and manufactured by {company.name}. For technical specifications, pricing and availability, please contact our team.</p>
             {ov.products?.[p.slug] && <p className="mt-4 whitespace-pre-line leading-relaxed text-silver">{ov.products[p.slug]}</p>}
             <div className="mt-10 flex flex-wrap gap-4"><Magnetic to="/contact#enquiry">Enquire about this product</Magnetic><Magnetic href={company.phoneHref} variant="ghost">{company.phone}</Magnetic></div>
-            <Link to={`/products/${next.slug}`} className="mt-12 inline-flex items-center gap-2 text-sm text-cyan link-u">Next: {next.name} <ArrowRight size={15} /></Link>
+            <Link to={`/products/${next.slug}`} className="mt-12 inline-flex items-center gap-2 text-sm text-accent link-u">Next: {next.name} <ArrowRight size={15} /></Link>
           </div>
         </div>
       </section>
@@ -168,7 +168,7 @@ export function Projects() {
             <Link to={`/projects/${p.slug}`} className="group relative block overflow-hidden rounded-3xl">
               <div className={i === 0 ? 'aspect-[21/9]' : 'aspect-[4/3]'}><img src={p.image} alt={p.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-[1600ms] group-hover:scale-110" /></div>
               <div className="absolute inset-0 bg-gradient-to-t from-midnight/90 to-transparent" />
-              <div className="absolute bottom-0 p-7"><div className="text-xs uppercase tracking-[0.2em] text-cyan">{p.sector}</div><h2 className="font-display text-2xl">{p.name}</h2><p className="text-sm text-silver">{p.location}</p></div>
+              <div className="absolute bottom-0 p-7"><div className="text-xs uppercase tracking-[0.2em] text-accent">{p.sector}</div><h2 className="font-display text-2xl">{p.name}</h2><p className="text-sm text-silver">{p.location}</p></div>
             </Link></Reveal>))}
       </div></section>
       <CtaBand />
@@ -207,7 +207,7 @@ export function ProjectDetail() {
       </div></section>
       <Link to={`/projects/${next.slug}`} className="group relative block overflow-hidden py-24 text-center">
         <img src={next.image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-30 transition-transform duration-1000 group-hover:scale-105" />
-        <div className="text-xs uppercase tracking-[0.2em] text-cyan">Next project</div><div className="mt-3 font-display text-3xl md:text-5xl">{next.name}</div>
+        <div className="text-xs uppercase tracking-[0.2em] text-accent">Next project</div><div className="mt-3 font-display text-3xl md:text-5xl">{next.name}</div>
       </Link>
     </>
   )
@@ -221,22 +221,22 @@ export function Training() {
         text="Our office is a certified KNX Training Center with training and certification facilities." />
       <section className="bg-midnight py-20 md:py-28"><div className="container-x grid gap-6 md:grid-cols-2">
         <Reveal><div className="h-full rounded-3xl border border-white/10 bg-deep p-9">
-          <div className="font-display text-xs uppercase tracking-[0.2em] text-cyan">Course 01</div><h2 className="mt-3 font-display text-3xl">KNX Basic Course</h2>
+          <div className="font-display text-xs uppercase tracking-[0.2em] text-accent">Course 01</div><h2 className="mt-3 font-display text-3xl">KNX Basic Course</h2>
           <div className="mt-2 text-silver">Duration: 5 days</div>
           <p className="mt-5 text-silver leading-relaxed">The KNX Partner (Basic) course at our certified KNX Training Center.</p></div></Reveal>
         <Reveal delay={0.08}><div className="h-full rounded-3xl border border-white/10 bg-deep p-9">
-          <div className="font-display text-xs uppercase tracking-[0.2em] text-cyan">Course 02</div><h2 className="mt-3 font-display text-3xl">Advanced KNX Training</h2>
+          <div className="font-display text-xs uppercase tracking-[0.2em] text-accent">Course 02</div><h2 className="mt-3 font-display text-3xl">Advanced KNX Training</h2>
           <p className="mt-5 text-silver leading-relaxed">Advanced KNX course for engineers continuing beyond the Basic course. Please contact us for the current schedule and duration.</p></div></Reveal>
       </div>
       <div className="container-x mt-16"><div className="mb-16 aspect-[16/8] overflow-hidden rounded-3xl border border-white/10"><ServiceScene slug="knx-training" /></div>
-        <h2 className="font-display text-sm uppercase tracking-[0.2em] text-cyan">Introductions covered</h2>
+        <h2 className="font-display text-sm uppercase tracking-[0.2em] text-accent">Introductions covered</h2>
         <ul className="mt-6 grid gap-3 md:grid-cols-3">
-          {['Smart control using touch panels', 'KNX wireless control via mobile apps', 'Central control or visualisation via computer'].map((t) => <li key={t} className="flex items-center gap-3 rounded-xl border border-white/10 px-5 py-4"><Check size={16} className="text-cyan" />{t}</li>)}
+          {['Smart control using touch panels', 'KNX wireless control via mobile apps', 'Central control or visualisation via computer'].map((t) => <li key={t} className="flex items-center gap-3 rounded-xl border border-white/10 px-5 py-4"><Check size={16} className="text-accent" />{t}</li>)}
         </ul>
-        <p className="mt-10 text-silver">Training facilities: {company.address}. For schedules, certification details and fees, call <a className="text-cyan link-u" href={company.phoneHref}>{company.phone}</a> or email <a className="text-cyan link-u" href={`mailto:${company.email}`}>{company.email}</a>.</p>
+        <p className="mt-10 text-silver">Training facilities: {company.address}. For schedules, certification details and fees, call <a className="text-accent link-u" href={company.phoneHref}>{company.phone}</a> or email <a className="text-accent link-u" href={`mailto:${company.email}`}>{company.email}</a>.</p>
       </div></section>
       <section className="light-section py-20"><div className="container-x grid gap-12 lg:grid-cols-12">
-        <div className="lg:col-span-5"><span className="eyebrow">Training enquiry</span><Words text="BOOK YOUR PLACE." className="h2 mt-5" /></div>
+        <div className="lg:col-span-5"><span className="eyebrow">Training enquiry</span><Words text="Book your place." className="h2 mt-5" /></div>
         <div className="lg:col-span-7"><ContactForm dark={false} /></div></div></section>
     </>
   )
@@ -250,9 +250,9 @@ export function Contact() {
       <section id="enquiry" className="bg-midnight py-16 md:py-24"><div className="container-x grid gap-14 lg:grid-cols-12">
         <div className="lg:col-span-7"><ContactForm /></div>
         <div className="space-y-8 lg:col-span-5">
-          <div><h2 className="font-display text-xs uppercase tracking-[0.2em] text-cyan">Head Office</h2><p className="mt-3 text-lg text-silver">{company.address}</p></div>
-          <div><h2 className="font-display text-xs uppercase tracking-[0.2em] text-cyan">Phone</h2><a className="mt-3 block text-lg link-u w-fit" href={company.phoneHref}>{company.phone}</a></div>
-          <div><h2 className="font-display text-xs uppercase tracking-[0.2em] text-cyan">Email</h2><a className="mt-3 block text-lg link-u w-fit" href={`mailto:${company.email}`}>{company.email}</a></div>
+          <div><h2 className="font-display text-xs uppercase tracking-[0.2em] text-accent">Head Office</h2><p className="mt-3 text-lg text-silver">{company.address}</p></div>
+          <div><h2 className="font-display text-xs uppercase tracking-[0.2em] text-accent">Phone</h2><a className="mt-3 block text-lg link-u w-fit" href={company.phoneHref}>{company.phone}</a></div>
+          <div><h2 className="font-display text-xs uppercase tracking-[0.2em] text-accent">Email</h2><a className="mt-3 block text-lg link-u w-fit" href={`mailto:${company.email}`}>{company.email}</a></div>
         </div></div>
         <div className="container-x mt-16"><iframe title="TAC UAE office location map" loading="lazy" className="h-[380px] w-full rounded-3xl border border-white/10 grayscale invert-[.9] contrast-[.9]"
           src="https://www.google.com/maps?q=Le+Solarium+Business+Tower+Dubai+Silicon+Oasis&output=embed" referrerPolicy="no-referrer-when-downgrade" /></div>
@@ -268,10 +268,10 @@ export function Legal({ kind }: { kind: 'privacy' | 'terms' }) {
     <>
       <PageHero eyebrow="Legal" title={priv ? 'Privacy Policy' : 'Terms & Conditions'} />
       <section className="bg-midnight pb-24"><div className="container-x max-w-3xl space-y-5 text-silver leading-relaxed">
-        <p className="rounded-xl border border-cyan/30 bg-cyan/5 p-4 text-sm text-ice">Draft text — to be reviewed and approved by {company.legal} before publication.</p>
+        <p className="rounded-xl border border-accent/30 bg-accent/5 p-4 text-sm text-ice">Draft text — to be reviewed and approved by {company.legal} before publication.</p>
         {priv ? (<>
           <p>{company.legal} (“TAC”) collects the information you submit through our enquiry form (name, company, email, phone and message) solely to respond to your enquiry.</p>
-          <p>We do not sell your information. To request access to or deletion of your data, contact <a className="text-cyan" href={`mailto:${company.email}`}>{company.email}</a>.</p>
+          <p>We do not sell your information. To request access to or deletion of your data, contact <a className="text-accent" href={`mailto:${company.email}`}>{company.email}</a>.</p>
         </>) : (<>
           <p>The content of this website is provided for general information about {company.legal}. Product and service details may change; please confirm specifications and availability with our team.</p>
           <p>All trademarks, logos and images remain the property of their respective owners.</p>
@@ -284,7 +284,7 @@ export function Legal({ kind }: { kind: 'privacy' | 'terms' }) {
 function CtaBand() {
   return (
     <section className="relative overflow-hidden bg-deep py-24 text-center"><div className="absolute inset-0 grid-bg opacity-40" />
-      <div className="container-x relative"><Words text="LET'S BUILD A SMARTER FUTURE." className="h2" />
+      <div className="container-x relative"><Words text="Let's build a smarter future." className="h2" />
         <p className="mx-auto mt-5 max-w-lg text-silver">Have a project in mind? Let's discuss how intelligent automation can transform your space.</p>
         <div className="mt-8"><Magnetic to="/contact#enquiry">Get a Consultation</Magnetic></div></div></section>
   )

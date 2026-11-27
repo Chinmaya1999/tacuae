@@ -1,4 +1,6 @@
-import { Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { MotionConfig } from 'framer-motion'
+import ClayScene from '../shared/components/ClayScene'
 import Layout from '../shared/components/Layout'
 import Home from '../features/website/pages/Home'
 import { lazy, Suspense, type ComponentType } from 'react'
@@ -19,13 +21,24 @@ const Login = lazy(() => import('../features/auth/pages/Auth').then((m) => ({ de
 const Register = lazy(() => import('../features/auth/pages/Auth').then((m) => ({ default: m.Register })))
 const P = { About: L('About'), Services: L('Services'), ServiceDetail: L('ServiceDetail'), Products: L('Products'), ProductDetail: L('ProductDetail'), Projects: L('Projects'), ProjectDetail: L('ProjectDetail'), Training: L('Training'), Contact: L('Contact'), Legal: L('Legal') }
 
-const NotFound = () => <div className="grid min-h-[70vh] place-items-center pt-32 text-center"><div><h1 className="display">404</h1><a href="/" className="btn btn-primary mt-8">Back home</a></div></div>
+const NotFound = () => (
+  <div className="aurora container-x grid min-h-[80vh] place-items-center pb-20 pt-32 text-center">
+    <div className="grid justify-items-center">
+      <ClayScene className="w-[min(100%,360px)]" />
+      <h1 className="h2 mt-6">Page not found</h1>
+      <p className="mt-3 max-w-md text-silver">The address may be mistyped, or the page has moved.</p>
+      <div className="mt-7 flex flex-wrap justify-center gap-3"><Link to="/" className="btn btn-primary">Back home</Link><Link to="/contact" className="btn btn-ghost">Contact TAC</Link></div>
+    </div>
+  </div>
+)
+const PageLoading = () => <div role="status" aria-label="Loading" className="grid min-h-screen place-items-center bg-midnight"><span className="h-9 w-9 animate-spin rounded-full border-2 border-accent/25 border-t-accent" /></div>
 const LegacyProduct = () => { const { slug } = useParams(); return <Navigate to={`/products/${slug}`} replace /> }
 
 export default function App() {
   return (
     <AuthProvider>
-    <Suspense fallback={<div className="min-h-screen" />}>
+    <MotionConfig reducedMotion="user">
+    <Suspense fallback={<PageLoading />}>
     <Routes>
       <Route path="admin/*" element={<Admin />} />
       <Route path="dashboard/*" element={<Dashboard />} />
@@ -60,6 +73,7 @@ export default function App() {
     </Suspense>
     <Suspense fallback={null}><Assistant /></Suspense>
     <DemoBar />
+    </MotionConfig>
     </AuthProvider>
   )
 }

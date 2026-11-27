@@ -19,11 +19,11 @@ type Props = {
 
 
 /** Text label as a sprite (canvas texture): pure WebGL, so there is no DOM to clean up when the scene changes. */
-function Label({ text, position, px = 14, color = '#00d5ff' }: { text: string; position: [number, number, number]; px?: number; color?: string }) {
+function Label({ text, position, px = 14, color = '#8b93ff' }: { text: string; position: [number, number, number]; px?: number; color?: string }) {
   const tex = useMemo(() => {
     const c = document.createElement('canvas'), ctx = c.getContext('2d')!, font = '600 40px Inter, system-ui, sans-serif'
     ctx.font = font; const w = Math.ceil(ctx.measureText(text).width) + 44; c.width = w; c.height = 72
-    ctx.font = font; ctx.fillStyle = 'rgba(7,17,31,.88)'; ctx.strokeStyle = color; ctx.lineWidth = 3
+    ctx.font = font; ctx.fillStyle = 'rgba(11,16,32,.88)'; ctx.strokeStyle = color; ctx.lineWidth = 3
     ctx.beginPath(); ctx.roundRect(2, 2, w - 4, 68, 34); ctx.fill(); ctx.stroke()
     ctx.fillStyle = '#ffffff'; ctx.textBaseline = 'middle'; ctx.fillText(text, 22, 38)
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return { t, w, h: 72 }
@@ -48,7 +48,7 @@ function Marker({ e, def, status, selected, onDown, pos, w, l }: { e: Equip; def
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} raycast={() => null}><ringGeometry args={[reach, reach + 0.09, 48]} /><meshBasicMaterial color={color} transparent opacity={status === 'offline' ? 0.5 : 0.95} /></mesh>
       {md.mount !== 'floor' && <mesh position={[0, lift / 2, 0]} raycast={() => null}><cylinderGeometry args={[0.025, 0.025, lift, 6]} /><meshBasicMaterial color={color} transparent opacity={0.45} /></mesh>}
       <mesh ref={beacon} position={[0, top + 0.45, 0]} raycast={() => null}><sphereGeometry args={[0.17, 14, 10]} /><meshBasicMaterial color={color} /></mesh>
-      {selected && <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} raycast={() => null}><ringGeometry args={[reach + 0.28, reach + 0.46, 48]} /><meshBasicMaterial color="#00d5ff" /></mesh>}
+      {selected && <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} raycast={() => null}><ringGeometry args={[reach + 0.28, reach + 0.46, 48]} /><meshBasicMaterial color="#8b93ff" /></mesh>}
       <mesh position={[0, lift + (sy * k) / 2, 0]} onPointerDown={onDown} onPointerOver={() => setHover(true)} onPointerOut={() => setHover(false)}>
         <boxGeometry args={[Math.max(sx * k, 0.9) + 0.3, Math.max(sy * k, 0.9) + 0.3, Math.max(sz * k, 0.9) + 0.3]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
@@ -210,7 +210,7 @@ function TowerBody({ t, ox, w, l, seed, pal, night, xray, sel, status, levelStat
           <group key={lv}>
             <mesh position={[0, lv * FH, 0]} receiveShadow castShadow material={mats.concrete} onPointerDown={onSlab(t.id, lv, ox, w, l)}>
               <boxGeometry args={[w, 0.3, l]} />
-              {isSel && <Edges color="#00d5ff" />}
+              {isSel && <Edges color="#8b93ff" />}
             </mesh>
             {isSel && <mesh position={[0, lv * FH + 0.158, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow raycast={() => null}><planeGeometry args={[w - 0.3, l - 0.3]} /><meshStandardMaterial color="#1a2a42" roughness={0.6} emissive="#0a2a40" emissiveIntensity={0.5} polygonOffset polygonOffsetFactor={-2} polygonOffsetUnits={-2} /></mesh>}
             {lv < 0 && !isSel && <mesh position={[0, lv * FH + FH / 2, 0]} material={basement} onPointerDown={onSlab(t.id, lv, ox, w, l)}><boxGeometry args={[w - 0.2, FH - 0.3, l - 0.2]} /></mesh>}
@@ -278,11 +278,11 @@ function Scene({ night, xray, resetKey, zoom, project, equipment, live, catalog,
       <color attach="background" args={[sky]} />
       <fog attach="fog" args={[sky, 180, 1100]} />
       {night ? <Stars radius={600} depth={60} count={2500} factor={5} fade speed={0.4} /> : <Sky distance={450000} sunPosition={[120, 70, 90]} turbidity={5} rayleigh={1.1} mieCoefficient={0.004} mieDirectionalG={0.85} />}
-      <hemisphereLight args={night ? ['#41567f', '#0a0f18', 0.5] : ['#cfe3ff', '#6b7a5a', 0.75]} />
+      <hemisphereLight args={night ? ['#41567f', '#0a0f18', 0.5] : ['#dde1ff', '#6b7a5a', 0.75]} />
       <directionalLight position={night ? [-80, 140, -60] : [120, 190, 90]} color={night ? '#8fa8ff' : '#fff0dc'} intensity={night ? 0.55 : 2.7} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0003}
         shadow-camera-left={-R} shadow-camera-right={R} shadow-camera-top={R} shadow-camera-bottom={-R} shadow-camera-far={700} />
       <Environment key={night ? 'n' : 'd'} resolution={128} frames={1}>
-        <Lightformer form="rect" intensity={night ? 0.5 : 3.2} color={night ? '#6c84c8' : '#d8ebff'} position={[0, 30, -40]} scale={[120, 40, 1]} />
+        <Lightformer form="rect" intensity={night ? 0.5 : 3.2} color={night ? '#6c84c8' : '#e2e6ff'} position={[0, 30, -40]} scale={[120, 40, 1]} />
         <Lightformer form="rect" intensity={night ? 0.3 : 5} color={night ? '#8da2d8' : '#fff0d8'} position={[60, 20, 40]} rotation-y={-Math.PI / 3} scale={[60, 30, 1]} />
         <Lightformer form="rect" intensity={night ? 0.2 : 1.2} color="#c9d6c0" position={[0, -10, 0]} rotation-x={Math.PI / 2} scale={[200, 200, 1]} />
       </Environment>

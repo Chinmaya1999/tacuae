@@ -23,7 +23,7 @@ export default function SendDialog({ design, builder, onClose, onSend }: Props) 
       <div role="dialog" aria-modal="true" aria-labelledby="send-title" className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/10 bg-deep p-6 shadow-2xl sm:p-8">
         {phase === 'sent' ? (
           <div className="text-center">
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-cyan text-midnight"><Check size={26} /></div>
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-accent text-midnight"><Check size={26} /></div>
             <h2 id="send-title" className="mt-5 font-display text-2xl">Sent to TAC</h2>
             <p className="mt-2 text-silver">Our engineers will review your design and prepare a quotation. You will find the price here in your dashboard.</p>
             <ol className="mx-auto mt-6 max-w-xs space-y-2 text-left text-sm text-silver"><li>✓ Design received</li><li className="text-slate">② TAC reviews your rooms</li><li className="text-slate">③ Your quote appears under “Quotes”</li></ol>
@@ -35,11 +35,11 @@ export default function SendDialog({ design, builder, onClose, onSend }: Props) 
           <dl className="mt-6 grid grid-cols-3 gap-3 text-center">{[['Rooms', design.rooms.length], ['Smart items', items], ['Property', design.property ?? 'apartment']].map(([k, v]) => (
             <div key={k} className="rounded-xl border border-white/10 bg-white/[.03] p-3"><dt className="text-[0.65rem] uppercase tracking-wider text-slate">{k}</dt><dd className="mt-1 font-display capitalize">{v}</dd></div>))}</dl>
           <ul className="mt-4 space-y-1.5 text-sm">{design.rooms.map((r) => <li key={r.id} className="flex justify-between text-silver"><span>{r.name}</span><span className="tabular-nums text-slate">{r.devices.length} items</span></li>)}</ul>
-          <div className="mt-5 rounded-2xl border border-cyan/30 bg-cyan/[.06] p-4"><div className="flex items-baseline justify-between"><span className="text-xs uppercase tracking-[0.14em] text-silver">Estimated cost</span><span className="font-display text-2xl text-cyan">{est ? aed(est.total) : '…'}</span></div>
+          <div className="mt-5 rounded-2xl border border-accent/30 bg-accent/[.06] p-4"><div className="flex items-baseline justify-between"><span className="text-xs uppercase tracking-[0.14em] text-silver">Estimated cost</span><span className="font-display text-2xl text-accent">{est ? aed(est.total) : '…'}</span></div>
             <p className="mt-1 text-xs text-slate">Includes installation and 5% VAT. This is an estimate — TAC confirms the final price in the quotation.</p></div>
           {builder && !design.clientName && <p className="mt-3 text-xs text-amber-300">Tip: add the client name under “Details” so TAC knows which project this is for.</p>}
           <label className="mt-5 block text-xs uppercase tracking-[0.15em] text-silver">Message to TAC (optional)
-            <textarea rows={3} maxLength={3000} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Budget, timeline, anything we should know…" className="mt-2 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base normal-case tracking-normal text-white outline-none placeholder:text-slate focus:border-cyan" /></label>
+            <textarea rows={3} maxLength={3000} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Budget, timeline, anything we should know…" className="mt-2 w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base normal-case tracking-normal text-white outline-none placeholder:text-slate focus:border-accent" /></label>
           {err && <p role="alert" className="mt-3 text-sm text-red-400">{err}</p>}
           <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"><button onClick={onClose} disabled={phase === 'sending'} className="btn btn-ghost justify-center">Keep editing</button>
             <button onClick={go} disabled={phase === 'sending'} className="btn btn-primary justify-center disabled:opacity-60">{phase === 'sending' ? <Loader2 size={17} className="animate-spin" /> : <Send size={17} />}Send to TAC</button></div>

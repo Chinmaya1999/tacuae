@@ -56,7 +56,7 @@ function Builder({ quoteId }: { quoteId: string | null }) {
     } catch (e) { setErr((e as Error).message) } finally { setBusy(false) }
   }
 
-  if (!options || !ready) return <div className="grid min-h-[70vh] place-items-center pt-32">{optErr || err ? <p role="alert" className="text-red-400">{optErr || err}</p> : <Loader2 className="animate-spin text-cyan" />}</div>
+  if (!options || !ready) return <div className="grid min-h-[70vh] place-items-center pt-32">{optErr || err ? <p role="alert" className="text-red-400">{optErr || err}</p> : <Loader2 className="animate-spin text-accent" />}</div>
   const p = input.project
   const canSave = !user || user.role === 'customer' || user.role === 'builder'
   const bomIds = [...new Map((results ?? []).flatMap((r) => r.pricing.lines.map((l) => [l.productId, l.name] as const)))]
@@ -93,7 +93,7 @@ function Builder({ quoteId }: { quoteId: string | null }) {
                     <button className={small} aria-label={`Remove ${u.name}`} disabled={input.unitTypes.length === 1} onClick={() => confirm(`Remove ${u.name}?`) && set({ unitTypes: input.unitTypes.filter((x) => x.id !== u.id) })}><Trash2 size={15} /></button>
                   </div>
                 </div>
-                <button className="mt-3 text-sm text-cyan hover:underline" aria-expanded={open === u.id} onClick={() => setOpen(open === u.id ? null : u.id)}>{open === u.id ? 'Close template' : `Configure template (${u.config.rooms.length} rooms, ${Object.keys(u.config.levels).length} categories)`}</button>
+                <button className="mt-3 text-sm text-accent hover:underline" aria-expanded={open === u.id} onClick={() => setOpen(open === u.id ? null : u.id)}>{open === u.id ? 'Close template' : `Configure template (${u.config.rooms.length} rooms, ${Object.keys(u.config.levels).length} categories)`}</button>
                 {open === u.id && <div className="mt-4 space-y-5 border-t border-white/10 pt-4">
                   <RoomPicker rooms={u.config.rooms} max={15} onChange={(rooms) => setUnit(u.id, { config: { ...u.config, rooms } })} />
                   <CategoryPicker options={options} levels={u.config.levels} onChange={(levels) => setUnit(u.id, { config: { ...u.config, levels } })} />
@@ -110,7 +110,7 @@ function Builder({ quoteId }: { quoteId: string | null }) {
             <ul className="space-y-2 text-sm">{input.common.map((c) => <li key={c.productId} className="flex items-center justify-between gap-3"><span>{options.products.find((x) => x.id === c.productId)?.name ?? c.productId}</span><span className="flex items-center gap-3"><input aria-label="Quantity" type="number" min={1} max={10000} className={`${field} !w-24`} value={c.qty} onChange={(e) => set({ common: input.common.map((x) => (x.productId === c.productId ? { ...x, qty: Math.max(1, Math.round(Number(e.target.value))) } : x)) })} /><button className="text-slate hover:text-red-300" aria-label="Remove" onClick={() => set({ common: input.common.filter((x) => x.productId !== c.productId) })}><Trash2 size={15} /></button></span></li>)}</ul>
             <select aria-label="Add common-area device" className={`${field} mt-3 max-w-xs`} value="" onChange={(e) => e.target.value && set({ common: [...input.common, { productId: e.target.value, qty: 1 }] })}><option value="">+ Add a device…</option>{options.products.filter((x) => !input.common.some((c) => c.productId === x.id)).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select>
             <div className="mt-4"><Field name="Building systems TAC should quote (BMS / HVAC integration, access control, metering…)"><textarea rows={3} maxLength={1500} className={field} value={p.buildingSystems} onChange={(e) => setP({ buildingSystems: e.target.value })} /></Field></div>
-            {options.amcAvailable && <label className="mt-4 flex items-center gap-3 text-sm"><input type="checkbox" checked={input.amc} onChange={(e) => set({ amc: e.target.checked })} className="h-4 w-4 accent-cyan" />Include annual maintenance (AMC)</label>}
+            {options.amcAvailable && <label className="mt-4 flex items-center gap-3 text-sm"><input type="checkbox" checked={input.amc} onChange={(e) => set({ amc: e.target.checked })} className="h-4 w-4 accent-accent" />Include annual maintenance (AMC)</label>}
           </section>
 
           <section className={card} aria-label="Scenario comparison">

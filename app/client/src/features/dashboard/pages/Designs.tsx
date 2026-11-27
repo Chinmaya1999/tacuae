@@ -27,12 +27,12 @@ export default function Designs({ builder, mode }: { builder: boolean; mode: 'al
       </div>
       <div className="space-y-3">
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0" role="group" aria-label="Filter by status">
-          {chips.map(([k, l]) => <button key={k} onClick={() => setParams(k === 'all' ? {} : { f: k })} aria-pressed={filter === k} className={`shrink-0 rounded-full border px-4 py-2 text-sm transition ${filter === k ? 'border-cyan bg-cyan/15 text-cyan' : 'border-white/15 text-silver hover:text-white'}`}>{l} <span className="ml-1 text-xs opacity-70">{counts(k)}</span></button>)}
+          {chips.map(([k, l]) => <button key={k} onClick={() => setParams(k === 'all' ? {} : { f: k })} aria-pressed={filter === k} className={`shrink-0 rounded-full border px-4 py-2 text-sm transition ${filter === k ? 'border-accent bg-accent/15 text-accent' : 'border-white/15 text-silver hover:text-white'}`}>{l} <span className="ml-1 text-xs opacity-70">{counts(k)}</span></button>)}
         </div>
-        {pool.length > 3 && <label className="relative block sm:max-w-xs"><span className="sr-only">Search designs</span><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate" /><input placeholder="Search designs…" value={q} onChange={(e) => setQ(e.target.value)} className="w-full rounded-full border border-white/15 bg-white/5 py-2.5 pl-9 pr-4 text-base outline-none focus:border-cyan" /></label>}
+        {pool.length > 3 && <label className="relative block sm:max-w-xs"><span className="sr-only">Search designs</span><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate" /><input placeholder="Search designs…" value={q} onChange={(e) => setQ(e.target.value)} className="w-full rounded-full border border-white/15 bg-white/5 py-2.5 pl-9 pr-4 text-base outline-none focus:border-accent" /></label>}
       </div>
       {error && <p role="alert" className="text-red-400">{error}</p>}
-      {!items && !error && <Loader2 className="animate-spin text-cyan" />}
+      {!items && !error && <Loader2 className="animate-spin text-accent" />}
       {items && shown.length === 0 && (
         <div className="rounded-3xl border border-dashed border-white/20 p-12 text-center"><ClipboardList className="mx-auto mb-3 text-slate" />
           <p className="text-silver">{pool.length === 0 ? (mode === 'quotes' ? 'No quotes yet. Send a design to TAC and the price will appear here.' : 'No designs yet.') : 'Nothing matches this filter.'}</p>

@@ -10,7 +10,7 @@ export default function EquipPicker({ catalog, value, onChange }: { catalog: Cat
           <div className="mb-1.5 text-[0.68rem] uppercase tracking-[0.14em]" style={{ color: m.color }}>{m.label}</div>
           <ul className="grid grid-cols-3 gap-1.5">{catalog.equipment.filter((d) => d.module === m.id).map((d) => (
             <li key={d.id}><button role="option" aria-selected={value === d.id} onClick={() => onChange(value === d.id ? null : d.id)} title={d.name}
-              className={`flex w-full flex-col items-center rounded-lg border p-1.5 text-center transition ${value === d.id ? 'border-cyan bg-cyan/10' : 'border-white/10 bg-white/[.03] hover:border-white/30'}`}>
+              className={`flex w-full flex-col items-center rounded-lg border p-1.5 text-center transition ${value === d.id ? 'border-accent bg-accent/10' : 'border-white/10 bg-white/[.03] hover:border-white/30'}`}>
               <EquipImage type={d.id} size={58} /><span className="mt-1 line-clamp-2 text-[0.65rem] leading-tight text-silver">{d.name}</span></button></li>))}</ul>
         </div>))}
     </div>

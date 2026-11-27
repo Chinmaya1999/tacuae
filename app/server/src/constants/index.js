@@ -13,6 +13,7 @@ export const CONTENT_TYPES = ['products', 'projects']
 
 export const SESSION_COOKIE = 'tac_session'
 export const SESSION_MS = 8 * 3600 * 1000
+export const REMEMBER_MS = 30 * 24 * 3600 * 1000 // sign-in with "Remember me"
 export const CSRF_HEADER = 'x-requested-with'
 export const CSRF_VALUE = 'tac-admin'
 

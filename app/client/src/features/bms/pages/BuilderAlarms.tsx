@@ -14,8 +14,8 @@ export default function BuilderAlarms() {
   return (
     <div className="space-y-6">
       <div><h1 className="font-display text-3xl">Alarms</h1><p className="mt-1 text-silver">Acknowledge problems, then resolve them with a note. Everything stays in the event history.</p></div>
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Alarm state">{[['open', 'Open'], ['acknowledged', 'Acknowledged'], ['resolved', 'Resolved']].map(([k, l]) => <button key={k} onClick={() => setState(k)} aria-pressed={state === k} className={`rounded-full border px-4 py-2 text-sm ${state === k ? 'border-cyan bg-cyan/15 text-cyan' : 'border-white/15 text-silver'}`}>{l}</button>)}</div>
-      {!items ? <Loader2 className="animate-spin text-cyan" /> : <AlarmsList items={items} projects={projects} showProject onAck={async (a) => { await api(`/api/bms/projects/${a.projectId}/alarms/${a.id}/ack`, { method: 'POST' }); await load() }} onResolve={async (a, note) => { await api(`/api/bms/projects/${a.projectId}/alarms/${a.id}/resolve`, { method: 'POST', body: { note } }); await load() }} empty={state === 'open' ? 'No open alarms. Everything is running normally.' : 'Nothing here.'} />}
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Alarm state">{[['open', 'Open'], ['acknowledged', 'Acknowledged'], ['resolved', 'Resolved']].map(([k, l]) => <button key={k} onClick={() => setState(k)} aria-pressed={state === k} className={`rounded-full border px-4 py-2 text-sm ${state === k ? 'border-accent bg-accent/15 text-accent' : 'border-white/15 text-silver'}`}>{l}</button>)}</div>
+      {!items ? <Loader2 className="animate-spin text-accent" /> : <AlarmsList items={items} projects={projects} showProject onAck={async (a) => { await api(`/api/bms/projects/${a.projectId}/alarms/${a.id}/ack`, { method: 'POST' }); await load() }} onResolve={async (a, note) => { await api(`/api/bms/projects/${a.projectId}/alarms/${a.id}/resolve`, { method: 'POST', body: { note } }); await load() }} empty={state === 'open' ? 'No open alarms. Everything is running normally.' : 'Nothing here.'} />}
     </div>
   )
 }

@@ -5,7 +5,7 @@ import type { User } from './auth'
 
 export type AuthValue = {
   user: User | null; loading: boolean
-  login: (email: string, password: string) => Promise<User>
+  login: (email: string, password: string, remember?: boolean) => Promise<User>
   register: (b: { name: string; email: string; password: string; role: 'customer' | 'builder'; company?: string; phone?: string; trn?: string; tradeLicence?: string; sector?: string }) => Promise<User>
   logout: () => Promise<void>
   /** adopt a session created by another sign-in endpoint */

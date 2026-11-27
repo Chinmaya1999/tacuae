@@ -17,12 +17,12 @@ export function QuotationList({ builder }: { builder: boolean }) {
       <div className="flex flex-wrap items-center justify-between gap-3"><h1 className="font-display text-3xl">Quotations</h1>
         <div className="flex flex-wrap gap-2">{builder && <Link to="/project-quote" className="btn btn-primary !py-2.5">New project quote</Link>}<Link to="/design-my-home" className={`btn !py-2.5 ${builder ? 'btn-ghost' : 'btn-primary'}`}>Design a smart home</Link></div></div>
       {err && <p role="alert" className="text-red-400">{err}</p>}
-      {!items && !err && <Loader2 className="animate-spin text-cyan" />}
+      {!items && !err && <Loader2 className="animate-spin text-accent" />}
       {items?.length === 0 && <p className="rounded-2xl border border-dashed border-white/15 p-10 text-center text-silver">No quotations yet. Configure a home or project to create your first one.</p>}
       <ul className="space-y-3">{items?.map((q) => (
-        <li key={q.id}><Link to={`/dashboard/quotations/${q.id}`} className={`${card} flex flex-wrap items-center gap-x-4 gap-y-2 hover:border-cyan/50`}>
+        <li key={q.id}><Link to={`/dashboard/quotations/${q.id}`} className={`${card} flex flex-wrap items-center gap-x-4 gap-y-2 hover:border-accent/50`}>
           <StatusPill s={q.status} /><span className="font-display text-lg">{q.name}</span><span className="text-xs text-slate">{q.ref} · v{q.version} · {q.kind === 'project' ? 'Project' : 'Home'}</span>
-          <span className="ml-auto tabular-nums text-cyan">{money(q.total)}</span><span className="w-full text-xs text-slate sm:w-auto">{day(q.updatedAt)}</span></Link></li>))}</ul>
+          <span className="ml-auto tabular-nums text-accent">{money(q.total)}</span><span className="w-full text-xs text-slate sm:w-auto">{day(q.updatedAt)}</span></Link></li>))}</ul>
     </div>
   )
 }
@@ -36,7 +36,7 @@ export function QuotationDetail() {
   const run = async (fn: () => Promise<void>) => { setBusy(true); setErr(''); try { await fn() } catch (e) { setErr((e as Error).message); load() } finally { setBusy(false) } }
   const post = (path: string, body?: unknown) => run(async () => setQ((await api<{ item: Quote }>(url + path, { method: 'POST', body: body ?? {} })).item))
 
-  if (!q) return err ? <p role="alert" className="text-red-400">{err}</p> : <Loader2 className="animate-spin text-cyan" />
+  if (!q) return err ? <p role="alert" className="text-red-400">{err}</p> : <Loader2 className="animate-spin text-accent" />
   const editable = !['accepted', 'survey'].includes(q.status)
   const share = () => {
     if (q.shared && !confirm('Create a new link? The previous link will stop working.')) return
@@ -45,7 +45,7 @@ export function QuotationDetail() {
   const message = encodeURIComponent(`My Total Automation quotation ${q.ref}: ${link}`)
   return (
     <div className="space-y-6">
-      <Link to="/dashboard/quotations" className="no-print inline-flex items-center gap-2 text-sm text-silver hover:text-cyan"><ArrowLeft size={15} />All quotations</Link>
+      <Link to="/dashboard/quotations" className="no-print inline-flex items-center gap-2 text-sm text-silver hover:text-accent"><ArrowLeft size={15} />All quotations</Link>
       <div className="flex flex-wrap items-center gap-3"><h1 className="font-display text-3xl">{q.name}</h1><StatusPill s={q.status} /><span className="text-sm text-slate">{q.ref} · version {q.version}</span></div>
       <div className="no-print flex flex-wrap gap-2">
         {q.status === 'final' && !q.expired && <button className="btn btn-primary !py-2" disabled={busy} onClick={() => confirm(`Accept this final quotation for ${money(q.total)}?`) && post('/accept')}>Accept quotation</button>}
@@ -91,7 +91,7 @@ export function Versions({ q }: { q: Quote }) {
     <section className={`${card} no-print`} aria-label="Version history">
       <h3 className="mb-3 text-xs uppercase tracking-[0.14em] text-silver">Version history</h3>
       <ul className="space-y-2 text-sm">{[...versions].reverse().map((v) => <li key={v.version} className="flex flex-wrap items-center gap-x-4 gap-y-1"><b>v{v.version}</b><span>{v.note}</span><span className="text-xs text-slate">{v.author} · {new Date(v.at).toLocaleString('en-GB')}</span><span className="ml-auto tabular-nums">{money(v.total)}</span>
-        {v.version !== now?.version && <button className="text-cyan hover:underline" onClick={() => setOther(other === v.version ? null : v.version)}>{other === v.version ? 'Close' : 'Compare'}</button>}</li>)}</ul>
+        {v.version !== now?.version && <button className="text-accent hover:underline" onClick={() => setOther(other === v.version ? null : v.version)}>{other === v.version ? 'Close' : 'Compare'}</button>}</li>)}</ul>
       {old && now && <table className="mt-4 w-full text-left text-sm"><thead className="text-xs uppercase tracking-wider text-slate"><tr><th className="py-1">Item</th><th className="text-right">v{old.version}</th><th className="text-right">v{now.version}</th></tr></thead>
         <tbody>{ids.map(([pid, name]) => <tr key={pid} className={`border-t border-white/10 ${qty(old, pid) !== qty(now, pid) ? 'text-amber-200' : 'text-silver'}`}><td className="py-1">{name}</td><td className="text-right tabular-nums">{qty(old, pid)}</td><td className="text-right tabular-nums">{qty(now, pid)}</td></tr>)}
           <tr className="border-t border-white/10 font-medium"><td className="py-1">Total</td><td className="text-right tabular-nums">{money(old.total)}</td><td className="text-right tabular-nums">{money(now.total)}</td></tr></tbody></table>}

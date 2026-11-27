@@ -5,7 +5,7 @@ import { api } from '../../../shared/lib/api'
 import { groupColor, type Group } from '../../../shared/data/catalog'
 import type { Product } from '../../../shared/lib/products'
 
-const num = 'w-28 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-right text-sm tabular-nums text-white outline-none focus:border-cyan'
+const num = 'w-28 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-right text-sm tabular-nums text-white outline-none focus:border-accent'
 
 export default function ProductsAdmin() {
   const [items, setItems] = useState<Product[] | null>(null), [err, setErr] = useState('')
@@ -21,7 +21,7 @@ export default function ProductsAdmin() {
       {edit && <ProductForm key={edit === 'new' ? 'new' : edit.id} product={edit === 'new' ? null : edit} close={() => setEdit(null)} saved={() => { setEdit(null); load() }} />}
       {unpriced > 0 && <p role="status" className="rounded-xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">{unpriced} active product{unpriced > 1 && 's have'} no price. The starter prices were placeholders — please review every row.</p>}
       {err && <p role="alert" className="text-red-400">{err}</p>}
-      {!items && !err && <Loader2 className="animate-spin text-cyan" />}
+      {!items && !err && <Loader2 className="animate-spin text-accent" />}
       <div className="overflow-x-auto rounded-2xl border border-white/10">
         <table className="w-full min-w-[1100px] text-left text-sm">
           <thead className="bg-white/[.04] text-xs uppercase tracking-wider text-slate"><tr><th className="p-4">Product</th><th>Retail price</th><th>Install / unit</th><th>Trade</th><th>Partner</th><th>Accessories</th><th>Connectivity</th><th>Active</th><th /></tr></thead>
@@ -43,13 +43,13 @@ function Row({ p, onSaved, onEdit }: { p: Product; onSaved: () => void; onEdit: 
   }
   return (
     <tr className="border-t border-white/10">
-      <td className="p-4"><div style={{ color: groupColor[p.group as Group] }}>{p.name}</div><div className="text-xs text-slate">{p.group} · {p.sku || 'no SKU'} · {p.protocol}</div><button onClick={onEdit} className="text-xs text-cyan hover:underline">Details</button></td>
+      <td className="p-4"><div style={{ color: groupColor[p.group as Group] }}>{p.name}</div><div className="text-xs text-slate">{p.group} · {p.sku || 'no SKU'} · {p.protocol}</div><button onClick={onEdit} className="text-xs text-accent hover:underline">Details</button></td>
       <td><input aria-label={`Unit price of ${p.name}`} type="number" min="0" step="0.01" inputMode="decimal" value={unit} onChange={(e) => { setUnit(e.target.value); setState('') }} className={num} /></td>
       <td><input aria-label={`Installation price of ${p.name}`} type="number" min="0" step="0.01" inputMode="decimal" value={inst} onChange={(e) => { setInst(e.target.value); setState('') }} className={num} /></td>
       {([['Trade price', trade, setTrade], ['Partner price', partner, setPartner], ['Accessory price', acc, setAcc]] as const).map(([n, v, on]) => <td key={n}><input aria-label={`${n} of ${p.name}`} type="number" min="0" step="0.01" inputMode="decimal" value={v} onChange={(e) => { on(e.target.value); setState('') }} className={num} /></td>)}
       <td className="text-silver">{p.connectivity.join(' / ') || '—'}</td>
-      <td><input aria-label={`${p.name} active`} type="checkbox" checked={active} onChange={(e) => { setActive(e.target.checked); setState('') }} className="h-4 w-4 accent-cyan" /></td>
-      <td className="pr-4 text-right"><button disabled={!dirty || state === 'saving'} onClick={save} className="text-sm text-cyan hover:underline disabled:opacity-40">{state === 'saving' ? 'Saving…' : 'Save'}</button>
+      <td><input aria-label={`${p.name} active`} type="checkbox" checked={active} onChange={(e) => { setActive(e.target.checked); setState('') }} className="h-4 w-4 accent-accent" /></td>
+      <td className="pr-4 text-right"><button disabled={!dirty || state === 'saving'} onClick={save} className="text-sm text-accent hover:underline disabled:opacity-40">{state === 'saving' ? 'Saving…' : 'Save'}</button>
         {state === 'saved' && !dirty && <Check size={14} className="ml-2 inline text-emerald-300" />}{state === 'err' && <span className="ml-2 text-red-400">Failed</span>}</td>
     </tr>
   )

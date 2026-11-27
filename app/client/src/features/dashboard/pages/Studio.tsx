@@ -10,7 +10,7 @@ import { Badge, fmtDate } from '../components/ui'
 import { useDesigns } from './useDesigns'
 import SendDialog from './SendDialog'
 
-const field = 'w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base text-white outline-none transition placeholder:text-slate focus:border-cyan disabled:opacity-60'
+const field = 'w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base text-white outline-none transition placeholder:text-slate focus:border-accent disabled:opacity-60'
 const TIPS_KEY = 'tac-studio-tips'
 const tipsSeen = () => { try { return localStorage.getItem(TIPS_KEY) === '1' } catch { return false } }
 const body = (d: Design) => ({ name: d.name, property: d.property, clientName: d.clientName, siteAddress: d.siteAddress, notes: d.notes, rooms: d.rooms })
@@ -56,7 +56,7 @@ export default function Studio({ builder }: { builder: boolean }) {
     return () => clearTimeout(t)
   }, [d, dirty, locked]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!d) return <div className="grid min-h-screen place-items-center bg-midnight"><Loader2 className="animate-spin text-cyan" /></div>
+  if (!d) return <div className="grid min-h-screen place-items-center bg-midnight"><Loader2 className="animate-spin text-accent" /></div>
 
   const total = d.rooms.reduce((n, r) => n + r.devices.length, 0)
   const afterCreate = (s: Design) => { if (id === 'new') nav(`/dashboard/design/${s.id}`, { replace: true }) }
@@ -85,13 +85,13 @@ export default function Studio({ builder }: { builder: boolean }) {
     <div className="min-h-screen bg-midnight text-white">
       <header className="sticky top-0 z-40 border-b border-white/10 bg-deep/90 backdrop-blur">
         <div className="mx-auto flex max-w-[1700px] flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 lg:px-6">
-          <Link to="/dashboard" aria-label="Back to dashboard" className="rounded-full p-2 text-silver hover:bg-white/5 hover:text-cyan"><ArrowLeft size={20} /></Link>
+          <Link to="/dashboard" aria-label="Back to dashboard" className="rounded-full p-2 text-silver hover:bg-white/5 hover:text-accent"><ArrowLeft size={20} /></Link>
           <div className="min-w-0 flex-1 basis-52">
-            <input aria-label="Design name" maxLength={100} {...set('name')} className="w-full truncate rounded-md bg-transparent px-1 font-display text-lg outline-none ring-cyan/60 focus:ring-1 sm:text-xl" />
+            <input aria-label="Design name" maxLength={100} {...set('name')} className="w-full truncate rounded-md bg-transparent px-1 font-display text-lg outline-none ring-accent/60 focus:ring-1 sm:text-xl" />
             <div className="flex items-center gap-2 px-1 text-xs text-slate">{d.status && <Badge s={d.status} />}<span role="status" className={dirty ? 'text-amber-300' : ''}>{status}</span></div>
           </div>
           <button onClick={() => setDetails(!details)} aria-expanded={details} className="flex items-center gap-1.5 rounded-full border border-white/15 px-4 py-2 text-sm text-silver hover:text-white">Details<ChevronDown size={15} className={`transition ${details ? 'rotate-180' : ''}`} /></button>
-          <div className="flex rounded-full border border-white/15 p-0.5" role="group" aria-label="Designer view">{([['3d', '3D'], ['2d', '2D']] as const).map(([v, l]) => <button key={v} onClick={() => setView(v)} aria-pressed={view === v} className={`rounded-full px-3.5 py-1.5 text-sm ${view === v ? 'bg-cyan/20 text-cyan' : 'text-silver'}`}>{l}</button>)}</div>
+          <div className="flex rounded-full border border-white/15 p-0.5" role="group" aria-label="Designer view">{([['3d', '3D'], ['2d', '2D']] as const).map(([v, l]) => <button key={v} onClick={() => setView(v)} aria-pressed={view === v} className={`rounded-full px-3.5 py-1.5 text-sm ${view === v ? 'bg-accent/20 text-accent' : 'text-silver'}`}>{l}</button>)}</div>
           {!locked && <>
             <button onClick={saveNow} disabled={!!busy || (!dirty && !!d.id)} className="btn btn-ghost !px-5 !py-2.5 disabled:opacity-50">{busy === 'save' ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}Save</button>
             <button onClick={() => setSending(true)} disabled={total === 0} title={total === 0 ? 'Add at least one smart device first' : undefined} className="btn btn-primary !px-5 !py-2.5 disabled:opacity-50"><Send size={16} />Review &amp; send</button></>}
@@ -101,8 +101,8 @@ export default function Studio({ builder }: { builder: boolean }) {
 
       <main className="mx-auto max-w-[1700px] space-y-4 px-4 py-5 lg:px-6">
         {d.quote && (
-          <section aria-label="Quotation" className="flex flex-wrap items-center gap-x-8 gap-y-4 rounded-3xl border border-cyan/40 bg-gradient-to-br from-cyan/10 to-transparent p-5 sm:p-6">
-            <div><p className="eyebrow">Quotation from TAC</p><div className="mt-2 font-display text-4xl text-cyan">{aed(d.quote.amount)}</div><p className="mt-1 text-xs text-slate">Issued {fmtDate(d.quote.at)} · incl. installation &amp; VAT unless stated</p></div>
+          <section aria-label="Quotation" className="flex flex-wrap items-center gap-x-8 gap-y-4 rounded-3xl border border-accent/40 bg-gradient-to-br from-accent/10 to-transparent p-5 sm:p-6">
+            <div><p className="eyebrow">Quotation from TAC</p><div className="mt-2 font-display text-4xl text-accent">{aed(d.quote.amount)}</div><p className="mt-1 text-xs text-slate">Issued {fmtDate(d.quote.at)} · incl. installation &amp; VAT unless stated</p></div>
             {d.quote.note && <p className="min-w-[200px] flex-1 whitespace-pre-wrap text-silver">{d.quote.note}</p>}
             {d.status === 'quoted' && <div className="flex flex-wrap gap-3"><button disabled={!!busy} onClick={() => act('acc', 'respond', { accept: true }, 'Quotation accepted. TAC will contact you to proceed.')} className="btn btn-primary"><Check size={16} />Accept quotation</button><button disabled={!!busy} onClick={() => act('dec', 'respond', { accept: false }, 'Quotation declined. You can edit the design and send it again.')} className="btn btn-ghost">Decline</button></div>}
             {d.status === 'accepted' && <p className="font-display text-emerald-300">✓ Accepted — TAC will be in touch.</p>}
@@ -118,8 +118,8 @@ export default function Studio({ builder }: { builder: boolean }) {
           </section>)}
 
         {tips && !locked && view === '3d' && (
-          <aside className="flex items-start gap-3 rounded-2xl border border-cyan/25 bg-cyan/[.06] p-4 text-sm" aria-label="Tips">
-            <Info size={18} className="mt-0.5 shrink-0 text-cyan" />
+          <aside className="flex items-start gap-3 rounded-2xl border border-accent/25 bg-accent/[.06] p-4 text-sm" aria-label="Tips">
+            <Info size={18} className="mt-0.5 shrink-0 text-accent" />
             <ol className="flex-1 list-inside list-decimal space-y-0.5 text-silver"><li><b className="text-white">Add</b> a device or furniture from the left.</li><li><b className="text-white">Click</b> a device in the room to switch it on, <b className="text-white">drag</b> to move it.</li><li>Try the <b className="text-white">scenes</b> under the room, then <b className="text-white">Review &amp; send</b>.</li></ol>
             <button onClick={() => { setTips(false); try { localStorage.setItem(TIPS_KEY, '1') } catch { /* private mode */ } }} aria-label="Dismiss tips" className="rounded-full p-1 text-slate hover:text-white"><X size={16} /></button>
           </aside>)}

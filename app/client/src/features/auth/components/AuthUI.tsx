@@ -2,69 +2,90 @@
 import { useState, type InputHTMLAttributes, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { AlertCircle, ArrowLeft, Building2, Check, Eye, EyeOff, Loader2, Lock, type LucideIcon } from 'lucide-react'
+import { AlertCircle, ArrowLeft, Check, Eye, EyeOff, Loader2, Lock, ReceiptText, Rotate3d, ShieldCheck, type LucideIcon } from 'lucide-react'
+import ClayScene from '../../../shared/components/ClayScene'
 import { company } from '../../../shared/data/content'
 
-export const control = 'w-full rounded-xl border border-white/12 bg-white/[.04] py-3 text-[0.95rem] text-white outline-none transition placeholder:text-slate hover:border-white/25 focus:border-cyan focus:bg-cyan/[.04] focus:ring-4 focus:ring-cyan/15'
-const caption = 'mb-1.5 block text-sm font-medium text-silver'
+export const control = 'field-control'
+const caption = 'mb-1.5 block text-sm font-medium text-[color:var(--label-ink,var(--color-silver))]'
 
-type FieldProps = InputHTMLAttributes<HTMLInputElement> & { id: string; label: string; icon: LucideIcon; hint?: ReactNode }
-export function TextField({ id, label, icon: Icon, hint, type = 'text', ...rest }: FieldProps) {
+type FieldProps = InputHTMLAttributes<HTMLInputElement> & { id: string; label: string; icon: LucideIcon; hint?: ReactNode; error?: string }
+export function TextField({ id, label, icon: Icon, hint, error, type = 'text', ...rest }: FieldProps) {
   const [show, setShow] = useState(false), secret = type === 'password'
   return (
     <div>
       <label htmlFor={id} className={caption}>{label}</label>
       <div className="group relative">
-        <Icon size={17} aria-hidden className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate transition group-focus-within:text-cyan" />
-        <input id={id} type={secret && show ? 'text' : type} className={`${control} pl-11 ${secret ? 'pr-12' : 'pr-4'}`} {...rest} />
-        {secret && <button type="button" onClick={() => setShow(!show)} aria-label={show ? 'Hide password' : 'Show password'} aria-pressed={show} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate hover:text-cyan">{show ? <EyeOff size={17} /> : <Eye size={17} />}</button>}
+        <Icon size={17} aria-hidden className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate transition group-focus-within:text-brand" />
+        <input id={id} type={secret && show ? 'text' : type} aria-invalid={error ? true : undefined} aria-describedby={error ? `${id}-error` : undefined} className={`${control} pl-11 ${secret ? 'pr-12' : 'pr-4'}`} {...rest} />
+        {secret && <button type="button" onClick={() => setShow(!show)} aria-label={show ? 'Hide password' : 'Show password'} aria-pressed={show} className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg p-2.5 text-slate transition hover:text-brand">{show ? <EyeOff size={17} /> : <Eye size={17} />}</button>}
       </div>
+      {error && <p id={`${id}-error`} className="mt-1.5 flex items-center gap-1.5 text-[0.82rem] text-[color:var(--color-error,#f87171)]"><AlertCircle size={14} aria-hidden />{error}</p>}
       {hint}
     </div>
   )
 }
 
-export const ErrorNote = ({ text }: { text: string }) => (text ? <p role="alert" className="flex items-start gap-2.5 rounded-xl border border-red-400/35 bg-red-500/10 px-3.5 py-3 text-sm text-red-300"><AlertCircle size={17} className="mt-0.5 shrink-0" />{text}</p> : null)
+export const ErrorNote = ({ text }: { text: string }) => (text ? <p role="alert" className="flex items-start gap-2.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3.5 py-3 text-sm text-[color:var(--color-error,#fca5a5)]"><AlertCircle size={17} aria-hidden className="mt-0.5 shrink-0" />{text}</p> : null)
 
-export const Submit = ({ busy, disabled, children, busyText }: { busy: boolean; disabled: boolean; children: ReactNode; busyText: string }) => (
-  <button className="btn btn-primary w-full justify-center !py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-75" disabled={busy || disabled}>{busy ? <><Loader2 size={17} className="animate-spin" />{busyText}</> : children}</button>
+export const Submit = ({ busy, disabled, children, busyText }: { busy: boolean; disabled?: boolean; children: ReactNode; busyText: string }) => (
+  <button className="btn btn-primary w-full justify-center !py-3.5 text-[0.95rem] disabled:cursor-not-allowed disabled:opacity-65" disabled={busy || disabled}>{busy ? <><Loader2 size={17} className="animate-spin" aria-hidden />{busyText}</> : children}</button>
 )
 
-const POINTS = ['Design your smart home in interactive 3D', 'Live, itemised pricing as you choose', 'Save, share and track your quotations']
+export const Divider = ({ children }: { children: ReactNode }) => (
+  <div className="my-6 flex items-center gap-3 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-slate"><span className="h-px flex-1 bg-current opacity-20" /><span>{children}</span><span className="h-px flex-1 bg-current opacity-20" /></div>
+)
 
-/** Two columns on large screens: brand story on the left, the form on the right. */
+/** Shown for a moment after signing in, before the next page opens. */
+export const SignedIn = () => (
+  <div className="theme-light grid min-h-screen place-items-center px-6">
+    <motion.div role="status" initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="text-center">
+      <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-gradient-to-b from-brand to-primary text-white shadow-lg shadow-primary/30"><Check size={30} aria-hidden /></span>
+      <p className="mt-5 font-display text-xl font-bold">You're signed in</p><p className="mt-1 text-sm text-muted">Opening your workspace…</p>
+    </motion.div>
+  </div>
+)
+
+const POINTS: [LucideIcon, string, string][] = [
+  [Rotate3d, 'Design in 3D', 'Plan rooms and smart devices'],
+  [ReceiptText, 'Itemised quotes', 'Track every quotation'],
+  [ShieldCheck, 'Protected access', 'Your own private workspace'],
+]
+
+/** Two columns on large screens: the visual story on the left, the form on the right. */
 export default function AuthShell({ title, sub, wide, children }: { title: string; sub: string; wide?: boolean; children: ReactNode }) {
   return (
-    <div className="grid min-h-screen bg-midnight text-white lg:grid-cols-[1.05fr_1fr]">
-      <aside className="relative hidden overflow-hidden border-r border-white/10 lg:sticky lg:top-0 lg:block lg:h-screen">
-        <img src="/images/site/hero.jpg" alt="" className="absolute inset-0 h-full w-full object-cover opacity-45" />
-        <div className="absolute inset-0 bg-gradient-to-t from-midnight via-midnight/70 to-midnight/30" />
-        <div aria-hidden className="absolute -left-24 bottom-10 h-96 w-96 rounded-full bg-cyan/20 blur-3xl" />
-        <div className="relative flex h-full flex-col justify-between p-12 xl:p-16">
-          <Link to="/" aria-label="TAC UAE home" className="w-fit"><img src={company.logoDark} alt="TAC — Total Automation" className="h-12 w-auto" /></Link>
-          <div>
-            <p className="eyebrow">Total Automation</p>
-            <h2 className="mt-4 max-w-md font-display text-4xl leading-tight xl:text-5xl">Intelligence built into <span className="bg-gradient-to-r from-cyan to-azure bg-clip-text text-transparent">every space.</span></h2>
-            <ul className="mt-8 space-y-3.5">{POINTS.map((p) => <li key={p} className="flex items-center gap-3 text-silver"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-cyan/15 text-cyan"><Check size={14} /></span><span>{p}</span></li>)}</ul>
-            <dl className="mt-10 flex gap-10 border-t border-white/10 pt-6">{[[String(company.established), 'Established'], ['600+', 'Projects'], ['KNX', 'Training center']].map(([v, k]) => <div key={k}><dt className="sr-only">{k}</dt><dd className="font-display text-2xl">{v}</dd><dd className="text-xs text-slate">{k}</dd></div>)}</dl>
-          </div>
+    <div className="grid min-h-screen bg-midnight lg:grid-cols-[1.08fr_1fr]">
+      <aside className="relative hidden overflow-hidden text-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:justify-between lg:px-10 lg:py-8 xl:px-14 xl:py-11">
+        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(90%_70%_at_20%_0%,#2a2f7a_0%,transparent_60%),radial-gradient(80%_60%_at_100%_70%,#3b1d72_0%,transparent_65%)]" />
+        <div aria-hidden className="absolute inset-0 grid-bg opacity-70" />
+        <Link to="/" aria-label="TAC UAE home" className="relative w-fit"><img src={company.logoDark} alt="TAC — Total Automation" className="h-11 w-auto" /></Link>
+        <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7 }} className="relative flex min-h-0 flex-1 items-center justify-center py-4">
+          <ClayScene className="!w-[min(100%,560px,62vh)]" />
+        </motion.div>
+        <div className="relative">
+          <h2 className="max-w-lg text-3xl font-bold leading-[1.15] xl:text-[2.5rem]">Your smart building, <span className="bg-gradient-to-r from-ice to-violet bg-clip-text text-transparent">in one secure place.</span></h2>
+          <p className="mt-3 max-w-md text-silver">Design, price and follow your automation project with {company.name}.</p>
+          <ul className="mt-7 grid grid-cols-3 gap-3">{POINTS.map(([Icon, t, d]) => <li key={t} className="rounded-2xl border border-white/10 bg-white/[.05] p-3.5 backdrop-blur"><Icon size={19} aria-hidden className="text-accent" /><span className="mt-2.5 block text-sm font-semibold">{t}</span><span className="mt-0.5 block text-xs leading-relaxed text-silver">{d}</span></li>)}</ul>
         </div>
       </aside>
 
-      <main className="relative flex flex-col px-5 py-6 sm:px-10">
-        <div className="pointer-events-none absolute inset-0 grid-bg opacity-30" />
-        <div className="relative flex items-center justify-between">
-          <Link to="/" className="lg:invisible"><img src={company.logoDark} alt="TAC — back to website" className="h-9 w-auto" /></Link>
-          <Link to="/" aria-label="Back to website" className="flex items-center gap-1.5 p-1 text-sm text-silver hover:text-cyan"><ArrowLeft size={18} /><span className="hidden sm:inline">Back to website</span></Link>
+      <main className="theme-light relative flex min-w-0 flex-col px-5 py-5 sm:px-10">
+        <div className="flex items-center justify-between lg:justify-end">
+          <Link to="/" className="lg:hidden"><img src={company.logo} alt="TAC — back to website" className="h-9 w-auto" /></Link>
+          <Link to="/" aria-label="Back to website" className="flex items-center gap-1.5 rounded-lg p-2 text-sm font-medium text-muted transition hover:text-primary"><ArrowLeft size={17} aria-hidden /><span className="hidden sm:inline">Back to website</span></Link>
         </div>
-        <div className="relative flex flex-1 items-center justify-center py-8">
-          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className={`glass w-full rounded-3xl border border-white/10 p-6 shadow-2xl shadow-black/40 sm:p-9 ${wide ? 'max-w-xl' : 'max-w-[460px]'}`}>
-            <h1 className="font-display text-3xl">{title}</h1>
-            <p className="mt-2 text-sm text-silver">{sub}</p>
+        <div className="flex flex-1 items-center justify-center py-8">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.05 }} className={`w-full ${wide ? 'max-w-[520px]' : 'max-w-[410px]'}`}>
+            <img src={company.logo} alt="" className="mb-7 hidden h-11 w-auto lg:block" />
+            {/* tablets get a smaller version of the illustration; phones get the form alone */}
+            <div aria-hidden className="mb-7 hidden justify-center overflow-hidden rounded-3xl bg-[radial-gradient(90%_120%_at_20%_0%,#2a2f7a_0%,#0b1020_60%,#2a1656_100%)] py-3 sm:flex lg:hidden"><ClayScene className="w-[250px]" /></div>
+            <h1 className="text-[2rem] font-bold leading-tight">{title}</h1>
+            <p className="mt-2 text-muted">{sub}</p>
             {children}
           </motion.div>
         </div>
-        <p className="relative flex items-center justify-center gap-2 text-xs text-slate"><Building2 size={13} />{company.name}<Lock size={13} className="ml-3" /><Link to="/privacy" className="hover:text-cyan">Privacy Policy</Link></p>
+        <p className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-center text-xs text-muted"><span className="inline-flex items-center gap-1.5"><Lock size={13} aria-hidden />Passwords are stored encrypted, never as plain text.</span><Link to="/privacy" className="font-medium hover:text-primary">Privacy Policy</Link></p>
       </main>
     </div>
   )

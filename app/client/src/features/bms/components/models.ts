@@ -18,7 +18,7 @@ const mk = (g: G, geo: THREE.BufferGeometry, m: THREE.Material, x = 0, y = 0, z 
 const box = (g: G, w: number, h: number, d: number, m: THREE.Material, x = 0, y = 0, z = 0) => mk(g, new THREE.BoxGeometry(w, h, d), m, x, y, z)
 const cyl = (g: G, rt: number, rb: number, h: number, m: THREE.Material, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0, seg = 24) => mk(g, new THREE.CylinderGeometry(rt, rb, h, seg), m, x, y, z, rx, ry, rz)
 const led = (g: G, x: number, y: number, z: number, c = '#35e07c', r = 0.012) => mk(g, new THREE.SphereGeometry(r, 8, 6), mat(c, { emissive: c, ei: 2.2, rough: 0.3 }), x, y, z)
-const screen = (g: G, w: number, h: number, x: number, y: number, z: number, c = '#38d6ff') => box(g, w, h, 0.01, mat('#06222e', { emissive: c, ei: 0.9, rough: 0.2 }), x, y, z)
+const screen = (g: G, w: number, h: number, x: number, y: number, z: number, c = '#9aa2ff') => box(g, w, h, 0.01, mat('#06222e', { emissive: c, ei: 0.9, rough: 0.2 }), x, y, z)
 
 function fan(g: G, x: number, y: number, z: number, r: number, spin: THREE.Object3D[]) {
   const f = new THREE.Group(); f.position.set(x, y, z); g.add(f)
@@ -45,7 +45,7 @@ const B: Record<string, () => G> = {
     cyl(g, 0.34, 0.34, 0.95, mat('#555b62', { metal: 0.7, rough: 0.35 }), 1.15, 2.3, -0.2); cyl(g, 0.1, 0.1, 0.9, mat('#555b62', { metal: 0.7 }), 1.15, 3.2, -0.2); cyl(g, 0.16, 0.1, 0.1, mat(C.dark), 1.15, 3.7, -0.2)
     box(g, 0.5, 0.18, 0.18, mat(C.red), -1.6, 0.35, 0.72); return g },
   ups: () => { const g = new THREE.Group(), b = mat('#3b4048', { rough: 0.5 })
-    box(g, 0.8, 1.8, 0.8, b, -0.42, 0.9, 0); box(g, 0.8, 1.8, 0.8, mat('#444b54'), 0.42, 0.9, 0); screen(g, 0.3, 0.14, -0.42, 1.5, 0.402, '#38d6ff'); louvers(g, 8, 0.6, -0.42, 0.4, 0.07, 0.402, mat('#111'))
+    box(g, 0.8, 1.8, 0.8, b, -0.42, 0.9, 0); box(g, 0.8, 1.8, 0.8, mat('#444b54'), 0.42, 0.9, 0); screen(g, 0.3, 0.14, -0.42, 1.5, 0.402, '#9aa2ff'); louvers(g, 8, 0.6, -0.42, 0.4, 0.07, 0.402, mat('#111'))
     ;[-0.5, -0.4, -0.3].forEach((x, i) => led(g, x, 1.3, 0.402, ['#35e07c', '#35e07c', '#ffd166'][i])); seams(g, [0.42], 1.7, 0.9, 0.402); handle(g, 0.7, 0.9, 0.41); return g },
   'solar-inverter': () => { const g = new THREE.Group()
     box(g, 0.62, 0.82, 0.18, mat('#eef0f1'), 0, 0.41, 0); for (let i = 0; i < 8; i++) box(g, 0.5, 0.012, 0.1, mat('#9aa1a7'), 0, 0.15 + i * 0.085, -0.13); screen(g, 0.3, 0.12, 0, 0.62, 0.095, '#ffd166'); led(g, -0.2, 0.3, 0.095); led(g, -0.14, 0.3, 0.095, '#ffd166'); return g },
@@ -53,7 +53,7 @@ const B: Record<string, () => G> = {
     box(g, 5.2, 0.36, 2.3, mat(C.darker), 0, 0.18, 0); box(g, 5.0, 1.4, 2.1, b, 0, 1.06, 0)
     for (const z of [1.07, -1.07]) box(g, 4.8, 1.25, 0.05, mat('#20262d', { rough: 0.9 }), 0, 1.08, z)
     box(g, 5.04, 0.12, 2.14, mat('#8f9aa3'), 0, 1.82, 0); [-1.7, 0, 1.7].forEach((x) => { cyl(g, 0.78, 0.78, 0.24, mat('#aab3ba', { metal: 0.5 }), x, 1.95, 0, 0, 0, 0, 32); fan(g, x, 1.99, 0, 0.72, spin) })
-    box(g, 0.1, 0.9, 1.0, mat('#c1c9ce'), 2.55, 1.0, 0); screen(g, 0.01, 0.2, 2.61, 1.2, 0.1, '#38d6ff'); cyl(g, 0.1, 0.1, 0.5, mat('#2c6fd0'), 2.78, 0.55, -0.45, 0, 0, Math.PI / 2); cyl(g, 0.1, 0.1, 0.5, mat('#d0402c'), 2.78, 0.55, 0.45, 0, 0, Math.PI / 2)
+    box(g, 0.1, 0.9, 1.0, mat('#c1c9ce'), 2.55, 1.0, 0); screen(g, 0.01, 0.2, 2.61, 1.2, 0.1, '#9aa2ff'); cyl(g, 0.1, 0.1, 0.5, mat('#2c6fd0'), 2.78, 0.55, -0.45, 0, 0, Math.PI / 2); cyl(g, 0.1, 0.1, 0.5, mat('#d0402c'), 2.78, 0.55, 0.45, 0, 0, Math.PI / 2)
     g.userData.spin = spin; return g },
   ahu: () => { const g = new THREE.Group(), b = mat('#d6dce0', { rough: 0.5 })
     box(g, 4.2, 0.2, 1.7, mat('#29517e'), 0, 0.1, 0); box(g, 4.0, 1.5, 1.5, b, 0, 0.95, 0); box(g, 4.04, 0.06, 1.54, mat('#a9b2b9'), 0, 1.73, 0); seams(g, [-1.3, -0.3, 0.9], 1.45, 0.95, 0.752)
@@ -65,7 +65,7 @@ const B: Record<string, () => G> = {
     led(g, 0.26, 0.0, 0.26, '#35e07c', 0.01); void s; return g },
   vrf: () => { const g = new THREE.Group()
     box(g, 1.0, 0.3, 0.22, mat(C.white, { rough: 0.35 }), 0, 0.15, 0); box(g, 0.92, 0.03, 0.12, mat('#d3d7da'), 0, 0.03, 0.1); const f = box(g, 0.9, 0.012, 0.1, mat('#c9ced1'), 0, 0.02, 0.16); f.rotation.x = -0.5
-    screen(g, 0.1, 0.03, 0.38, 0.22, 0.112, '#38d6ff'); led(g, 0.45, 0.22, 0.112, '#35e07c', 0.008); return g },
+    screen(g, 0.1, 0.03, 0.38, 0.22, 0.112, '#9aa2ff'); led(g, 0.45, 0.22, 0.112, '#35e07c', 0.008); return g },
   'exhaust-fan': () => { const g = new THREE.Group(), s: THREE.Object3D[] = []
     cyl(g, 0.5, 0.5, 0.3, mat('#c3c9ce', { metal: 0.4 }), 0, 0.15, 0, Math.PI / 2, 0, 0, 32); for (const r of [0.2, 0.32, 0.44]) mk(g, new THREE.TorusGeometry(r, 0.012, 6, 32), mat('#565d64', { metal: 0.6 }), 0, 0.15, 0.16); fan(g, 0, 0.15, 0.04, 0.42, s); (s[0] as THREE.Group).rotation.x = Math.PI / 2; return g },
   'temp-sensor': () => { const g = new THREE.Group()
@@ -74,11 +74,11 @@ const B: Record<string, () => G> = {
     box(g, 0.17, 0.11, 0.05, mat(C.white), 0, 0.055, 0); for (let i = 0; i < 5; i++) box(g, 0.1, 0.004, 0.006, mat('#9aa0a5'), 0, 0.03 + i * 0.01, 0.026); box(g, 0.12, 0.012, 0.006, mat('#35e07c', { emissive: '#35e07c', ei: 1.5 }), 0, 0.095, 0.026); return g },
   'access-door': () => { const g = new THREE.Group()
     box(g, 1.2, 2.25, 0.16, mat('#8e969c', { metal: 0.5 }), 0, 1.125, 0); box(g, 0.94, 2.1, 0.06, mat('#8a5a3a', { rough: 0.7 }), 0, 1.05, 0.04); handle(g, 0.36, 1.0, 0.1); box(g, 0.5, 0.08, 0.06, mat('#111', { metal: 0.6 }), 0, 2.16, 0.1)
-    box(g, 0.12, 0.2, 0.04, mat('#15181d'), 0.78, 1.25, 0.04); led(g, 0.78, 1.3, 0.065, '#38d6ff'); box(g, 0.07, 0.07, 0.03, mat('#2f9e5b'), 0.78, 1.08, 0.05); return g },
+    box(g, 0.12, 0.2, 0.04, mat('#15181d'), 0.78, 1.25, 0.04); led(g, 0.78, 1.3, 0.065, '#9aa2ff'); box(g, 0.07, 0.07, 0.03, mat('#2f9e5b'), 0.78, 1.08, 0.05); return g },
   'rfid-reader': () => { const g = new THREE.Group()
-    box(g, 0.1, 0.16, 0.03, mat('#15181d'), 0, 0.08, 0); mk(g, new THREE.TorusGeometry(0.03, 0.006, 6, 20), mat('#38d6ff', { emissive: '#38d6ff', ei: 1.8 }), 0, 0.09, 0.017); return g },
+    box(g, 0.1, 0.16, 0.03, mat('#15181d'), 0, 0.08, 0); mk(g, new THREE.TorusGeometry(0.03, 0.006, 6, 20), mat('#9aa2ff', { emissive: '#9aa2ff', ei: 1.8 }), 0, 0.09, 0.017); return g },
   biometric: () => { const g = new THREE.Group(), p = box(g, 0.14, 0.22, 0.04, mat('#15181d'), 0, 0.11, 0); p.rotation.x = -0.12
-    screen(g, 0.1, 0.07, 0, 0.16, 0.022, '#38d6ff'); mk(g, new THREE.CylinderGeometry(0.025, 0.025, 0.006, 16), mat('#2a5a7a', { emissive: '#38d6ff', ei: 0.7 }), 0, 0.07, 0.022, Math.PI / 2); return g },
+    screen(g, 0.1, 0.07, 0, 0.16, 0.022, '#9aa2ff'); mk(g, new THREE.CylinderGeometry(0.025, 0.025, 0.006, 16), mat('#2a5a7a', { emissive: '#9aa2ff', ei: 0.7 }), 0, 0.07, 0.022, Math.PI / 2); return g },
   pump: () => { const g = new THREE.Group(), blue = mat(C.blue, { rough: 0.4, metal: 0.25 }), pipe = mat('#8f979d', { metal: 0.7, rough: 0.35 })
     box(g, 1.5, 0.08, 0.55, mat(C.darker), 0.05, 0.04, 0); cyl(g, 0.24, 0.24, 0.8, blue, 0.5, 0.42, 0, 0, 0, Math.PI / 2); cyl(g, 0.26, 0.26, 0.08, mat('#3b78c4'), 0.12, 0.42, 0, 0, 0, Math.PI / 2)
     for (let i = 0; i < 6; i++) box(g, 0.012, 0.4, 0.5, mat('#164b86'), 0.2 + i * 0.12, 0.42, 0); cyl(g, 0.33, 0.33, 0.24, mat('#3d444b', { metal: 0.6, rough: 0.4 }), -0.15, 0.42, 0, 0, 0, Math.PI / 2, 28)
@@ -90,7 +90,7 @@ const B: Record<string, () => G> = {
   'flow-meter': () => { const g = new THREE.Group(), pipe = mat('#8f979d', { metal: 0.7, rough: 0.35 })
     cyl(g, 0.12, 0.12, 1.1, pipe, 0, 0.3, 0, 0, 0, Math.PI / 2); for (const x of [-0.38, 0.38]) cyl(g, 0.19, 0.19, 0.05, pipe, x, 0.3, 0, 0, 0, Math.PI / 2); cyl(g, 0.08, 0.08, 0.2, mat('#2c3037'), 0, 0.5, 0); box(g, 0.22, 0.2, 0.14, mat('#1f2933'), 0, 0.68, 0); screen(g, 0.16, 0.07, 0, 0.7, 0.075, '#7dff9f'); return g },
   'leak-sensor': () => { const g = new THREE.Group()
-    cyl(g, 0.06, 0.06, 0.03, mat('#f0c400'), 0, 0.015, 0); for (const x of [-0.025, 0.025]) cyl(g, 0.004, 0.004, 0.03, mat('#cfcfcf', { metal: 0.9 }), x, 0.0, 0.03); led(g, 0, 0.034, 0, '#38d6ff', 0.008); return g },
+    cyl(g, 0.06, 0.06, 0.03, mat('#f0c400'), 0, 0.015, 0); for (const x of [-0.025, 0.025]) cyl(g, 0.004, 0.004, 0.03, mat('#cfcfcf', { metal: 0.9 }), x, 0.0, 0.03); led(g, 0, 0.034, 0, '#9aa2ff', 0.008); return g },
   stp: () => { const g = new THREE.Group()
     cyl(g, 0.9, 0.9, 1.9, mat('#a9c4b4'), -0.6, 0.95, 0, 0, 0, 0, 36); cyl(g, 0.9, 0.9, 1.9, mat('#9cb8a8'), 1.2, 0.95, 0, 0, 0, 0, 36); box(g, 0.8, 0.7, 0.8, mat(C.green), 0.3, 0.35, 1.3); cyl(g, 0.07, 0.07, 1.6, mat('#8f979d', { metal: 0.7 }), 0.3, 0.9, 0.2, 0, 0, Math.PI / 2); box(g, 2.6, 0.04, 0.5, mat('#777'), 0.3, 1.95, 0); return g },
   elevator: () => { const g = new THREE.Group(), st = mat('#c9ced2', { metal: 0.85, rough: 0.28 })

@@ -5,7 +5,7 @@ export type Device = { id: string; name: string; group: Group; icon: string; kin
 
 export const groups: { id: Group; blurb: string; color: string }[] = [
   { id: 'Lighting', blurb: 'The right light, when and where it is needed.', color: '#ffd166' },
-  { id: 'Air Conditioning', blurb: 'Comfort that adjusts itself.', color: '#5ee1ff' },
+  { id: 'Air Conditioning', blurb: 'Comfort that adjusts itself.', color: '#a5b4fc' },
   { id: 'Curtains', blurb: 'Open the day, close the night.', color: '#c9a7ff' },
   { id: 'Security', blurb: 'Unified security, always watching.', color: '#ff7a7a' },
   { id: 'Energy', blurb: 'See it, save it.', color: '#7dff9f' },
@@ -133,6 +133,6 @@ export function bill(rooms: Room[]) {
 export const statusLabel: Record<string, string> = { draft: 'Draft', submitted: 'Sent to TAC', quoted: 'Quote ready', accepted: 'Accepted', rejected: 'Declined' }
 export const statusStyle: Record<string, string> = {
   draft: 'border-white/20 bg-white/5 text-silver', submitted: 'border-amber-300/40 bg-amber-400/10 text-amber-300',
-  quoted: 'border-cyan/40 bg-cyan/15 text-cyan', accepted: 'border-emerald-300/40 bg-emerald-400/10 text-emerald-300', rejected: 'border-red-400/40 bg-red-500/10 text-red-300',
+  quoted: 'border-accent/40 bg-accent/15 text-accent', accepted: 'border-emerald-300/40 bg-emerald-400/10 text-emerald-300', rejected: 'border-red-400/40 bg-red-500/10 text-red-300',
 }
 export const aed = (n: number) => `AED ${n.toLocaleString('en-AE', { maximumFractionDigits: 2 })}`

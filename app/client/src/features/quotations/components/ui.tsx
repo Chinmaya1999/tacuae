@@ -1,25 +1,25 @@
 import { useState, type ReactNode } from 'react'
 import { money, day, pretty, type Fx, type Pricing, type Quote, type QuoteStatus } from '../lib/quote'
 
-export const field = 'w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate focus:border-cyan [&>option]:bg-deep'
+export const field = 'w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate focus:border-accent [&>option]:bg-deep'
 export const label = 'mb-1.5 block text-xs uppercase tracking-[0.14em] text-silver'
 export const card = 'rounded-2xl border border-white/10 bg-white/[.03] p-5'
-export const small = 'rounded-full border border-white/20 px-4 py-2 text-sm text-silver transition hover:border-cyan hover:text-cyan disabled:opacity-40'
+export const small = 'rounded-full border border-white/20 px-4 py-2 text-sm text-silver transition hover:border-accent hover:text-accent disabled:opacity-40'
 
 export const Field = ({ name, children }: { name: string; children: ReactNode }) => <label className="block"><span className={label}>{name}</span>{children}</label>
 
 export const Choice = ({ on, onClick, children, className = '' }: { on: boolean; onClick: () => void; children: ReactNode; className?: string }) => (
-  <button type="button" aria-pressed={on} onClick={onClick} className={`rounded-xl border px-4 py-3 text-left text-sm transition ${on ? 'border-cyan bg-cyan/10 text-white' : 'border-white/15 text-silver hover:border-white/40'} ${className}`}>{children}</button>
+  <button type="button" aria-pressed={on} onClick={onClick} className={`rounded-xl border px-4 py-3 text-left text-sm transition ${on ? 'border-accent bg-accent/10 text-white' : 'border-white/15 text-silver hover:border-white/40'} ${className}`}>{children}</button>
 )
 
 export function Stepper({ value, onChange, label: l, min = 0, max = 99 }: { value: number; onChange: (n: number) => void; label: string; min?: number; max?: number }) {
-  const b = 'grid h-8 w-8 place-items-center rounded-lg border border-white/15 text-silver hover:border-cyan hover:text-cyan disabled:opacity-30'
+  const b = 'grid h-8 w-8 place-items-center rounded-lg border border-white/15 text-silver hover:border-accent hover:text-accent disabled:opacity-30'
   return <span className="inline-flex items-center gap-2"><button type="button" className={b} disabled={value <= min} onClick={() => onChange(value - 1)} aria-label={`Fewer: ${l}`}>−</button><span className="w-6 text-center tabular-nums">{value}</span><button type="button" className={b} disabled={value >= max} onClick={() => onChange(value + 1)} aria-label={`More: ${l}`}>+</button></span>
 }
 
 const STATUS: Record<QuoteStatus, [string, string]> = {
-  draft: ['Draft', 'border-white/20 text-silver'], shared: ['Shared', 'border-azure/50 text-ice'], revision_requested: ['With TAC / revision', 'border-amber-300/40 text-amber-300'],
-  reviewed: ['TAC reviewed', 'border-cyan/40 text-cyan'], final: ['Final quotation', 'border-cyan bg-cyan/15 text-cyan'], accepted: ['Accepted', 'border-emerald-300/40 text-emerald-300'], survey: ['Site survey', 'border-emerald-300/40 text-emerald-300'],
+  draft: ['Draft', 'border-white/20 text-silver'], shared: ['Shared', 'border-brand/50 text-ice'], revision_requested: ['With TAC / revision', 'border-amber-300/40 text-amber-300'],
+  reviewed: ['TAC reviewed', 'border-accent/40 text-accent'], final: ['Final quotation', 'border-accent bg-accent/15 text-accent'], accepted: ['Accepted', 'border-emerald-300/40 text-emerald-300'], survey: ['Site survey', 'border-emerald-300/40 text-emerald-300'],
 }
 export const statusText = (s: QuoteStatus) => STATUS[s][0]
 export const StatusPill = ({ s }: { s: QuoteStatus }) => <span className={`whitespace-nowrap rounded-full border px-3 py-0.5 text-xs ${STATUS[s][1]}`}>{STATUS[s][0]}</span>
@@ -49,7 +49,7 @@ export function PriceSummary({ pricing, fx }: { pricing: Pricing | null; fx?: Fx
   return (
     <div className="space-y-3">
       <div className="flex items-start justify-between gap-3">
-        <div><div className="text-xs uppercase tracking-[0.14em] text-silver">Total incl. VAT</div><div aria-live="polite" className="mt-1 font-display text-3xl tabular-nums text-cyan">{m(t.total)}</div></div>
+        <div><div className="text-xs uppercase tracking-[0.14em] text-silver">Total incl. VAT</div><div aria-live="polite" className="mt-1 font-display text-3xl tabular-nums text-accent">{m(t.total)}</div></div>
         {currencies.length > 1 && <select aria-label="Display currency" value={cur} onChange={(e) => setCur(e.target.value as typeof cur)} className={`${field} !w-auto no-print`}>{currencies.map((c) => <option key={c}>{c}</option>)}</select>}
       </div>
       {cur !== 'AED' && <p className="text-xs text-slate">Converted for display only{fx?.asOf ? ` (rate as of ${fx.asOf})` : ''}. Quotations are in AED.</p>}
@@ -89,7 +89,7 @@ export function QuoteDocument({ q, edit }: { q: Quote; edit?: Parameters<typeof 
   const p = q.input?.project
   return (
     <div className="space-y-5">
-      <div className={`rounded-xl border px-4 py-3 text-sm ${q.indicative ? 'border-amber-300/40 bg-amber-400/10 text-amber-200' : 'border-cyan/40 bg-cyan/10 text-ice'}`}>
+      <div className={`rounded-xl border px-4 py-3 text-sm ${q.indicative ? 'border-amber-300/40 bg-amber-400/10 text-amber-200' : 'border-accent/40 bg-accent/10 text-ice'}`}>
         {q.indicative ? 'Indicative quotation — subject to site survey.' : 'Final quotation issued by TAC.'}
         {q.validUntil && <> Valid until <b>{day(q.validUntil)}</b>{q.expired && ' (expired)'}.</>}
         {q.trn ? <> TAC TRN: {q.trn}.</> : null}

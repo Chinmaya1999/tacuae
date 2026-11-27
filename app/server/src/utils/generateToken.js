@@ -17,8 +17,8 @@ function getSecret() {
 const b64 = (b) => Buffer.from(b).toString('base64url')
 const sign = (p) => crypto.createHmac('sha256', getSecret()).update(p).digest('base64url')
 
-export function generateToken(user) {
-  const p = b64(JSON.stringify({ uid: String(user._id), role: user.role, v: user.pwChangedAt, sid: crypto.randomBytes(12).toString('base64url'), exp: Date.now() + SESSION_MS }))
+export function generateToken(user, lifetime = SESSION_MS) {
+  const p = b64(JSON.stringify({ uid: String(user._id), role: user.role, v: user.pwChangedAt, sid: crypto.randomBytes(12).toString('base64url'), exp: Date.now() + lifetime }))
   return `${p}.${sign(p)}`
 }
 export function verifyToken(tok) {
@@ -34,5 +34,6 @@ export function verifyToken(tok) {
   } catch { return null }
 }
 export const parseCookies = (h = '') => Object.fromEntries(h.split(';').map((c) => c.trim().split('=')).filter((x) => x[0]).map(([k, ...v]) => [k, v.join('=')]))
-export const sessionCookie = (token, secure) => `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${SESSION_MS / 1000}${secure ? '; Secure' : ''}`
+/** `lifetime` null gives a cookie the browser drops when it closes. */
+export const sessionCookie = (token, secure, lifetime = SESSION_MS) => `${SESSION_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict${lifetime ? `; Max-Age=${lifetime / 1000}` : ''}${secure ? '; Secure' : ''}`
 export const clearSessionCookie = (secure) => `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0${secure ? '; Secure' : ''}`

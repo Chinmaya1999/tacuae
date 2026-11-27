@@ -17,15 +17,14 @@ export default function PhoneSignIn({ role = 'customer' }: { role?: Role }) {
   }
   const create = () => { setErr(''); setBusy(true); enter(token, { name, email }).catch((e) => setErr(e.message)).finally(() => setBusy(false)) }
   return (
-    <div className="mt-6 space-y-3">
-      <div className="flex items-center gap-3 text-xs text-slate"><span className="h-px flex-1 bg-white/10" /><span>or use your mobile number</span><span className="h-px flex-1 bg-white/10" /></div>
+    <div className="space-y-3">
       {!token ? <PhoneCode config={config} onToken={(t) => enter(t)} /> : <div className="space-y-3">
-        <p role="status" className="text-sm text-silver">Number verified. Add your details to create your account.</p>
+        <p role="status" className="text-sm text-slate">Number verified. Add your details to create your account.</p>
         <TextField id="phn" label="Full name" icon={UserIcon} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />
         <TextField id="phe" label="Email" icon={Mail} type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
         <ErrorNote text={err} />
         <button type="button" className="btn btn-primary w-full justify-center disabled:opacity-75" disabled={busy || name.trim().length < 2 || !email.includes('@')} onClick={create}>Create account</button>
-        <button type="button" className="w-full text-sm text-silver hover:text-cyan" onClick={() => { setToken(''); setErr('') }}>Use a different number</button>
+        <button type="button" className="w-full py-2 text-sm font-medium text-slate hover:text-brand" onClick={() => { setToken(''); setErr('') }}>Use a different number</button>
       </div>}
     </div>
   )

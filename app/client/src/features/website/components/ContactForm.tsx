@@ -33,7 +33,7 @@ export default function ContactForm({ dark = true }: { dark?: boolean }) {
     } catch { setState('fail') }
   }
 
-  const base = `w-full rounded-xl border px-4 py-3.5 text-sm outline-none transition focus:border-cyan ${dark ? 'bg-white/5 border-white/15 text-white placeholder:text-slate' : 'bg-white border-slate/30 text-midnight'}`
+  const base = `w-full rounded-xl border px-4 py-3.5 text-sm outline-none transition focus:border-accent ${dark ? 'bg-white/5 border-white/15 text-white placeholder:text-slate' : 'bg-white border-slate/30 text-midnight'}`
   const set = (k: keyof F) => (e: { target: { value: string } }) => setF({ ...f, [k]: e.target.value })
   const field = (k: keyof F, label: string, type = 'text', req = false) => (
     <div>
@@ -44,11 +44,11 @@ export default function ContactForm({ dark = true }: { dark?: boolean }) {
   )
 
   if (state === 'ok') return (
-    <div role="status" className={`rounded-2xl border p-10 text-center ${dark ? 'border-cyan/30 bg-cyan/5' : 'border-azure/30 bg-white'}`}>
-      <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-cyan text-midnight"><Check /></div>
+    <div role="status" className={`rounded-2xl border p-10 text-center ${dark ? 'border-accent/30 bg-accent/5' : 'border-brand/30 bg-white'}`}>
+      <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-accent text-midnight"><Check /></div>
       <h3 className="font-display text-2xl">Thank you — we’ve received your enquiry.</h3>
       <p className="mt-2 text-silver">Our team will get back to you shortly.</p>
-      <button className="mt-6 text-cyan link-u" onClick={() => setState('idle')}>Send another enquiry</button>
+      <button className="mt-6 text-accent link-u" onClick={() => setState('idle')}>Send another enquiry</button>
     </div>
   )
 

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 // Illustrative, conceptual animations of what each product type does in a KNX system.
 // They are NOT product photos or specifications.
-const C = '#00D5FF', B = '#268BFF', I = '#A5E8FF', S = '#65758B'
+const C = '#8b93ff', B = '#6366f1', I = '#c7d2fe', S = '#65758B'
 const d = (n: number) => ({ animationDelay: `${n * 0.3}s` })
 
 const Bulb = ({ x, y, delay = 0 }: { x: number; y: number; delay?: number }) => (
@@ -13,7 +13,7 @@ const Bulb = ({ x, y, delay = 0 }: { x: number; y: number; delay?: number }) => 
   </g>
 )
 const Box = ({ x, y, w, h, label }: { x: number; y: number; w: number; h: number; label?: string }) => (
-  <g><rect x={x} y={y} width={w} height={h} rx="5" fill="#13213a" stroke={C} strokeOpacity=".6" />
+  <g><rect x={x} y={y} width={w} height={h} rx="5" fill="#1b2340" stroke={C} strokeOpacity=".6" />
     {label && <text x={x + w / 2} y={y + h / 2 + 3} textAnchor="middle" fontSize="8" fill={I} fontFamily="Sora">{label}</text>}</g>
 )
 const Led = ({ x, y, delay = 0, c = C }: { x: number | string; y: number | string; delay?: number; c?: string }) => <circle cx={x} cy={y} r="2.5" fill={c} className="a-blink" style={d(delay)} />
@@ -26,30 +26,30 @@ const scenes: Record<string, ReactNode> = {
     {[0, 1, 2, 3, 4, 5, 6].map((i) => <rect key={i} x={110 + i * 12} y="40" width="7" height="70" rx="2" fill={i % 2 ? B : C} className="a-bar" style={{ animationDelay: `${i * 0.13}s` }} />)}
   </>),
   'rack-mount-type': (<>
-    {[0, 1, 2].map((i) => <g key={i}><rect x="30" y={30 + i * 32} width="140" height="26" rx="3" fill="#13213a" stroke={C} strokeOpacity=".5" />
+    {[0, 1, 2].map((i) => <g key={i}><rect x="30" y={30 + i * 32} width="140" height="26" rx="3" fill="#1b2340" stroke={C} strokeOpacity=".5" />
       {[0, 1, 2, 3].map((j) => <Led key={j} x={46 + j * 12} y={43 + i * 32} delay={i + j} />)}
-      <rect x="120" y={38 + i * 32} width="40" height="10" rx="2" fill="#0b1728" /></g>)}
+      <rect x="120" y={38 + i * 32} width="40" height="10" rx="2" fill="#101828" /></g>)}
     <Flow d="M170 43 H190 M170 75 H190 M170 107 H190" />
   </>),
   'envision-touch-server': (<>
-    <rect x="35" y="22" width="130" height="96" rx="8" fill="#0b1728" stroke={C} />
+    <rect x="35" y="22" width="130" height="96" rx="8" fill="#101828" stroke={C} />
     {[0, 1, 2, 3, 4, 5].map((i) => <rect key={i} x={46 + (i % 3) * 38} y={34 + Math.floor(i / 3) * 40} width="32" height="32" rx="6" fill={B} className="a-glow" style={d(i)} />)}
     <circle cx="62" cy="50" r="6" fill="none" stroke="#fff" className="a-ripple" style={{ animationDuration: '3s' }} />
   </>),
   'compact-and-compactdin': (<>
     <rect x="15" y="92" width="170" height="8" fill={S} />
-    {[0, 1, 2].map((i) => <g key={i}><rect x={28 + i * 54} y="36" width="46" height="62" rx="4" fill="#13213a" stroke={C} strokeOpacity=".6" />
-      <Led x={38 + i * 54} y="48" delay={i * 2} /><Led x={50 + i * 54} y="48" delay={i * 2 + 1} c="#7CFFB2" /><rect x={36 + i * 54} y="62" width="30" height="20" rx="2" fill="#0b1728" /></g>)}
+    {[0, 1, 2].map((i) => <g key={i}><rect x={28 + i * 54} y="36" width="46" height="62" rx="4" fill="#1b2340" stroke={C} strokeOpacity=".6" />
+      <Led x={38 + i * 54} y="48" delay={i * 2} /><Led x={50 + i * 54} y="48" delay={i * 2 + 1} c="#7CFFB2" /><rect x={36 + i * 54} y="62" width="30" height="20" rx="2" fill="#101828" /></g>)}
     <Flow d="M20 112 H180" />
   </>),
   'micro-and-microdin': (<>
     <rect x="15" y="86" width="170" height="6" fill={S} />
-    {[0, 1, 2, 3].map((i) => <g key={i}><rect x={24 + i * 41} y="50" width="32" height="40" rx="4" fill="#13213a" stroke={C} strokeOpacity=".6" /><Led x={40 + i * 41} y="60" delay={i} /></g>)}
+    {[0, 1, 2, 3].map((i) => <g key={i}><rect x={24 + i * 41} y="50" width="32" height="40" rx="4" fill="#1b2340" stroke={C} strokeOpacity=".6" /><Led x={40 + i * 41} y="60" delay={i} /></g>)}
     <circle cx="40" cy="108" r="3.5" fill={C} className="a-hop" style={{ '--dx': '120px' } as React.CSSProperties} /><Flow d="M30 108 H170" />
   </>),
   'knx-cable': (<>
     <path d="M20 90 C 60 20, 100 160, 140 70 S 180 50, 185 60" fill="none" stroke={S} strokeWidth="10" strokeLinecap="round" />
-    <path d="M20 90 C 60 20, 100 160, 140 70 S 180 50, 185 60" fill="none" stroke="#0b1728" strokeWidth="6" strokeLinecap="round" />
+    <path d="M20 90 C 60 20, 100 160, 140 70 S 180 50, 185 60" fill="none" stroke="#101828" strokeWidth="6" strokeLinecap="round" />
     <path d="M20 90 C 60 20, 100 160, 140 70 S 180 50, 185 60" fill="none" stroke={C} strokeWidth="2" strokeLinecap="round" className="a-flow" />
     <circle cx="20" cy="90" r="7" fill={B} /><circle cx="185" cy="60" r="7" fill={C} className="a-glow" />
   </>),
@@ -66,7 +66,7 @@ const scenes: Record<string, ReactNode> = {
     {[0, 1, 2, 3].map((i) => <circle key={i} cx="160" cy={52 + i * 14} r="5" fill={i === 3 ? '#ffb347' : B} className="a-blink" style={d(i)} />)}
   </>),
   '160ma-flush-power-supply': (<>
-    <circle cx="70" cy="70" r="32" fill="#13213a" stroke={C} /><circle cx="70" cy="70" r="14" fill="#0b1728" stroke={I} />
+    <circle cx="70" cy="70" r="32" fill="#1b2340" stroke={C} /><circle cx="70" cy="70" r="14" fill="#101828" stroke={I} />
     <circle cx="70" cy="70" r="14" fill="none" stroke={C} className="a-ripple" /><circle cx="70" cy="70" r="14" fill="none" stroke={C} className="a-ripple" style={d(3)} />
     <Flow d="M105 70 H185" />
   </>),
@@ -88,9 +88,9 @@ const scenes: Record<string, ReactNode> = {
 export default function ProductAnim({ slug, className = '' }: { slug: string; className?: string }) {
   return (
     <svg viewBox="0 0 200 140" className={`sv h-full w-full ${className}`} role="img" aria-label="Illustrative animation of the product function">
-      <defs><radialGradient id="pg"><stop offset="0" stopColor="#0f2a4a" /><stop offset="1" stopColor="#07111f" /></radialGradient></defs>
+      <defs><radialGradient id="pg"><stop offset="0" stopColor="#232a55" /><stop offset="1" stopColor="#0b1020" /></radialGradient></defs>
       <rect width="200" height="140" fill="url(#pg)" />
-      <g stroke="#00D5FF" strokeOpacity=".08">{[...Array(10)].map((_, i) => <path key={i} d={`M${i * 22} 0V140M0 ${i * 16}H200`} />)}</g>
+      <g stroke="#8b93ff" strokeOpacity=".08">{[...Array(10)].map((_, i) => <path key={i} d={`M${i * 22} 0V140M0 ${i * 16}H200`} />)}</g>
       {scenes[slug] ?? null}
     </svg>
   )

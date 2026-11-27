@@ -76,15 +76,15 @@ export default function Assistant() {
       {open && <section aria-label="Assistant" className="mb-3 flex h-[460px] max-h-[70vh] w-[min(370px,92vw)] flex-col rounded-2xl border border-white/15 bg-deep shadow-2xl">
         <header className="flex items-center justify-between border-b border-white/10 px-4 py-3"><div><div className="font-display text-sm">TAC assistant</div><div className="text-xs text-amber-300">Demo — scripted, not AI</div></div><button onClick={() => setOpen(false)} aria-label="Close"><X size={18} /></button></header>
         <div className="flex-1 space-y-3 overflow-y-auto p-3 text-sm" aria-live="polite">
-          {msgs.map((m, i) => <div key={i} dir="auto" className={`max-w-[88%] rounded-2xl px-3 py-2 ${m.me ? 'ml-auto bg-cyan/20' : 'bg-white/5'}`}>{m.text}
-            {m.change && i === msgs.length - 1 && <div className="mt-2 flex gap-2"><button className="rounded-full bg-cyan px-3 py-1 text-xs text-midnight" onClick={() => apply(i, m.change!)}>Apply</button><button className="rounded-full border border-white/20 px-3 py-1 text-xs" onClick={() => setMsgs((x) => x.map((y, j) => (j === i ? { ...y, change: undefined } : y)))}>No thanks</button></div>}
-            {m.book && <Link to="/book" onClick={() => setOpen(false)} className="mt-2 block text-cyan underline">Book now</Link>}</div>)}
+          {msgs.map((m, i) => <div key={i} dir="auto" className={`max-w-[88%] rounded-2xl px-3 py-2 ${m.me ? 'ml-auto bg-accent/20' : 'bg-white/5'}`}>{m.text}
+            {m.change && i === msgs.length - 1 && <div className="mt-2 flex gap-2"><button className="rounded-full bg-accent px-3 py-1 text-xs text-midnight" onClick={() => apply(i, m.change!)}>Apply</button><button className="rounded-full border border-white/20 px-3 py-1 text-xs" onClick={() => setMsgs((x) => x.map((y, j) => (j === i ? { ...y, change: undefined } : y)))}>No thanks</button></div>}
+            {m.book && <Link to="/book" onClick={() => setOpen(false)} className="mt-2 block text-accent underline">Book now</Link>}</div>)}
           <div ref={end} />
         </div>
-        <div className="flex flex-wrap gap-1.5 px-3 pb-2">{['Add blinds to all bedrooms', 'How much is my design?', 'أضف ستائر إلى غرف النوم'].map((s) => <button key={s} dir="auto" onClick={() => ask(s)} className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-silver hover:text-cyan">{s}</button>)}</div>
-        <form onSubmit={(e: FormEvent) => { e.preventDefault(); ask(text) }} className="flex gap-2 border-t border-white/10 p-3"><input aria-label="Message" dir="auto" value={text} onChange={(e) => setText(e.target.value)} placeholder="Type a message…" className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm outline-none focus:border-cyan" /><button aria-label="Send" disabled={busy} className="rounded-xl bg-cyan px-3 text-midnight disabled:opacity-50"><Send size={16} /></button></form>
+        <div className="flex flex-wrap gap-1.5 px-3 pb-2">{['Add blinds to all bedrooms', 'How much is my design?', 'أضف ستائر إلى غرف النوم'].map((s) => <button key={s} dir="auto" onClick={() => ask(s)} className="rounded-full border border-white/15 px-2.5 py-1 text-xs text-silver hover:text-accent">{s}</button>)}</div>
+        <form onSubmit={(e: FormEvent) => { e.preventDefault(); ask(text) }} className="flex gap-2 border-t border-white/10 p-3"><input aria-label="Message" dir="auto" value={text} onChange={(e) => setText(e.target.value)} placeholder="Type a message…" className="min-w-0 flex-1 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm outline-none focus:border-accent" /><button aria-label="Send" disabled={busy} className="rounded-xl bg-accent px-3 text-midnight disabled:opacity-50"><Send size={16} /></button></form>
       </section>}
-      <button onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Open the assistant" className="ml-auto grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-cyan to-azure text-midnight shadow-lg shadow-cyan/30"><MessageCircle size={24} /></button>
+      <button onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Open the assistant" className="ml-auto grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-brand to-primary text-white shadow-lg shadow-accent/30"><MessageCircle size={24} /></button>
     </div>
   )
 }

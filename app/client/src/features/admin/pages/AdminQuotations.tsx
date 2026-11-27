@@ -22,15 +22,15 @@ export default function QuotationsAdmin() {
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">{(['revision_requested', 'shared', 'final', 'accepted'] as QuoteStatus[]).map((s) => <div key={s} className={card}><div className="text-xs uppercase tracking-[0.14em] text-silver">{statusText(s)}</div><div className="mt-1 font-display text-3xl tabular-nums">{data?.summary[s]?.count ?? 0}</div><div className="text-xs text-slate">{money(data?.summary[s]?.value ?? 0)}</div></div>)}</div>
       <div className="flex flex-wrap items-center gap-3">
         <select aria-label="Filter by status" value={status} onChange={(e) => setStatus(e.target.value)} className={`${field} !w-auto`}><option value="">All statuses</option>{STATUSES.map((s) => <option key={s} value={s}>{statusText(s)}</option>)}</select>
-        <label className="flex items-center gap-2 text-sm text-silver"><input type="checkbox" className="h-4 w-4 accent-cyan" checked={mine} onChange={(e) => setMine(e.target.checked)} />Assigned to me</label>
+        <label className="flex items-center gap-2 text-sm text-silver"><input type="checkbox" className="h-4 w-4 accent-accent" checked={mine} onChange={(e) => setMine(e.target.checked)} />Assigned to me</label>
       </div>
       {err && <p role="alert" className="text-red-400">{err}</p>}
-      {!data && !err && <Loader2 className="animate-spin text-cyan" />}
+      {!data && !err && <Loader2 className="animate-spin text-accent" />}
       {data?.items.length === 0 && <p className="rounded-2xl border border-dashed border-white/15 p-10 text-center text-silver">No quotations match.</p>}
-      <ul className="space-y-3">{data?.items.map((q) => <li key={q.id}><button onClick={() => setOpen(q.id)} className={`${card} flex w-full flex-wrap items-center gap-x-4 gap-y-2 text-left hover:border-cyan/50`}>
+      <ul className="space-y-3">{data?.items.map((q) => <li key={q.id}><button onClick={() => setOpen(q.id)} className={`${card} flex w-full flex-wrap items-center gap-x-4 gap-y-2 text-left hover:border-accent/50`}>
         <StatusPill s={q.status} />{q.needsApproval && <span className="rounded-full bg-amber-300 px-2 py-0.5 text-xs font-medium text-midnight">Discount approval</span>}
         <span className="font-display">{q.name}</span><span className="text-sm text-silver">{q.owner?.name}{q.owner?.company ? ` · ${q.owner.company}` : ''}</span><span className="text-xs text-slate">{q.ref} · {q.kind}</span>
-        <span className="ml-auto tabular-nums text-cyan">{money(q.total)}</span><span className="text-xs text-slate">{q.assignedTo || 'Unassigned'} · {day(q.updatedAt)}</span></button></li>)}</ul>
+        <span className="ml-auto tabular-nums text-accent">{money(q.total)}</span><span className="text-xs text-slate">{q.assignedTo || 'Unassigned'} · {day(q.updatedAt)}</span></button></li>)}</ul>
     </div>
   )
 }
@@ -47,14 +47,14 @@ function Detail({ id, team, back }: { id: string; team: Inbox['team']; back: () 
     setBusy(true); setErr('')
     try { apply((await api<{ item: Quote }>(url + path, { method, body })).item) } catch (e) { setErr((e as Error).message) } finally { setBusy(false) }
   }
-  if (!q) return err ? <p role="alert" className="text-red-400">{err}</p> : <Loader2 className="animate-spin text-cyan" />
+  if (!q) return err ? <p role="alert" className="text-red-400">{err}</p> : <Loader2 className="animate-spin text-accent" />
   const adjustable = ['draft', 'shared', 'revision_requested', 'reviewed'].includes(q.status)
   const pending = q.discount?.approval === 'pending'
   return (
     <div className="space-y-6">
-      <button onClick={back} className="no-print inline-flex items-center gap-2 text-sm text-silver hover:text-cyan"><ArrowLeft size={15} />All quotations</button>
+      <button onClick={back} className="no-print inline-flex items-center gap-2 text-sm text-silver hover:text-accent"><ArrowLeft size={15} />All quotations</button>
       <div className="flex flex-wrap items-center gap-3"><h1 className="font-display text-3xl">{q.name}</h1><StatusPill s={q.status} /><span className="text-sm text-slate">{q.ref} · v{q.version} · {q.segment} price list</span></div>
-      <p className="text-sm text-silver">{q.owner?.name} · <a className="text-cyan hover:underline" href={`mailto:${q.owner?.email}`}>{q.owner?.email}</a>{q.owner?.phone && <> · <a className="text-cyan hover:underline" href={`tel:${q.owner.phone.replace(/\s/g, '')}`}>{q.owner.phone}</a></>}{q.owner?.company && ` · ${q.owner.company}`}</p>
+      <p className="text-sm text-silver">{q.owner?.name} · <a className="text-accent hover:underline" href={`mailto:${q.owner?.email}`}>{q.owner?.email}</a>{q.owner?.phone && <> · <a className="text-accent hover:underline" href={`tel:${q.owner.phone.replace(/\s/g, '')}`}>{q.owner.phone}</a></>}{q.owner?.company && ` · ${q.owner.company}`}</p>
       {err && <p role="alert" className="text-sm text-red-400">{err}</p>}
       {pending && <div className="no-print flex flex-wrap items-center gap-3 rounded-xl border border-amber-300/40 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">{q.discount?.requestedBy} requested a {q.discount?.pct}% discount. It is not applied until an admin approves.
         {user?.role === 'admin' && <><button className={small} disabled={busy} onClick={() => send('/discount-decision', { approve: true })}>Approve</button><button className={small} disabled={busy} onClick={() => send('/discount-decision', { approve: false })}>Decline</button></>}</div>}

@@ -44,7 +44,7 @@ function Shell({ room }: { room: Room }) {
           <mesh position={[0, -h / 2 + 0.05, 0.012]}><boxGeometry args={[len, 0.1, 0.02]} /><meshStandardMaterial color="#ffffff" roughness={0.6} /></mesh>
           {k === 'back' && <group position={[0, 1.55 - h / 2, 0]}>
             <mesh position={[0, 0, 0.02]}><boxGeometry args={[gw + 0.12, 1.32, 0.04]} /><meshStandardMaterial color="#cfd5df" /></mesh>
-            <mesh position={[0, 0, 0.045]}><planeGeometry args={[gw, 1.2]} /><meshStandardMaterial color={night ? '#16234a' : '#bfe6ff'} emissive={night ? '#16234a' : '#bfe6ff'} emissiveIntensity={night ? 0.5 : 1.4} /></mesh>
+            <mesh position={[0, 0, 0.045]}><planeGeometry args={[gw, 1.2]} /><meshStandardMaterial color={night ? '#16234a' : '#d5dbff'} emissive={night ? '#16234a' : '#d5dbff'} emissiveIntensity={night ? 0.5 : 1.4} /></mesh>
           </group>}
           {k === 'right' && <mesh position={[0, 1.025 - h / 2, 0.03]} castShadow><boxGeometry args={[0.95, 2.05, 0.06]} /><meshStandardMaterial color="#6b5543" roughness={0.7} /></mesh>}
         </group>

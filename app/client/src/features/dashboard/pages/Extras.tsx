@@ -14,9 +14,9 @@ export function Appointments() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3 pr-14"><h1 className="font-display text-3xl">Appointments</h1><Link to="/book" className="btn btn-primary !py-2.5">Book a visit</Link></div>
       {err && <p role="alert" className="text-red-400">{err}</p>}
-      {!items && !err && <Loader2 className="animate-spin text-cyan" />}
+      {!items && !err && <Loader2 className="animate-spin text-accent" />}
       {items?.length === 0 && <p className="text-silver">Nothing booked yet.</p>}
-      <ul className="space-y-3">{items?.map((a) => <li key={a.id} className={`${card} flex flex-wrap items-center gap-4`}><b>{pretty(a.type)}</b><span>{a.date} · {a.slot}</span><span className="ml-auto rounded-full border border-cyan/40 px-3 py-0.5 text-xs text-cyan">{pretty(a.status)}</span></li>)}</ul>
+      <ul className="space-y-3">{items?.map((a) => <li key={a.id} className={`${card} flex flex-wrap items-center gap-4`}><b>{pretty(a.type)}</b><span>{a.date} · {a.slot}</span><span className="ml-auto rounded-full border border-accent/40 px-3 py-0.5 text-xs text-accent">{pretty(a.status)}</span></li>)}</ul>
     </div>
   )
 }
@@ -32,13 +32,13 @@ export function Team() {
     try { const d = await api<{ password: string }>('/api/team', { method: 'POST', body: f }); setMsg(`${f.email} added. Temporary password (shown once): ${d.password}`); setF({ ...f, name: '', email: '' }); load() } catch (x) { setErr((x as Error).message) }
   }
   const patch = (id: string, body: object) => api(`/api/team/${id}`, { method: 'PATCH', body }).then(load).catch((e) => setErr(e.message))
-  if (!data) return err ? <p role="alert" className="text-red-400">{err}</p> : <Loader2 className="animate-spin text-cyan" />
+  if (!data) return err ? <p role="alert" className="text-red-400">{err}</p> : <Loader2 className="animate-spin text-accent" />
   return (
     <div className="space-y-6">
       <div><h1 className="font-display text-3xl">Company team</h1><p className="mt-2 text-sm text-silver">Owner: everything. Procurement: edit, share and accept quotations. Viewer: read and comment.</p></div>
-      <ul className="space-y-3"><li className={`${card} flex flex-wrap gap-3`}><b>{data.owner.name}</b><span className="text-silver">{data.owner.email}</span><span className="ml-auto text-cyan">Owner</span></li>
+      <ul className="space-y-3"><li className={`${card} flex flex-wrap gap-3`}><b>{data.owner.name}</b><span className="text-silver">{data.owner.email}</span><span className="ml-auto text-accent">Owner</span></li>
         {data.members.map((m) => <li key={m.id} className={`${card} flex flex-wrap items-center gap-3`}><b>{m.name}</b><span className="text-silver">{m.email}</span>
-          {data.canManage ? <span className="ml-auto flex gap-2"><select aria-label={`Role of ${m.name}`} className={`${field} !w-auto`} value={m.teamRole} onChange={(e) => patch(m.id, { teamRole: e.target.value })}><option value="procurement">Procurement</option><option value="viewer">Viewer</option></select><button className={small} onClick={() => patch(m.id, { active: !m.active })}>{m.active ? 'Disable' : 'Enable'}</button></span> : <span className="ml-auto text-cyan">{pretty(m.teamRole)}</span>}</li>)}</ul>
+          {data.canManage ? <span className="ml-auto flex gap-2"><select aria-label={`Role of ${m.name}`} className={`${field} !w-auto`} value={m.teamRole} onChange={(e) => patch(m.id, { teamRole: e.target.value })}><option value="procurement">Procurement</option><option value="viewer">Viewer</option></select><button className={small} onClick={() => patch(m.id, { active: !m.active })}>{m.active ? 'Disable' : 'Enable'}</button></span> : <span className="ml-auto text-accent">{pretty(m.teamRole)}</span>}</li>)}</ul>
       {data.canManage && <form onSubmit={add} className={`${card} grid items-end gap-3 sm:grid-cols-[1fr_1fr_180px_auto]`}>
         <Field name="Name"><input required className={field} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
         <Field name="Email"><input required type="email" className={field} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} /></Field>

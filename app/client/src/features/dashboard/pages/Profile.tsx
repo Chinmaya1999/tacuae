@@ -56,7 +56,7 @@ export default function Profile() {
           {!member && <TextField id="pc" label={builder ? 'Company' : 'Company (optional)'} icon={Building2} autoComplete="organization" maxLength={120} value={f.company} onChange={set('company')} />}
         </div>
         {builder && !member && <fieldset className="grid gap-4 rounded-2xl border border-white/10 p-4 sm:grid-cols-2">
-          <legend className="px-2 text-xs uppercase tracking-[0.15em] text-cyan">Business details</legend>
+          <legend className="px-2 text-xs uppercase tracking-[0.15em] text-accent">Business details</legend>
           <TextField id="pl" label="Trade licence no." icon={FileText} maxLength={60} value={f.tradeLicence} onChange={set('tradeLicence')} />
           <TextField id="pt" label="TRN (15 digits)" icon={BadgeCheck} inputMode="numeric" maxLength={20} value={f.trn} onChange={set('trn')} />
           <div className="sm:col-span-2"><label htmlFor="ps" className="mb-1.5 block text-sm font-medium text-silver">Business sector</label><div className="relative"><Briefcase size={17} aria-hidden className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate" /><select id="ps" value={f.sector} onChange={set('sector')} className={`${control} pl-11 pr-4 capitalize [&>option]:bg-deep`}>{SECTORS.map((x) => <option key={x} value={x}>{x.replaceAll('-', ' ')}</option>)}</select></div></div>

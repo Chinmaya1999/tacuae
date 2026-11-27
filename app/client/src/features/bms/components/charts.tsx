@@ -3,7 +3,7 @@ import { limitState, type Reading } from '../data/bms'
 type Pt = { t: number; v: number }
 
 /** Small trend line with min/max labels. Data is simulated for now; the parent labels it. */
-export function TrendChart({ points, unit = '', color = '#00d5ff', height = 120 }: { points: Pt[]; unit?: string; color?: string; height?: number }) {
+export function TrendChart({ points, unit = '', color = '#8b93ff', height = 120 }: { points: Pt[]; unit?: string; color?: string; height?: number }) {
   if (points.length < 2) return <div className="grid place-items-center text-xs text-slate" style={{ height }}>No data</div>
   const w = 400, pad = 4, vs = points.map((p) => p.v), lo = Math.min(...vs), hi = Math.max(...vs), span = hi - lo || 1
   const x = (i: number) => pad + (i / (points.length - 1)) * (w - pad * 2), y = (v: number) => height - pad - ((v - lo) / span) * (height - pad * 2 - 12) - 6

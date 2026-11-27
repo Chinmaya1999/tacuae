@@ -16,7 +16,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.addEventListener('tac-signout', out)
     return () => window.removeEventListener('tac-signout', out)
   }, [])
-  const login = useCallback(async (email: string, password: string) => { const d = await api<{ user: User }>('/api/account/login', { method: 'POST', body: { email, password } }); setUser(d.user); return d.user }, [])
+  const login = useCallback(async (email: string, password: string, remember = false) => { const d = await api<{ user: User }>('/api/account/login', { method: 'POST', body: { email, password, remember } }); setUser(d.user); return d.user }, [])
   const register = useCallback(async (b: Parameters<AuthValue['register']>[0]) => { const d = await api<{ user: User }>('/api/account/register', { method: 'POST', body: b }); setUser(d.user); return d.user }, [])
   const logout = useCallback(async () => { await api('/api/account/logout', { method: 'POST' }).catch(() => {}); setUser(null) }, [])
   const value = useMemo(() => ({ user, loading, login, register, logout, adopt: setUser }), [user, loading, login, register, logout])

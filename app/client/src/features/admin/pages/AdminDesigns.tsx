@@ -7,7 +7,7 @@ import Studio3D from '../../studio/three/Studio3D'
 import CostPanel from '../../studio/components/CostPanel'
 
 type AD = Design & { owner: { id: string; name: string; email: string; role: string; company: string }; adminNote: string; submittedAt?: string }
-const inputCls = 'w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base text-white outline-none transition placeholder:text-slate focus:border-cyan'
+const inputCls = 'w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base text-white outline-none transition placeholder:text-slate focus:border-accent'
 const fmt = (s?: string | null) => (s ? new Date(s).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '')
 const FILTERS = [['submitted', 'Awaiting quote'], ['quoted', 'Quoted'], ['accepted', 'Accepted'], ['rejected', 'Declined'], ['all', 'All sent designs']] as const
 
@@ -20,17 +20,17 @@ export default function DesignsAdmin({ onChange }: { onChange: () => void }) {
   return (
     <div className="space-y-6">
       <div><h1 className="font-display text-3xl">Room designs</h1><p className="mt-2 max-w-2xl text-sm text-silver">Designs customers and builders sent from their virtual playground. Open one to see every feature they chose, then send a quotation.</p></div>
-      <div className="flex flex-wrap gap-2">{FILTERS.map(([v, l]) => <button key={v} onClick={() => setStatus(v)} className={`rounded-full border px-4 py-2 text-sm ${status === v ? 'border-cyan bg-cyan/15 text-cyan' : 'border-white/15 text-silver'}`}>{l}</button>)}</div>
+      <div className="flex flex-wrap gap-2">{FILTERS.map(([v, l]) => <button key={v} onClick={() => setStatus(v)} className={`rounded-full border px-4 py-2 text-sm ${status === v ? 'border-accent bg-accent/15 text-accent' : 'border-white/15 text-silver'}`}>{l}</button>)}</div>
       {err && <p role="alert" className="text-red-400">{err}</p>}
-      {!items && !err && <Loader2 className="animate-spin text-cyan" />}
+      {!items && !err && <Loader2 className="animate-spin text-accent" />}
       {items?.length === 0 && <p className="rounded-2xl border border-dashed border-white/20 p-10 text-center text-silver">Nothing here.</p>}
       <ul className="space-y-3">{items?.map((d) => (
-        <li key={d.id}><button onClick={() => setOpen(d.id!)} className="flex w-full flex-wrap items-center gap-4 rounded-2xl border border-white/10 bg-white/[.03] p-5 text-left transition hover:border-cyan/50">
+        <li key={d.id}><button onClick={() => setOpen(d.id!)} className="flex w-full flex-wrap items-center gap-4 rounded-2xl border border-white/10 bg-white/[.03] p-5 text-left transition hover:border-accent/50">
           <div className="min-w-0 flex-1"><div className="font-display text-lg">{d.name}</div>
             <div className="text-sm text-silver">{d.owner.name} <span className="text-slate">· {d.owner.role}{d.owner.company ? ` · ${d.owner.company}` : ''}</span></div>
             {d.clientName && <div className="text-xs text-slate">Client: {d.clientName}{d.siteAddress ? ` · ${d.siteAddress}` : ''}</div>}</div>
           <div className="text-sm text-slate">{d.rooms.length} rooms · {d.deviceCount} items<br />{fmt(d.submittedAt || d.updatedAt)}</div>
-          {d.quote && <div className="font-display text-cyan">{aed(d.quote.amount)}</div>}
+          {d.quote && <div className="font-display text-accent">{aed(d.quote.amount)}</div>}
           <span className={`rounded-full border px-3 py-1 text-xs ${statusStyle[d.status!]}`}>{statusLabel[d.status!]}</span></button></li>))}</ul>
     </div>
   )
@@ -48,11 +48,11 @@ function Detail({ d, back }: { d: AD; back: () => void }) {
   const saveNote = async () => { await api(`/api/admin/designs/${d.id}`, { method: 'PATCH', body: { adminNote } }).then(() => setMsg({ ok: true, t: 'Internal note saved.' })).catch((e) => setMsg({ ok: false, t: e.message })) }
   return (
     <div className="space-y-6">
-      <button onClick={back} className="text-sm text-silver hover:text-cyan">← All designs</button>
+      <button onClick={back} className="text-sm text-silver hover:text-accent">← All designs</button>
       <div className="flex flex-wrap items-center gap-3"><h1 className="font-display text-3xl">{d.name}</h1><span className={`rounded-full border px-3 py-1 text-xs ${statusStyle[cur.status!]}`}>{statusLabel[cur.status!]}</span></div>
       <div className="grid gap-4 rounded-2xl border border-white/10 bg-white/[.03] p-5 text-sm sm:grid-cols-2 xl:grid-cols-4">
         <div><div className="text-xs uppercase tracking-wider text-slate">From</div>{d.owner.name} ({d.owner.role})</div>
-        <div><div className="text-xs uppercase tracking-wider text-slate">Contact</div><a className="text-cyan hover:underline" href={`mailto:${d.owner.email}`}>{d.owner.email}</a></div>
+        <div><div className="text-xs uppercase tracking-wider text-slate">Contact</div><a className="text-accent hover:underline" href={`mailto:${d.owner.email}`}>{d.owner.email}</a></div>
         <div><div className="text-xs uppercase tracking-wider text-slate">Client / site</div>{[d.clientName, d.siteAddress].filter(Boolean).join(' · ') || '—'}</div>
         <div><div className="text-xs uppercase tracking-wider text-slate">Property</div><span className="capitalize">{d.property ?? 'apartment'}</span></div>
         <div><div className="text-xs uppercase tracking-wider text-slate">Sent</div>{fmt(d.submittedAt || d.updatedAt)}</div>
@@ -71,8 +71,8 @@ function Detail({ d, back }: { d: AD; back: () => void }) {
             <ul className="space-y-1 text-sm text-silver">{cur.rooms.map((r) => <li key={r.id} className="flex justify-between"><span>{r.name}</span><span className="tabular-nums">{r.devices.length} items</span></li>)}</ul>
           </section>
           {cur.estimate && <CostPanel e={cur.estimate} />}
-          <section className="rounded-2xl border border-cyan/30 bg-cyan/[.04] p-5">
-            <h2 className="mb-4 text-xs uppercase tracking-[0.16em] text-cyan">Quotation</h2>
+          <section className="rounded-2xl border border-accent/30 bg-accent/[.04] p-5">
+            <h2 className="mb-4 text-xs uppercase tracking-[0.16em] text-accent">Quotation</h2>
             {canQuote ? <div className="space-y-3">
               <div><label htmlFor="amt" className="mb-2 block text-xs uppercase tracking-wider text-silver">Total price (AED)</label><input id="amt" type="number" min="0" step="0.01" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} className={inputCls} /></div>
               <div><label htmlFor="qn" className="mb-2 block text-xs uppercase tracking-wider text-silver">Message to customer</label><textarea id="qn" rows={4} maxLength={2000} value={note} onChange={(e) => setNote(e.target.value)} placeholder="What is included, lead time, validity…" className={inputCls} /></div>
@@ -81,7 +81,7 @@ function Detail({ d, back }: { d: AD; back: () => void }) {
             {msg && <p role="alert" className={`mt-3 text-sm ${msg.ok ? 'text-emerald-300' : 'text-red-400'}`}>{msg.ok && <Check size={14} className="mr-1 inline" />}{msg.t}</p>}
           </section>
           <section><label htmlFor="an" className="mb-2 block text-xs uppercase tracking-wider text-slate">Internal note (customer cannot see)</label>
-            <textarea id="an" rows={3} value={adminNote} onChange={(e) => setAdminNote(e.target.value)} className={inputCls} /><button onClick={saveNote} className="mt-2 text-sm text-cyan hover:underline">Save note</button></section>
+            <textarea id="an" rows={3} value={adminNote} onChange={(e) => setAdminNote(e.target.value)} className={inputCls} /><button onClick={saveNote} className="mt-2 text-sm text-accent hover:underline">Save note</button></section>
         </div>
       </div>
     </div>

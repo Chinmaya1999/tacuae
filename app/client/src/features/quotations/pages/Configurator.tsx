@@ -53,15 +53,15 @@ function Wizard({ quoteId }: { quoteId: string | null }) {
     } catch (e) { setErr((e as Error).message) } finally { setBusy(false) }
   }
 
-  if (!options || !ready) return <div className="grid min-h-[70vh] place-items-center pt-32">{optErr || err ? <p role="alert" className="text-red-400">{optErr || err}</p> : <Loader2 className="animate-spin text-cyan" />}</div>
+  if (!options || !ready) return <div className="grid min-h-[70vh] place-items-center pt-32">{optErr || err ? <p role="alert" className="text-red-400">{optErr || err}</p> : <Loader2 className="animate-spin text-accent" />}</div>
   const name = (id: string) => options.products.find((p) => p.id === id)?.name ?? id
   const adjust = (roomId: string, productId: string, by: number) => set({ rooms: input.rooms.map((r) => (r.id === roomId ? { ...r, adjustments: { ...r.adjustments, [productId]: (r.adjustments[productId] ?? 0) + by } } : r)) })
 
   return (
     <div className="container-x pb-24 pt-32">
       <h1 className="font-display text-3xl md:text-4xl">Design my smart home</h1>
-      <div className="mt-5" role="progressbar" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1} aria-label="Progress"><div className="h-1.5 rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-cyan to-azure transition-all" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} /></div></div>
-      <nav aria-label="Steps" className="mt-3 flex flex-wrap gap-1.5">{STEPS.map((s, i) => <button key={s} onClick={() => go(i)} aria-current={i === step ? 'step' : undefined} className={`rounded-full border px-3 py-1 text-xs ${i === step ? 'border-cyan bg-cyan/15 text-cyan' : 'border-white/15 text-silver hover:text-white'}`}>{i + 1}. {s}</button>)}</nav>
+      <div className="mt-5" role="progressbar" aria-valuemin={1} aria-valuemax={STEPS.length} aria-valuenow={step + 1} aria-label="Progress"><div className="h-1.5 rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-accent to-brand transition-all" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} /></div></div>
+      <nav aria-label="Steps" className="mt-3 flex flex-wrap gap-1.5">{STEPS.map((s, i) => <button key={s} onClick={() => go(i)} aria-current={i === step ? 'step' : undefined} className={`rounded-full border px-3 py-1 text-xs ${i === step ? 'border-accent bg-accent/15 text-accent' : 'border-white/15 text-silver hover:text-white'}`}>{i + 1}. {s}</button>)}</nav>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
         <section className="min-w-0 space-y-5" aria-label={STEPS[step]}>
@@ -89,7 +89,7 @@ function Wizard({ quoteId }: { quoteId: string | null }) {
                 <ul className="mt-3 space-y-2 text-sm">{r.items.map((i) => <li key={i.productId} className="flex items-center justify-between gap-3"><span>{name(i.productId)}</span>{r.id === 'property' ? <span className="tabular-nums text-silver">× {i.qty}</span> : <Stepper label={`${name(i.productId)} in ${r.name}`} value={i.qty} onChange={(v) => adjust(r.id, i.productId, v - i.qty)} />}</li>)}{!r.items.length && <li className="text-slate">No devices yet.</li>}</ul>
                 {r.id !== 'property' && <select aria-label={`Add a device to ${r.name}`} className={`${field} mt-3 max-w-xs`} value="" onChange={(e) => e.target.value && adjust(r.id, e.target.value, 1)}><option value="">+ Add a device…</option>{options.products.filter((p) => !r.items.some((i) => i.productId === p.id)).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select>}
               </div>))}
-            {options.amcAvailable && <label className="flex items-center gap-3 text-sm"><input type="checkbox" checked={input.amc} onChange={(e) => set({ amc: e.target.checked })} className="h-4 w-4 accent-cyan" />Add an annual maintenance contract (AMC)</label>}
+            {options.amcAvailable && <label className="flex items-center gap-3 text-sm"><input type="checkbox" checked={input.amc} onChange={(e) => set({ amc: e.target.checked })} className="h-4 w-4 accent-accent" />Add an annual maintenance contract (AMC)</label>}
             <button type="button" className={small} onClick={() => setPreview(!preview)} aria-pressed={preview}><Box size={15} className="mr-2 inline" />{preview ? 'Hide 3D preview' : 'Preview in 3D'}</button>
             {preview && pricing?.rooms && <><Preview3D rooms={pricing.rooms} /><p className="text-xs text-slate">Simulated preview — illustrative device placement, not a site layout.</p></>}
           </div>}
@@ -98,8 +98,8 @@ function Wizard({ quoteId }: { quoteId: string | null }) {
             {step > 0 && <button className="btn btn-ghost" onClick={() => go(step - 1)}><ArrowLeft size={16} />Back</button>}
             {step < STEPS.length - 1 ? <button className="btn btn-primary" onClick={() => go(step + 1)}>Next<ArrowRight size={16} /></button>
               : canSave && <button className="btn btn-primary disabled:opacity-60" disabled={busy || !pricing?.lines.length} onClick={save}><Save size={16} />{!user ? 'Create account to save and share' : quoteId ? 'Save new version' : 'Save quotation'}</button>}
-            {!quoteId && <button className="text-sm text-slate hover:text-cyan" onClick={() => confirm('Start over? Your current answers will be cleared.') && setState(blankHome())}>Start over</button>}
-            {step === STEPS.length - 1 && !user && <Link to="/login?next=/design-my-home" className="text-sm text-cyan hover:underline">Sign in</Link>}
+            {!quoteId && <button className="text-sm text-slate hover:text-accent" onClick={() => confirm('Start over? Your current answers will be cleared.') && setState(blankHome())}>Start over</button>}
+            {step === STEPS.length - 1 && !user && <Link to="/login?next=/design-my-home" className="text-sm text-accent hover:underline">Sign in</Link>}
           </div>
           {err && <p role="alert" className="text-sm text-red-400">{err}</p>}
         </section>

@@ -19,9 +19,9 @@ type Stats = { accounts?: boolean; customers?: number; builders?: number; design
 
 const api = <T = any>(path: string, opts: { method?: string; body?: unknown } = {}) => rawApi<T>(`/api/admin${path}`, opts)
 
-const STATUS_STYLE: Record<Status, string> = { new: 'bg-cyan/15 text-cyan border-cyan/40', contacted: 'bg-amber-400/10 text-amber-300 border-amber-300/40', closed: 'bg-white/5 text-silver border-white/20' }
+const STATUS_STYLE: Record<Status, string> = { new: 'bg-accent/15 text-accent border-accent/40', contacted: 'bg-amber-400/10 text-amber-300 border-amber-300/40', closed: 'bg-white/5 text-silver border-white/20' }
 const fmtDate = (s: string) => new Date(s).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-const inputCls = 'w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base text-white outline-none transition placeholder:text-slate focus:border-cyan'
+const inputCls = 'w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-base text-white outline-none transition placeholder:text-slate focus:border-accent'
 
 export default function Admin() {
   const { user, loading, logout } = useAuth()
@@ -32,7 +32,7 @@ export default function Admin() {
     m.content = 'noindex, nofollow'
     return () => m?.remove()
   }, [])
-  if (loading) return <div className="grid min-h-screen place-items-center bg-midnight"><Loader2 className="animate-spin text-cyan" /></div>
+  if (loading) return <div className="grid min-h-screen place-items-center bg-midnight"><Loader2 className="animate-spin text-accent" /></div>
   if (!user) return <Navigate to="/login?next=/admin" replace />
   if (user.role !== 'admin' && user.role !== 'sales') return <Navigate to="/dashboard" replace />
   return <div className="min-h-screen bg-midnight text-white"><Dashboard onOut={logout} sales={user.role === 'sales'} /></div>
@@ -67,19 +67,19 @@ function Dashboard({ onOut, sales }: { onOut: () => void; sales: boolean }) {
       <aside className="no-print border-b border-white/10 bg-deep lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between px-5 py-4 lg:block lg:py-7">
           <img src="/images/site/logo-dark.png" alt="TAC" className="h-9 w-auto" />
-          <button onClick={logout} className="flex items-center gap-2 text-sm text-silver hover:text-cyan lg:mt-8"><LogOut size={16} />Sign out</button>
+          <button onClick={logout} className="flex items-center gap-2 text-sm text-silver hover:text-accent lg:mt-8"><LogOut size={16} />Sign out</button>
         </div>
         <nav aria-label="Admin" className="flex gap-1 overflow-x-auto px-3 pb-3 lg:block lg:space-y-1 lg:px-4">
           {visible.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)} aria-current={tab === t.id ? 'page' : undefined}
-              className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm transition lg:w-full ${tab === t.id ? 'bg-cyan/15 text-cyan' : 'text-silver hover:bg-white/5 hover:text-white'}`}>
+              className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm transition lg:w-full ${tab === t.id ? 'bg-accent/15 text-accent' : 'text-silver hover:bg-white/5 hover:text-white'}`}>
               <t.icon size={17} />{t.label}
               {t.id === 'designs' && !!stats?.designsSubmitted && <span className="ml-auto rounded-full bg-amber-300 px-2 py-0.5 text-[0.7rem] font-medium text-midnight">{stats.designsSubmitted}</span>}
-              {t.id === 'enquiries' && !!stats?.new && <span className="ml-auto rounded-full bg-cyan px-2 py-0.5 text-[0.7rem] font-medium text-midnight">{stats.new}</span>}
+              {t.id === 'enquiries' && !!stats?.new && <span className="ml-auto rounded-full bg-accent px-2 py-0.5 text-[0.7rem] font-medium text-midnight">{stats.new}</span>}
             </button>
           ))}
         </nav>
-        <a href="/" target="_blank" rel="noopener" className="hidden px-8 py-6 text-sm text-slate hover:text-cyan lg:block">View website ↗</a>
+        <a href="/" target="_blank" rel="noopener" className="hidden px-8 py-6 text-sm text-slate hover:text-accent lg:block">View website ↗</a>
       </aside>
       <main className="min-w-0 px-5 py-8 lg:px-10">
         {tab === 'overview' && <Overview stats={stats} go={setTab} />}
@@ -101,11 +101,11 @@ function Dashboard({ onOut, sales }: { onOut: () => void; sales: boolean }) {
 }
 
 const Card = ({ label, value, accent }: { label: string; value: number | string; accent?: boolean }) => (
-  <div className="rounded-2xl border border-white/10 bg-white/[.03] p-5"><div className="text-xs uppercase tracking-[0.16em] text-silver">{label}</div><div className={`mt-2 font-display text-4xl font-light tabular-nums ${accent ? 'text-cyan' : ''}`}>{value}</div></div>
+  <div className="rounded-2xl border border-white/10 bg-white/[.03] p-5"><div className="text-xs uppercase tracking-[0.16em] text-silver">{label}</div><div className={`mt-2 font-display text-4xl font-light tabular-nums ${accent ? 'text-accent' : ''}`}>{value}</div></div>
 )
 
 function Overview({ stats, go }: { stats: Stats | null; go: (t: 'enquiries' | 'designs' | 'users' | 'products') => void }) {
-  if (!stats) return <Loader2 className="animate-spin text-cyan" />
+  if (!stats) return <Loader2 className="animate-spin text-accent" />
   const max = Math.max(1, ...stats.daily.map((d) => d.count))
   return (
     <div className="space-y-8">
@@ -123,7 +123,7 @@ function Overview({ stats, go }: { stats: Stats | null; go: (t: 'enquiries' | 'd
             {stats.daily.map((d) => (
               <div key={d.date} className="group flex flex-1 flex-col items-center justify-end gap-2" title={`${d.date}: ${d.count}`}>
                 <span className="text-[0.7rem] tabular-nums text-silver">{d.count || ''}</span>
-                <div className="w-full rounded-t bg-gradient-to-t from-azure to-cyan transition-all" style={{ height: `${Math.max(d.count ? 8 : 2, (d.count / max) * 120)}px`, opacity: d.count ? 1 : 0.25 }} />
+                <div className="w-full rounded-t bg-gradient-to-t from-brand to-accent transition-all" style={{ height: `${Math.max(d.count ? 8 : 2, (d.count / max) * 120)}px`, opacity: d.count ? 1 : 0.25 }} />
                 <span className="text-[0.7rem] text-slate">{d.date.slice(8)}</span>
               </div>
             ))}
@@ -163,7 +163,7 @@ function Enquiries({ onChange }: { onChange: () => void }) {
         <select aria-label="Filter by status" value={status} onChange={(e) => setStatus(e.target.value)} className={`${inputCls} !w-auto`}><option value="">All statuses</option><option value="new">New</option><option value="contacted">Contacted</option><option value="closed">Closed</option></select>
       </div>
       {err && <p role="alert" className="text-sm text-red-400">{err}</p>}
-      {!items ? <Loader2 className="animate-spin text-cyan" /> : items.length === 0 ? <p className="rounded-2xl border border-dashed border-white/15 p-10 text-center text-silver">No enquiries match.</p> : (
+      {!items ? <Loader2 className="animate-spin text-accent" /> : items.length === 0 ? <p className="rounded-2xl border border-dashed border-white/15 p-10 text-center text-silver">No enquiries match.</p> : (
         <ul className="space-y-3">
           {items.map((e) => (
             <li key={e.id} className="rounded-2xl border border-white/10 bg-white/[.03]">
@@ -175,8 +175,8 @@ function Enquiries({ onChange }: { onChange: () => void }) {
               {open === e.id && (
                 <div className="space-y-5 border-t border-white/10 px-5 py-5">
                   <dl className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
-                    <div><dt className="text-xs uppercase tracking-wider text-slate">Email</dt><dd><a className="text-cyan hover:underline" href={`mailto:${e.email}`}>{e.email}</a></dd></div>
-                    <div><dt className="text-xs uppercase tracking-wider text-slate">Phone</dt><dd>{e.phone ? <a className="text-cyan hover:underline" href={`tel:${e.phone.replace(/\s/g, '')}`}>{e.phone}</a> : '—'}</dd></div>
+                    <div><dt className="text-xs uppercase tracking-wider text-slate">Email</dt><dd><a className="text-accent hover:underline" href={`mailto:${e.email}`}>{e.email}</a></dd></div>
+                    <div><dt className="text-xs uppercase tracking-wider text-slate">Phone</dt><dd>{e.phone ? <a className="text-accent hover:underline" href={`tel:${e.phone.replace(/\s/g, '')}`}>{e.phone}</a> : '—'}</dd></div>
                     <div><dt className="text-xs uppercase tracking-wider text-slate">Service</dt><dd>{e.service || '—'}</dd></div>
                     <div><dt className="text-xs uppercase tracking-wider text-slate">Project type</dt><dd>{e.projectType || '—'}</dd></div>
                   </dl>
@@ -201,7 +201,7 @@ function NoteBox({ e, save }: { e: Enquiry; save: (n: string) => Promise<void> }
   return (
     <div><label className="mb-2 block text-xs uppercase tracking-wider text-slate" htmlFor={`n-${e.id}`}>Internal note</label>
       <textarea id={`n-${e.id}`} rows={2} value={v} onChange={(x) => { setV(x.target.value); setSaved(false) }} className={inputCls} placeholder="e.g. Called on Sunday, sending a quotation…" />
-      <button className="mt-2 flex items-center gap-2 text-sm text-cyan hover:underline disabled:opacity-50" disabled={v === e.note && !saved} onClick={async () => { await save(v); setSaved(true) }}>{saved ? <><Check size={14} />Saved</> : 'Save note'}</button></div>
+      <button className="mt-2 flex items-center gap-2 text-sm text-accent hover:underline disabled:opacity-50" disabled={v === e.note && !saved} onClick={async () => { await save(v); setSaved(true) }}>{saved ? <><Check size={14} />Saved</> : 'Save note'}</button></div>
   )
 }
 
@@ -214,8 +214,8 @@ function Content() {
     <div className="space-y-6">
       <div><h1 className="font-display text-3xl">Site content</h1>
         <p className="mt-2 max-w-2xl text-sm text-silver">Add a description to appear on each product or project page of the website. Leave empty to show no extra text. Only add information TAC has verified.</p></div>
-      <div className="flex gap-2">{(['products', 'projects'] as const).map((t) => <button key={t} onClick={() => setType(t)} className={`rounded-full border px-5 py-2 text-sm capitalize ${type === t ? 'border-cyan bg-cyan/15 text-cyan' : 'border-white/15 text-silver'}`}>{t}</button>)}</div>
-      {!ov ? <Loader2 className="animate-spin text-cyan" /> : <ul className="grid gap-4 xl:grid-cols-2">{list.map((it) => <ContentItem key={type + it.slug} type={type} it={it} initial={ov[type]?.[it.slug] ?? ''} />)}</ul>}
+      <div className="flex gap-2">{(['products', 'projects'] as const).map((t) => <button key={t} onClick={() => setType(t)} className={`rounded-full border px-5 py-2 text-sm capitalize ${type === t ? 'border-accent bg-accent/15 text-accent' : 'border-white/15 text-silver'}`}>{t}</button>)}</div>
+      {!ov ? <Loader2 className="animate-spin text-accent" /> : <ul className="grid gap-4 xl:grid-cols-2">{list.map((it) => <ContentItem key={type + it.slug} type={type} it={it} initial={ov[type]?.[it.slug] ?? ''} />)}</ul>}
     </div>
   )
 }
@@ -225,7 +225,7 @@ function ContentItem({ type, it, initial }: { type: string; it: { slug: string; 
   const save = async () => { setState('saving'); try { await api(`/content/${type}/${it.slug}`, { method: 'PUT', body: { description: v } }); setBase(v.trim()); setState('saved') } catch { setState('err') } }
   return (
     <li className="rounded-2xl border border-white/10 bg-white/[.03] p-5">
-      <div className="mb-4 flex items-center gap-4"><img src={it.image} alt="" className="h-14 w-14 rounded-lg object-cover" /><div><div className="font-display">{it.name}</div><a className="text-xs text-cyan hover:underline" href={`/${type}/${it.slug}`} target="_blank" rel="noopener">View page ↗</a></div></div>
+      <div className="mb-4 flex items-center gap-4"><img src={it.image} alt="" className="h-14 w-14 rounded-lg object-cover" /><div><div className="font-display">{it.name}</div><a className="text-xs text-accent hover:underline" href={`/${type}/${it.slug}`} target="_blank" rel="noopener">View page ↗</a></div></div>
       <label className="sr-only" htmlFor={`c-${it.slug}`}>Description for {it.name}</label>
       <textarea id={`c-${it.slug}`} rows={4} maxLength={3000} value={v} onChange={(e) => { setV(e.target.value); setState('') }} className={inputCls} placeholder="Description shown on the page…" />
       <div className="mt-3 flex items-center gap-4 text-sm"><button className="btn btn-primary !px-5 !py-2 disabled:opacity-50" disabled={v.trim() === base || state === 'saving'} onClick={save}>{state === 'saving' ? 'Saving…' : 'Save'}</button>

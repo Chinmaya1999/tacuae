@@ -34,7 +34,7 @@ export default function Navbar() {
     <>
       <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${scrolled ? 'py-3' : 'py-6'}`}>
         <div className={`container-x`}>
-          <div className={`flex items-center justify-between rounded-full px-5 md:px-7 py-2.5 transition-all duration-500 ${scrolled ? 'glass border border-white/10 shadow-2xl shadow-black/30' : 'border border-transparent'}`}>
+          <div className={`flex items-center justify-between rounded-2xl px-4 md:px-5 py-2.5 transition-all duration-500 ${scrolled ? 'glass border border-white/10 shadow-lift' : 'border border-transparent'}`}>
             <Link to="/" aria-label="TAC UAE home" className="flex items-center gap-3">
               <img src={company.logoDark} alt="TAC — Total Automation" className="h-10 md:h-12 w-auto" />
             </Link>
@@ -49,7 +49,7 @@ export default function Navbar() {
                     <div className="invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:visible group-focus-within:opacity-100 group-focus-within:translate-y-0 transition-all duration-300 absolute left-1/2 -translate-x-1/2 top-full pt-4">
                       <ul className="glass border border-white/10 rounded-2xl p-2 min-w-[300px] shadow-2xl">
                         {sub[n.to].map((s) => (
-                          <li key={s.to}><Link to={s.to} className="block rounded-xl px-4 py-2.5 text-white/80 hover:bg-white/5 hover:text-cyan transition-colors">{s.label}</Link></li>
+                          <li key={s.to}><Link to={s.to} className="block rounded-xl px-4 py-2.5 text-white/80 hover:bg-white/5 hover:text-accent transition-colors">{s.label}</Link></li>
                         ))}
                       </ul>
                     </div>
@@ -59,7 +59,7 @@ export default function Navbar() {
             </nav>
 
             <div className="flex shrink-0 items-center gap-3 whitespace-nowrap">
-              <Link to={acct.to} className="hidden text-sm text-white/85 hover:text-cyan md:inline">{acct.label}</Link>
+              <Link to={acct.to} className="hidden text-sm text-white/85 hover:text-accent md:inline">{acct.label}</Link>
               <Link to="/design-my-home" className="btn btn-primary hidden md:inline-flex !py-2.5">Design my smart home</Link>
               <button className="xl:hidden p-2 -mr-2" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-menu" aria-label={open ? 'Close menu' : 'Open menu'}>
                 {open ? <X /> : <Menu />}

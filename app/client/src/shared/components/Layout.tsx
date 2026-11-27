@@ -21,7 +21,7 @@ function Loader() {
         <motion.div className="fixed inset-0 z-[100] grid place-items-center bg-midnight" exit={{ y: '-100%' }} transition={{ duration: 0.8, ease: [0.7, 0, 0.2, 1] }}>
           <div className="text-center">
             <motion.img src={company.logoDark} alt="" className="h-14 w-auto mx-auto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} />
-            <div className="mt-6 h-px w-48 bg-white/10 overflow-hidden"><motion.div className="h-full bg-cyan" initial={{ x: '-100%' }} animate={{ x: 0 }} transition={{ duration: 1, ease: 'easeInOut' }} /></div>
+            <div className="mt-6 h-px w-48 bg-white/10 overflow-hidden"><motion.div className="h-full bg-accent" initial={{ x: '-100%' }} animate={{ x: 0 }} transition={{ duration: 1, ease: 'easeInOut' }} /></div>
           </div>
         </motion.div>
       )}
@@ -57,9 +57,9 @@ export default function Layout() {
 
   return (
     <>
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[200] focus:bg-cyan focus:text-midnight focus:px-4 focus:py-2 focus:rounded">Skip to content</a>
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[200] focus:bg-accent focus:text-midnight focus:px-4 focus:py-2 focus:rounded">Skip to content</a>
       <Loader />
-      <motion.div className="fixed left-0 top-0 z-[60] h-[2px] w-full origin-left bg-gradient-to-r from-cyan to-azure" style={{ scaleX: prog }} />
+      <motion.div className="fixed left-0 top-0 z-[60] h-[2px] w-full origin-left bg-gradient-to-r from-accent to-brand" style={{ scaleX: prog }} />
       <Navbar />
       <AnimatePresence mode="wait">
         <motion.main id="main" key={loc.pathname} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
