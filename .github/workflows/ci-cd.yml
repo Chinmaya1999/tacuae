@@ -1,13 +1,13 @@
+# Checks run side by side and only COUNT errors; the release continues. It stops only when the site cannot work:
+# the app does not build, the container does not start, or the new version is unhealthy on the server (auto rollback).
+# Set the repository variable BLOCK_ON_ERRORS=true to also stop deployment while any check fails.
 name: CI/CD
 
 on:
-  push: { branches: [main] }
+  push: { branches: [main], paths-ignore: ["docs/**", "**/*.md"] }
   pull_request: { branches: [main] }
   workflow_dispatch:
     inputs:
-      sites:
-        description: "Build & deploy: all (only tac-site-c is deployed)"
-        default: all
       bootstrap:
         description: "First run only: install Docker and prepare the server"
         type: boolean
@@ -22,183 +22,243 @@ concurrency:
 
 env:
   DOCKERHUB_USER: ${{ vars.DOCKERHUB_USERNAME || 'awsmallick1999' }}
+  IMAGE: tac-site-c # kept so earlier image tags stay available for rollback
+
+defaults:
+  run: { shell: bash, working-directory: app }
 
 jobs:
-  # ───────────────────────── decide which sites changed ─────────────────────────
-  plan:
+  static:
+    name: Static checks
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      matrix: ${{ steps.plan.outputs.matrix }}
-      any: ${{ steps.plan.outputs.any }}
-      infra: ${{ steps.plan.outputs.infra }}
-      tags: ${{ steps.plan.outputs.tags }}
-    steps:
-      - uses: actions/checkout@v7
-        with: { fetch-depth: 0 }
-      - id: plan
-        env:
-          EVENT: ${{ github.event_name }}
-          BEFORE: ${{ github.event.before }}
-          SHA: ${{ github.sha }}
-          BASE_REF: ${{ github.base_ref }}
-          SITES_INPUT: ${{ github.event.inputs.sites }}
-        run: |
-          set -euo pipefail
-          ALL='[{"key":"c","dir":"tac-site-c","image":"tac-site-c","tagvar":"TAG_C"}]'
-          files=ALL
-          if [ "$EVENT" = pull_request ]; then
-            base=$(git merge-base "origin/$BASE_REF" HEAD); files=$(git diff --name-only "$base" HEAD)
-          elif [ "$EVENT" = push ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
-            files=$(git diff --name-only "$BEFORE" "$SHA" 2>/dev/null) || files=ALL
-          fi
-          sel='[]'; tags=""
-          while read -r row; do
-            key=$(jq -r .key <<<"$row"); dir=$(jq -r .dir <<<"$row"); tagvar=$(jq -r .tagvar <<<"$row"); want=0
-            if [ "$EVENT" = workflow_dispatch ]; then
-              case ",${SITES_INPUT:-all}," in *,all,*|*",$key,"*) want=1;; esac
-            elif [ "$files" = ALL ] || grep -q "^$dir/" <<<"$files"; then want=1; fi
-            if [ $want = 1 ]; then sel=$(jq -c ". + [$row]" <<<"$sel"); tags="$tags $tagvar=sha-${SHA::7}"; fi
-          done < <(jq -c '.[]' <<<"$ALL")
-          infra=false
-          if [ "$EVENT" = workflow_dispatch ] || [ "$files" = ALL ] || grep -qE '^(deploy/|\.github/workflows/)' <<<"$files"; then infra=true; fi
-          {
-            echo "matrix={\"include\":$sel}"
-            echo "any=$([ "$sel" != '[]' ] && echo true || echo false)"
-            echo "infra=$infra"
-            echo "tags=${tags# }"
-          } >> "$GITHUB_OUTPUT"
-          echo "Selected: $sel  | infra=$infra | tags=${tags# }"
-
-  # ───────────────────────── build + smoke-test every changed site ─────────────────────────
-  test:
-    needs: plan
-    if: needs.plan.outputs.any == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
-    defaults:
-      run: { working-directory: "${{ matrix.dir }}" }
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
-        with:
-          node-version: 26
-          cache: npm
-          cache-dependency-path: ${{ matrix.dir }}/package-lock.json
+        with: { node-version-file: app/.nvmrc, cache: npm, cache-dependency-path: app/package-lock.json }
       - run: npm ci
-      - name: Type-check, build, generate sitemap
-        run: npm run build
-      - name: Dependency audit (informational)
-        run: npm audit --omit=dev --audit-level=critical
-        continue-on-error: true
-      - name: Smoke-test the production server
-        run: |
-          set -euo pipefail
-          DATA_DIR="$(mktemp -d)"; export PORT=3100 DATA_DIR
-          node server/src/server.js > "$RUNNER_TEMP/server.log" 2>&1 & pid=$!
-          trap 'kill $pid 2>/dev/null || true' EXIT
-          for _ in $(seq 1 30); do curl -fs "localhost:$PORT/" >/dev/null && break; sleep 1; done
-          curl -fsS "localhost:$PORT/" | grep -qi "<title>"
-          curl -fsS "localhost:$PORT/sitemap.xml" | grep -q "<urlset"
-          curl -fsS "localhost:$PORT/robots.txt" | grep -qi "sitemap"
-          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "localhost:$PORT/api/enquiry" -H 'content-type: application/json' -d '{}')
-          [ "$code" -ge 400 ] && [ "$code" -lt 500 ] || { echo "empty enquiry should be rejected, got $code"; exit 1; }
-          echo "smoke test passed"
+      - name: Type check
+        if: ${{ !cancelled() }}
+        continue-on-error: true # counted in the report; never stops the release
+        run: node scripts/ci/run-check.mjs typecheck tsc "Type check" -- npx tsc -b
+      - name: Dependency audit
+        if: ${{ !cancelled() }}
+        continue-on-error: true # counted in the report; never stops the release
+        run: node scripts/ci/run-check.mjs audit audit "Dependency audit" -- npm audit --omit=dev --json
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: reports-static
+          path: app/reports/
+          if-no-files-found: ignore
 
-  # ───────────────────────── build, scan and push Docker images ─────────────────────────
-  image:
-    needs: [plan, test]
-    if: needs.plan.outputs.any == 'true'
+  unit:
+    name: Unit tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
-    env:
-      # images are only pushed from main once the repo variable DEPLOY_ENABLED=true is set
-      PUSH: ${{ github.event_name != 'pull_request' && vars.DEPLOY_ENABLED == 'true' }}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version-file: app/.nvmrc, cache: npm, cache-dependency-path: app/package-lock.json }
+      - run: npm ci
+      - name: Unit tests
+        if: ${{ !cancelled() }}
+        continue-on-error: true # counted in the report; never stops the release
+        run: node scripts/ci/run-check.mjs unit junit "Unit tests" -- node --test --test-reporter=junit --test-reporter-destination=reports/unit.xml --test-reporter=spec --test-reporter-destination=stdout "server/tests/unit/*.test.js"
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: reports-unit
+          path: app/reports/
+          if-no-files-found: ignore
+
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mongo:
+        image: mongo:8
+        ports: ["27017:27017"]
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1})'" --health-interval 5s --health-retries 20
+    env:
+      TEST_MONGODB_URI: mongodb://127.0.0.1:27017/tac_test
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version-file: app/.nvmrc, cache: npm, cache-dependency-path: app/package-lock.json }
+      - run: npm ci
+      - name: Integration tests
+        if: ${{ !cancelled() }}
+        continue-on-error: true # counted in the report; never stops the release
+        run: node scripts/ci/run-check.mjs integration junit "Integration tests" -- node --test --test-reporter=junit --test-reporter-destination=reports/integration.xml --test-reporter=spec --test-reporter-destination=stdout --experimental-test-coverage --test-coverage-include="server/src/**" "server/tests/integration/*.test.js"
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: reports-integration
+          path: app/reports/
+          if-no-files-found: ignore
+
+  e2e:
+    name: Browser tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mongo:
+        image: mongo:8
+        ports: ["27017:27017"]
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1})'" --health-interval 5s --health-retries 20
+    env:
+      TEST_MONGODB_URI: mongodb://127.0.0.1:27017/tac_test
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version-file: app/.nvmrc, cache: npm, cache-dependency-path: app/package-lock.json }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run bundle
+      - name: Browser tests
+        if: ${{ !cancelled() }}
+        continue-on-error: true # counted in the report; never stops the release
+        run: node scripts/ci/run-check.mjs e2e junit "Browser tests" -- npx playwright test
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: reports-e2e
+          path: app/reports/
+          if-no-files-found: ignore
+
+  build:
+    name: Build and push image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    env:
+      # images are pushed only from main once the repository variable DEPLOY_ENABLED=true is set
+      PUSH: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with: { node-version-file: app/.nvmrc }
+      - id: tag
+        run: echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v4
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: app
+          load: true
+          tags: ci/app:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Container starts read-only and answers (required)
+        run: |
+          set -euo pipefail
+          docker run -d --name smoke --read-only --tmpfs /tmp -v /data -v /app/server/data -p 3000:3000 ci/app:ci
+          s=starting
+          for _ in $(seq 1 30); do s=$(docker inspect -f '{{.State.Health.Status}}' smoke); [ "$s" = healthy ] && break; sleep 2; done
+          [ "$s" = healthy ] || { docker logs smoke; exit 1; }
+          curl -fsS localhost:3000/ | grep -qi "<title>"
+          curl -fsS localhost:3000/sitemap.xml | grep -q "<urlset"
+          docker rm -f smoke
+      - name: Image vulnerability scan
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ci/app:ci
+          severity: CRITICAL
+          ignore-unfixed: true
+          format: json
+          output: app/trivy.json
+          exit-code: "0"
+      - name: Record scan result
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        run: node scripts/ci/run-check.mjs image-scan trivy "Image vulnerability scan" -- cp trivy.json reports/image-scan.trivy.json
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with: { name: reports-build, path: app/reports/, if-no-files-found: ignore }
       - name: Log in to Docker Hub
         if: env.PUSH == 'true'
         uses: docker/login-action@v4
         with:
           username: ${{ env.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.DOCKERHUB_USER }}/${{ matrix.image }}
-          tags: |
-            type=sha,format=short,prefix=sha-
-            type=raw,value=latest,enable={{is_default_branch}}
-      - name: Build image for testing
-        uses: docker/build-push-action@v7
-        with:
-          context: ${{ matrix.dir }}
-          load: true
-          tags: ci/${{ matrix.image }}:ci
-          cache-from: type=gha,scope=${{ matrix.image }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
-      - name: Run the container (read-only, like production) and wait for healthy
-        run: |
-          set -euo pipefail
-          docker run -d --name smoke --read-only --tmpfs /tmp -v /data -v /app/server/data -p 3000:3000 ci/${{ matrix.image }}:ci
-          for _ in $(seq 1 30); do s=$(docker inspect -f '{{.State.Health.Status}}' smoke); [ "$s" = healthy ] && break; sleep 2; done
-          [ "$s" = healthy ] || { docker logs smoke; exit 1; }
-          curl -fsS localhost:3000/ >/dev/null
-          docker rm -f smoke
-      - name: Vulnerability scan (fixable CRITICAL issues fail the build)
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          image-ref: ci/${{ matrix.image }}:ci
-          severity: CRITICAL
-          ignore-unfixed: true
-          exit-code: "1"
       - name: Push image
         if: env.PUSH == 'true'
         uses: docker/build-push-action@v7
         with:
-          context: ${{ matrix.dir }}
+          context: app
           push: true
           platforms: ${{ vars.DOCKER_PLATFORMS || 'linux/amd64' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.image }}
+          tags: |
+            ${{ env.DOCKERHUB_USER }}/${{ env.IMAGE }}:${{ steps.tag.outputs.tag }}
+            ${{ env.DOCKERHUB_USER }}/${{ env.IMAGE }}:latest
+          cache-from: type=gha
 
-  # ───────────────────────── deploy to the server over SSH ─────────────────────────
-  deploy:
-    needs: [plan, test, image]
-    if: >-
-      ${{ !cancelled() && github.event_name != 'pull_request' && vars.DEPLOY_ENABLED == 'true'
-      && needs.plan.result == 'success'
-      && (needs.test.result == 'success' || needs.test.result == 'skipped')
-      && (needs.image.result == 'success' || needs.image.result == 'skipped')
-      && (needs.plan.outputs.any == 'true' || needs.plan.outputs.infra == 'true') }}
+  report:
+    name: Error report
+    needs: [static, unit, integration, e2e, build]
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    environment: production   # add required reviewers in Settings → Environments for manual approval
-    concurrency: { group: production-deploy, cancel-in-progress: false }
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    outputs:
+      errors: ${{ steps.summary.outputs.errors }}
     steps:
       - uses: actions/checkout@v7
-      - name: Configure SSH
+      - uses: actions/download-artifact@v8
+        with: { pattern: reports-*, merge-multiple: true, path: app/reports }
+      - id: summary
+        run: node scripts/ci/summary.mjs reports typecheck,audit,unit,integration,e2e,image-scan
+      - name: Warn on the run page
+        if: steps.summary.outputs.errors != '0'
+        run: echo "::warning title=Checks found errors::${{ steps.summary.outputs.errors }} error(s). See the run summary and the 'ci-errors' issue."
+      - name: Open, update or close the tracking issue
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         env:
-          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          KNOWN: ${{ secrets.SSH_KNOWN_HOSTS }}
+          GH_TOKEN: ${{ github.token }}
+          ERRORS: ${{ steps.summary.outputs.errors }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
-          [ -n "$SSH_KEY" ] && [ -n "$SSH_HOST" ] || { echo "::error::Set secrets SSH_PRIVATE_KEY and SSH_HOST"; exit 1; }
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy; chmod 600 ~/.ssh/id_deploy
-          if [ -n "$KNOWN" ]; then printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
-          else echo "::warning::SSH_KNOWN_HOSTS not set — trusting the host key on first contact (set it to pin the server)"; ssh-keyscan -T 15 -H "$SSH_HOST" > ~/.ssh/known_hosts; fi
-          printf 'Host target\n  HostName %s\n  User %s\n  IdentityFile ~/.ssh/id_deploy\n  IdentitiesOnly yes\n  StrictHostKeyChecking yes\n  ServerAliveInterval 20\n' "$SSH_HOST" "${SSH_USER:-ubuntu}" > ~/.ssh/config
+          printf '\nCommit %s — [pipeline run](%s)\n' "${GITHUB_SHA::7}" "$RUN_URL" >> report.md
+          gh label create ci-errors --color B60205 --description "Errors found by the pipeline" --force
+          open=$(gh issue list --label ci-errors --state open --json number --jq '.[0].number // empty')
+          if [ "$ERRORS" != 0 ]; then
+            title="Pipeline found $ERRORS error(s) — fix in the next release"
+            if [ -n "$open" ]; then gh issue edit "$open" --title "$title" --body-file report.md
+            else gh issue create --title "$title" --label ci-errors --body-file report.md; fi
+          elif [ -n "$open" ]; then
+            gh issue close "$open" --comment "All checks pass on ${GITHUB_SHA::7}. $RUN_URL"
+          fi
+
+  deploy:
+    name: Deploy to production
+    needs: [build, report]
+    if: >-
+      ${{ !cancelled() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+      && vars.DEPLOY_ENABLED == 'true' && needs.build.result == 'success'
+      && (vars.BLOCK_ON_ERRORS != 'true' || needs.report.outputs.errors == '0') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production # add required reviewers in Settings → Environments for manual approval
+    concurrency: { group: production-deploy, cancel-in-progress: false }
+    defaults:
+      run: { working-directory: . }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/ssh-setup
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          user: ${{ secrets.SSH_USER }}
+          known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
       - name: Bootstrap server (first run)
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.bootstrap == 'true'
         run: |
@@ -216,7 +276,7 @@ jobs:
           printf '%s' "$DOCKERHUB_TOKEN" | ssh target "docker login -u '$DOCKERHUB_USER' --password-stdin"
       - name: Deploy
         env:
-          TAGS: ${{ needs.plan.outputs.tags }}
+          TAGS: TAG_C=${{ needs.build.outputs.tag }}
           # repository variable DEMO_MODE=true runs the public site as a demonstration on its own database and data folder
           DEMO_MODE: ${{ vars.DEMO_MODE == 'true' && 'true' || 'false' }}
           DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD }}
@@ -231,6 +291,11 @@ jobs:
           SMTP_FROM: ${{ secrets.SMTP_FROM }}
           ENQUIRY_TO: ${{ vars.ENQUIRY_TO }}
           C_SITE: ${{ vars.C_SITE }}
+          GOOGLE_CLIENT_ID: ${{ vars.GOOGLE_CLIENT_ID }}
+          FIREBASE_API_KEY: ${{ vars.FIREBASE_API_KEY }}
+          FIREBASE_AUTH_DOMAIN: ${{ vars.FIREBASE_AUTH_DOMAIN }}
+          FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROJECT_ID }}
+          FIREBASE_APP_ID: ${{ vars.FIREBASE_APP_ID }}
         run: |
           set -euo pipefail
           # never let a demo fall back to the real database or to the password written in the code
@@ -238,18 +303,16 @@ jobs:
             [ -n "$MONGODB_URI" ] && [ -n "$DEMO_PASSWORD" ] || { echo "::error::DEMO_MODE needs the secrets DEMO_MONGODB_URI and DEMO_PASSWORD"; exit 1; }
           fi
           payload=""
-          for k in ADMIN_PASSWORD MONGODB_URI ADMIN_EMAIL SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASS SMTP_FROM ENQUIRY_TO C_SITE DEMO_MODE DEMO_PASSWORD APP_DATA_DIR; do
+          for k in ADMIN_PASSWORD MONGODB_URI ADMIN_EMAIL SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASS SMTP_FROM ENQUIRY_TO C_SITE DEMO_MODE DEMO_PASSWORD APP_DATA_DIR GOOGLE_CLIENT_ID FIREBASE_API_KEY FIREBASE_AUTH_DOMAIN FIREBASE_PROJECT_ID FIREBASE_APP_ID; do
             v="${!k:-}"; [ -n "$v" ] && payload+="$k=$v"$'\n'
           done
-          # shellcheck disable=SC2029  # tags/user are generated by the plan job from fixed patterns
+          # shellcheck disable=SC2029  # tag/user are generated by the build job from fixed patterns
           printf '%s' "$payload" | ssh target "bash /opt/tac/deploy.sh --env-stdin DOCKERHUB_USER=$DOCKERHUB_USER $TAGS"
       - name: Add the demonstration data (first time only)
         if: vars.DEMO_MODE == 'true'
         run: ssh target 'cd /opt/tac && docker compose exec -T tac-c node server/scripts/seed-demo.mjs'
-      - name: Smoke-test the live sites
+      - name: Verify the live site
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
-          URL_C: ${{ vars.SMOKE_URL_C }}
-        run: |
-          check() { for _ in $(seq 1 20); do curl -fsS -m 10 -o /dev/null "$1" && { echo "ok  $1"; return 0; }; sleep 3; done; echo "FAILED $1"; return 1; }
-          check "${URL_C:-http://$SSH_HOST:8082}"
+          LIVE_URL: ${{ vars.SMOKE_URL_C }}
+        run: bash deploy/verify-live.sh "${LIVE_URL:-http://$SSH_HOST:8082}"

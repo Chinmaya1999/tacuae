@@ -1,0 +1,89 @@
+# CI/CD & deployment
+
+```
+ push to main ─► static checks ─┐
+             ─► unit tests ─────┤
+             ─► integration ────┼─► error report (run summary + "ci-errors" issue)
+             ─► browser tests ──┤                    │
+             ─► build image ────┘                    ▼
+                (must work)                       deploy ─► health check (auto rollback) ─► live checks
+```
+## What stops a release
+| Problem | Result |
+|---|---|
+| Failing test, type error, vulnerable package | **Counted and reported; deployment continues** |
+| App does not build, or container does not start | Not deployed |
+| New version unhealthy on the server | Previous version restored automatically |
+| Live checks fail after deployment | Run marked failed; use **Rollback** |
+
+Errors are listed in the run summary and in one GitHub issue labelled `ci-errors`. It is updated on each run and closed
+when everything passes, so the next release can fix it.
+
+> A failing security or sign-in test also reaches the live site in this mode. To block deployment while any check
+> fails, set the repository variable `BLOCK_ON_ERRORS=true`.
+
+* Pull requests run all checks and the image build, and never deploy.
+* Images are tagged `sha-<commit>` and `latest`; each deploy pins the exact sha.
+* Containers run as non-root, read-only, capabilities dropped, 256 MB limit, with data in named volumes.
+* Names such as `tac-c`, `tac-site-c` and `C_SITE` are kept so existing server data and image tags stay valid.
+
+## One-time setup
+
+**0. Rotate credentials that were shared in chat.** Revoke the Docker Hub access token and create a new one
+(Docker Hub → Account settings → Personal access tokens → *Read & Write*). Keep the `.pem` outside the repo folder
+(`chmod 400`). Both are git-ignored, but never commit them.
+
+**1. AWS security group** (EC2 → Security groups → inbound): allow TCP **22**, **80**, **443**, **8082**.
+
+**2. GitHub → repo → Settings → Secrets and variables → Actions**
+
+Secrets
+| Name | Value |
+|---|---|
+| `DOCKERHUB_TOKEN` | the **new** Docker Hub token |
+| `SSH_PRIVATE_KEY` | full contents of the `.pem` file (including BEGIN/END lines) |
+| `SSH_HOST` | server IP (`3.111.214.203`) |
+| `SSH_USER` | `ubuntu` (Ubuntu AMI) or `ec2-user` (Amazon Linux) |
+| `MONGODB_URI` | MongoDB connection string for customer/builder/admin accounts and saved designs (use a **new** DB user — rotate the one shared in chat) |
+| `ADMIN_PASSWORD` | strong password for the first admin account (used on first start only) |
+| `SSH_KNOWN_HOSTS` | *(recommended)* output of `ssh-keyscan -H 3.111.214.203` run from a trusted machine |
+| `SMTP_HOST` `SMTP_PORT` `SMTP_USER` `SMTP_PASS` `SMTP_FROM` | *(optional)* to email enquiries |
+
+Variables
+| Name | Value |
+|---|---|
+| `DOCKERHUB_USERNAME` | `awsmallick1999` |
+| `DOCKER_PLATFORMS` | `linux/amd64` (use `linux/arm64` if the server is a Graviton `t4g/c7g/m7g` instance) |
+| `ADMIN_EMAIL` | *(optional)* email of the first admin (default `admin@tacuae.com`). Sign in at `/login` |
+| `GOOGLE_CLIENT_ID` | *(optional, needs a domain + HTTPS)* OAuth client ID that turns on Google sign-in. Add `https://<domain>` to the client's Authorized JavaScript origins |
+| `FIREBASE_API_KEY` `FIREBASE_AUTH_DOMAIN` `FIREBASE_PROJECT_ID` `FIREBASE_APP_ID` | *(optional, needs a domain + HTTPS)* Firebase web app config that turns on SMS sign-in. Add the domain under Firebase Authentication → Authorized domains |
+| `ENQUIRY_TO` | *(optional)* e-mail that receives enquiries (default `info@tacuae.com`) |
+| `C_SITE` | *(when you have a domain)* e.g. `tacuae.com, www.tacuae.com` → Caddy enables HTTPS automatically |
+| `SMOKE_URL_C` | *(when you have a domain)* e.g. `https://tacuae.com` |
+| `DEPLOY_ENABLED` | **`true`** — turn this on last; until then pushes only build and test |
+
+**3. Environment protection (recommended):** Settings → Environments → `production` → *Required reviewers*, so every
+deploy needs a click of approval.
+
+**4. Prepare the server:** Actions → **CI/CD** → *Run workflow* → tick **bootstrap** (installs Docker, creates `/opt/tac`).
+Run it once. Then push to `main` (or run the workflow with `sites = all`) to deploy.
+
+## Demonstration mode on the server
+`DEMO_MODE=true` (repository **variable**) makes the public site behave like `npm run demo`: sample accounts and prices,
+and **simulated** Google/Apple/OTP sign-in, payments, messaging, assistant and Arabic preview.
+It needs the secrets `DEMO_MONGODB_URI` (database name must contain `demo`) and `DEMO_PASSWORD`; it uses its own data
+folder, so real accounts, quotations and enquiries are not shown or changed.
+Switch back to the real site: `gh variable set DEMO_MODE --body false && gh workflow run CI/CD`.
+
+## Day to day
+* Merge to `main` → changed sites deploy automatically.
+* **Rollback:** Actions → **Rollback** → choose site and an older `sha-…` tag.
+* Logs: `ssh target 'cd /opt/tac && docker compose logs -f --tail 100 tac-c'`.
+* Data lives in Docker volumes (`tac_c_data` holds the admin dashboard's enquiries and content). Back up with
+  `docker run --rm -v tac_c_data:/d -v "$PWD":/b alpine tar czf /b/c-data.tgz -C /d .`
+
+## Addresses
+Without a domain (HTTP on the IP): `http://<ip>:8082` (dashboard `/admin`).
+**Use a domain + HTTPS before using the admin dashboard in production** — over plain HTTP the password travels
+unencrypted (until then, reach it through an SSH tunnel: `ssh -L 8082:localhost:8082 target`). Point DNS A records at the
+server, set `C_SITE`, and redeploy.

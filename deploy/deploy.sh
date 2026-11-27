@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Runs ON THE SERVER (from /opt/tac). Usage:
 #   deploy.sh [--env-stdin] KEY=VALUE ...
-# KEY=VALUE args update image tags (TAG_MAIN/TAG_B/TAG_C, DOCKERHUB_USER). With --env-stdin, KEY=VALUE lines
+# KEY=VALUE args update image tags (TAG_C, DOCKERHUB_USER). With --env-stdin, KEY=VALUE lines
 # on stdin (secrets/config) are merged into .env. Rolls back automatically if a service is unhealthy.
 set -euo pipefail
 cd /opt/tac
 touch .env && chmod 600 .env
-ALLOWED='^(DOCKERHUB_USER|TAG_MAIN|TAG_B|TAG_C|ADMIN_PASSWORD|MONGODB_URI|ADMIN_EMAIL|SMTP_HOST|SMTP_PORT|SMTP_SECURE|SMTP_USER|SMTP_PASS|SMTP_FROM|ENQUIRY_TO|MAIN_SITE|B_SITE|C_SITE|DEMO_MODE|DEMO_PASSWORD|APP_DATA_DIR)$'
+ALLOWED='^(DOCKERHUB_USER|TAG_C|ADMIN_PASSWORD|MONGODB_URI|ADMIN_EMAIL|SMTP_HOST|SMTP_PORT|SMTP_SECURE|SMTP_USER|SMTP_PASS|SMTP_FROM|ENQUIRY_TO|C_SITE|DEMO_MODE|DEMO_PASSWORD|APP_DATA_DIR|GOOGLE_CLIENT_ID|FIREBASE_API_KEY|FIREBASE_AUTH_DOMAIN|FIREBASE_PROJECT_ID|FIREBASE_APP_ID)$'
 
 set_var() { # key value
   local k="$1" v="$2"

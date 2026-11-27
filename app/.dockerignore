@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+*.tsbuildinfo
+.env*
+*.pem
+server/data
+server/tests
+tests
+reports
+test-results
+playwright-report
+playwright.config.js
+README.md

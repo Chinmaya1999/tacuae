@@ -24,7 +24,7 @@ services:
   tac-c:
     <<: *site
     image: ${DOCKERHUB_USER}/tac-site-c:${TAG_C:-latest}
-    environment: { <<: *mail, ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}", ADMIN_EMAIL: "${ADMIN_EMAIL:-admin@tacuae.com}", MONGODB_URI: "${MONGODB_URI:-}", DEMO_MODE: "${DEMO_MODE:-false}", DEMO_PASSWORD: "${DEMO_PASSWORD:-}", DATA_DIR: "${APP_DATA_DIR:-/data}" }
+    environment: { <<: *mail, ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}", ADMIN_EMAIL: "${ADMIN_EMAIL:-admin@tacuae.com}", MONGODB_URI: "${MONGODB_URI:-}", DEMO_MODE: "${DEMO_MODE:-false}", DEMO_PASSWORD: "${DEMO_PASSWORD:-}", GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-}", FIREBASE_API_KEY: "${FIREBASE_API_KEY:-}", FIREBASE_AUTH_DOMAIN: "${FIREBASE_AUTH_DOMAIN:-}", FIREBASE_PROJECT_ID: "${FIREBASE_PROJECT_ID:-}", FIREBASE_APP_ID: "${FIREBASE_APP_ID:-}", DATA_DIR: "${APP_DATA_DIR:-/data}" }
     volumes: ["c_data:/data"]
 
   caddy:

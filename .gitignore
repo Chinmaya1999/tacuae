@@ -6,10 +6,12 @@
 !.env.example
 # build / deps / local data
 node_modules/
+reports/
+report.md
+test-results/
+playwright-report/
 dist/
 *.tsbuildinfo
 **/server/data/*
 !**/server/data/.gitignore
-**/server/enquiries.jsonl
 .DS_Store
-H=3.111.214.203; for p in "" :8081 :8082; do u="http://$H$p"; code=$(curl -s -m 15 -o /tmp/p.html -w '%{http_code} %{size_download}B' "$u"); echo "$u -> $code | $(grep -o '<title>[^<]*' /tmp/p.html | head -1 | sed 's/<title>//')"; done; echo; echo "admin page:"; curl -s -m 15 -o /dev/null -w "http://$H:8082/admin -> %{http_code}\n" http://$H:8082/admin; curl -s -m 15 -o /dev/null -w "http://$H:8082/api/admin/me (not signed in, expect 401) -> %{http_code}\n" http://$H:8082/api/admin/me; echo; echo "images & sitemap:"; curl -s -m 15 -o /dev/null -w "logo %{http_code}\n" http://$H/images/site/logo-dark.png; curl -s -m 15 -o /dev/null -w "sitemap %{http_code}\n" http://$H/sitemap.xml
