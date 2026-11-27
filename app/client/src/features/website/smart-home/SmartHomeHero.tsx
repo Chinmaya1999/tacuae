@@ -1,4 +1,4 @@
-// Homepage hero: a full-screen smart-home simulation. One control panel shows at a time.
+// Full-screen smart-home simulation on the homepage. One control panel shows at a time.
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { useInView } from 'framer-motion'
 import { Clock, CloudSun, LayoutGrid, Mic, Minus, Plus, RotateCcw, Sparkles, Video, type LucideIcon } from 'lucide-react'
@@ -35,7 +35,9 @@ export default function SmartHomeHero() {
   const min = useHome((s) => s.min), weather = useHome((s) => s.weather), view = useHome((s) => s.view), playing = useHome((s) => s.playing), speed = useHome((s) => s.speed), mode = useHome((s) => s.mode)
   const step = useHome((s) => s.step), look = useHome((s) => s.look)
   const [tab, setTab] = useState<Tab>('day')
-  const [ready, setReady] = useState(false), webgl = useRef(true), camera = useRef<CameraApi | null>(null)
+  const webgl = useRef(true), camera = useRef<CameraApi | null>(null)
+  // the 3D house is only downloaded and built when the visitor gets close to it
+  const near = useInView(ref, { once: true, margin: '500px' }), [ready, setReady] = useState(false)
   // how much of the screen the text and controls cover, so the camera frames the house in the free space
   const intro = useRef<HTMLElement>(null), dock = useRef<HTMLDivElement>(null), [insets, setInsets] = useState<Insets>(NONE)
   useEffect(() => {
@@ -47,8 +49,7 @@ export default function SmartHomeHero() {
     return () => { watch.disconnect(); window.removeEventListener('resize', measure) }
   }, [])
 
-  // the page text appears first, then the 3D house loads
-  useEffect(() => { webgl.current = hasWebGL(); const t = setTimeout(() => setReady(true), 200); return () => clearTimeout(t) }, [])
+  useEffect(() => { if (near) { webgl.current = hasWebGL(); setReady(true) } }, [near])
   useEffect(() => {
     if (!playing || reduced || !inView) return
     const t = setInterval(step, speed === 'story' ? 5500 : 1000)
@@ -83,8 +84,8 @@ export default function SmartHomeHero() {
 
       {/* headline, status and what just happened */}
       <header ref={intro} className="relative z-10 order-1 flex flex-col items-start gap-3 px-5 pb-4 pt-24 md:px-10 lg:absolute lg:left-0 lg:top-24 lg:w-[400px] lg:p-0 lg:pl-8 xl:w-[460px] xl:pl-12">
-        <p className="eyebrow">Intelligent living · Live simulation</p>
-        <h1 className="font-display text-[2.1rem] font-bold leading-[1.08] tracking-tight [text-shadow:0_2px_24px_rgba(0,0,0,.5)] sm:text-4xl lg:text-[2.6rem] xl:text-5xl">Your Home. Your Intelligence.</h1>
+        <p className="eyebrow">Try it yourself · Live simulation</p>
+        <h2 className="font-display text-[2.1rem] font-bold leading-[1.08] tracking-tight [text-shadow:0_2px_24px_rgba(0,0,0,.5)] sm:text-4xl lg:text-[2.6rem] xl:text-5xl">Your Home. Your Intelligence.</h2>
         <p className="max-w-md text-sm text-white/85 sm:text-base">A home that adapts to your day, your weather and your voice. Try it below.</p>
         <div className="flex flex-wrap gap-2.5">
           <button type="button" onClick={() => { look('cutaway'); open('rooms') }} className="btn btn-primary">Explore smart home</button>

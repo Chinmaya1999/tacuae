@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import SmartHomeHero from '../smart-home/SmartHomeHero'
+import ShowcaseHero from '../components/ShowcaseHero'
 import ContactForm from '../components/ContactForm'
 import { Counter, MaskImage, Magnetic, Reveal, Words } from '../../../shared/components/ui'
 import { company, products, projects, strengths } from '../../../shared/data/content'
@@ -18,9 +19,11 @@ export default function Home() {
   useSeo('Smart Automation | Total Automation Co LLC (TAC) | Dubai', 'Home and building automation, BMS, GRMS, KNX and lighting control since 1998. Total Automation Co. LLC, Dubai, UAE.', '/', orgJsonLd)
   return (
     <>
-      <SmartHomeHero />
+      <ShowcaseHero />
 
       <CapabilityMarquee />
+
+      <div id="smart-home" className="scroll-mt-0"><SmartHomeHero /></div>
 
       <SolutionsShowcase />
 

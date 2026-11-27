@@ -48,7 +48,7 @@ export default function Layout() {
     if (loc.hash) {
       setTimeout(() => {
         const el = document.querySelector(loc.hash)
-        if (el) window.__lenis ? window.__lenis.scrollTo(el as HTMLElement, { offset: -100 }) : el.scrollIntoView()
+        if (el) window.__lenis ? window.__lenis.scrollTo(el as HTMLElement, { offset: loc.hash === '#smart-home' ? 0 : -100 }) : el.scrollIntoView()
       }, 350)
     } else {
       window.__lenis ? window.__lenis.scrollTo(0, { immediate: true }) : window.scrollTo(0, 0)
