@@ -1,10 +1,12 @@
 // Villa exterior: lit windows, garden lights, gate and cameras that react to the same simulated devices.
 import { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, Sky, Stars } from '@react-three/drei'
 import type { Group } from 'three'
 import { deviceById, type PlacedDevice } from '../../../shared/data/catalog'
 import { useStudioUI } from './store'
+import Cinematic from '../../../shared/three/Cinematic'
+import { useTexture } from '../../../shared/three/textures'
 
 type V3 = [number, number, number]
 const Box = ({ s, p, c, glow }: { s: V3; p: V3; c: string; glow?: string }) => (
@@ -16,17 +18,18 @@ function Gate({ open }: { open: boolean }) {
   return <>{[left, right].map((ref, i) => <group key={i} ref={ref} position={[(i ? 1 : -1) * 0.8, 0.6, 5]}>{Array.from({ length: 6 }, (_, n) => <Box key={n} s={[0.08, 1.2, 0.08]} p={[-0.65 + n * 0.26, 0, 0]} c="#2c3442" />)}<Box s={[1.5, 0.08, 0.1]} p={[0, 0.55, 0]} c="#2c3442" /></group>)}</>
 }
 export default function ExteriorScene({ devices }: { devices: PlacedDevice[] }) {
-  const night = useStudioUI((s) => s.night)
+  const night = useStudioUI((s) => s.night), grass = useTexture('grass', 30, 30)
   const on = (kind: string) => devices.some((d) => deviceById[d.cat]?.kind === kind && d.on)
   const light = devices.find((d) => deviceById[d.cat]?.kind === 'light' && d.on)
   const glow = light ? light.color || '#ffd9a0' : undefined, curtainsOpen = on('curtain')
   const unlocked = devices.some((d) => deviceById[d.cat]?.kind === 'lock' && !d.on)
   return (
     <Canvas shadows="percentage" dpr={[1, 1.75]} camera={{ fov: 45, position: [9, 6, 13] }}>
-      <color attach="background" args={[night ? '#071022' : '#a9d4f5']} />
+      {night ? <><color attach="background" args={['#060d22']} /><Stars radius={80} depth={30} count={1600} factor={3} fade /></> : <Sky distance={400} sunPosition={[40, 28, 25]} turbidity={4} rayleigh={1.2} />}
+      <fog attach="fog" args={[night ? '#060d22' : '#c4dcf0', 30, 90]} />
       <hemisphereLight args={[night ? '#5566a0' : '#ffffff', '#2b2f25', night ? 0.6 : 1.2]} />
       <directionalLight position={[6, 10, 8]} intensity={night ? 0.25 : 1.8} castShadow />
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[40, 40]} /><meshStandardMaterial color="#3f6b43" /></mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[120, 120]} /><meshStandardMaterial map={grass} roughness={1} /></mesh>
       <Box s={[2.4, 0.04, 6]} p={[0, 0.03, 3]} c="#8d8f94" />
       <Box s={[7, 2.4, 3.6]} p={[0, 1.2, -1.8]} c="#e8e1d4" /><Box s={[4.2, 2, 3.2]} p={[-1.2, 3.4, -2]} c="#d9d0bf" />
       <Box s={[7.3, 0.18, 3.9]} p={[0, 2.5, -1.8]} c="#6b5b49" /><Box s={[4.5, 0.18, 3.5]} p={[-1.2, 4.5, -2]} c="#6b5b49" />
@@ -38,6 +41,8 @@ export default function ExteriorScene({ devices }: { devices: PlacedDevice[] }) 
       {[-3.3, 3.3].map((x) => <group key={x}><Box s={[0.3, 0.18, 0.35]} p={[x, 2.2, 0.15]} c="#222" /><mesh position={[x, 2.2, 0.34]}><sphereGeometry args={[0.05, 10, 10]} /><meshStandardMaterial color={on('camera') ? '#ff3b3b' : '#333'} emissive={on('camera') ? '#ff3b3b' : '#000'} emissiveIntensity={3} /></mesh></group>)}
       {[-4.4, 4.4].map((x) => <Box key={x} s={[5, 1, 0.2]} p={[x, 0.5, 5]} c="#cfc6b4" />)}
       <Gate open={unlocked} />
+      {[[-7.5, -2, 1.1], [7.8, -3, 1.3], [-8.2, 3.5, 0.8], [8.4, 3.2, 0.9], [-5, -7, 1.4], [4.6, -7.5, 1.2]].map(([x, z, k]) => <group key={`${x}${z}`} position={[x, 0, z]} scale={k}><mesh position={[0, 0.8, 0]} castShadow><cylinderGeometry args={[0.12, 0.2, 1.6, 10]} /><meshStandardMaterial color="#6a4a33" roughness={1} /></mesh>{[[0, 2.1, 0, 0.95], [-0.6, 1.7, 0.2, 0.6], [0.6, 1.8, -0.1, 0.7]].map(([a, b, c, r], i) => <mesh key={i} position={[a, b, c]} castShadow><icosahedronGeometry args={[r, 2]} /><meshStandardMaterial color={i ? '#356b3d' : '#43854d'} roughness={1} /></mesh>)}</group>)}
+      <Cinematic environment={night ? 0.12 : 0.35} bloom={night ? 0.6 : 0.12} threshold={night ? 0.7 : 1.4} ao={0.5} />
       <OrbitControls target={[0, 1.5, 0]} maxPolarAngle={Math.PI / 2.05} minDistance={6} maxDistance={24} />
     </Canvas>
   )

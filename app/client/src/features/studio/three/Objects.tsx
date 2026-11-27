@@ -1,14 +1,17 @@
 import { useRef, type ReactNode } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
-import { Edges } from '@react-three/drei'
+import { Edges, RoundedBox } from '@react-three/drei'
 import type { Group, Mesh } from 'three'
 import { deviceById, furnitureById, type PlacedDevice, type PlacedFurniture, type Room } from '../../../shared/data/catalog'
 import { levelOf, placeDevice, toWorld, dims } from './geometry'
 
 type V3 = [number, number, number]
-const Box = ({ s, p = [0, 0, 0], c, rough = 0.7, metal = 0.05, shadow = true }: { s: V3; p?: V3; c: string; rough?: number; metal?: number; shadow?: boolean }) => (
-  <mesh position={p} castShadow={shadow} receiveShadow><boxGeometry args={s} /><meshStandardMaterial color={c} roughness={rough} metalness={metal} /></mesh>
+type BoxProps = { s: V3; p?: V3; c: string; rough?: number; metal?: number; shadow?: boolean }
+const Box = ({ s, p = [0, 0, 0], c, rough = 0.7, metal = 0.05, shadow = true }: BoxProps) => (
+  <RoundedBox args={s} radius={Math.min(0.045, Math.min(...s) * 0.3)} smoothness={3} position={p} castShadow={shadow} receiveShadow><meshStandardMaterial color={c} roughness={rough} metalness={metal} /></RoundedBox>
 )
+/** Furniture parts are written as width × depth × height, like the catalogue sizes. */
+const Part = ({ s: [w, d, h], ...rest }: BoxProps) => <Box s={[w, h, d]} {...rest} />
 const Led = ({ on, color = '#8b93ff', p, r = 0.022 }: { on: boolean; color?: string; p: V3; r?: number }) => (
   <mesh position={p}><sphereGeometry args={[r, 12, 12]} /><meshStandardMaterial color={on ? color : '#222'} emissive={on ? color : '#000'} emissiveIntensity={on ? 3 : 0} /></mesh>
 )
@@ -17,14 +20,14 @@ const Led = ({ on, color = '#8b93ff', p, r = 0.022 }: { on: boolean; color?: str
 function FurnitureBody({ type }: { type: PlacedFurniture['type'] }) {
   const f = furnitureById[type], [w, d, h] = f.size, c = f.color
   switch (type) {
-    case 'bed': return <><Box s={[w, d, 0.3]} p={[0, 0.15, 0]} c="#4a4f5c" /><Box s={[w - 0.08, d - 0.1, 0.22]} p={[0.02, 0.41, 0]} c="#e8ecf3" rough={0.95} /><Box s={[0.12, d, 0.9]} p={[-w / 2 + 0.06, 0.45, 0]} c="#6b5a48" /><Box s={[0.4, 0.55, 0.12]} p={[-w / 2 + 0.4, 0.58, -0.42]} c="#fff" rough={1} /><Box s={[0.4, 0.55, 0.12]} p={[-w / 2 + 0.4, 0.58, 0.42]} c="#fff" rough={1} /></>
-    case 'sofa': return <><Box s={[w, d, 0.4]} p={[0, 0.2, 0]} c={c} rough={0.95} /><Box s={[w, 0.22, 0.45]} p={[0, 0.62, -d / 2 + 0.11]} c={c} rough={0.95} /><Box s={[0.2, d, 0.3]} p={[-w / 2 + 0.1, 0.55, 0]} c={c} rough={0.95} /><Box s={[0.2, d, 0.3]} p={[w / 2 - 0.1, 0.55, 0]} c={c} rough={0.95} /></>
-    case 'coffee-table': return <><Box s={[w, d, 0.05]} p={[0, h, 0]} c={c} />{[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b], i) => <Box key={i} s={[0.05, 0.05, h]} p={[a * (w / 2 - 0.05), h / 2, b * (d / 2 - 0.05)]} c="#2a2a2a" />)}</>
-    case 'tv-unit': return <><Box s={[w, d, 0.45]} p={[0, 0.225, 0]} c={c} /><mesh position={[0, 0.82, 0]} castShadow><boxGeometry args={[w * 0.85, 0.05, 0.55]} /><meshStandardMaterial color="#0b0d12" roughness={0.2} metalness={0.6} /></mesh></>
-    case 'wardrobe': return <><Box s={[w, d, h]} p={[0, h / 2, 0]} c={c} /><Box s={[0.02, d + 0.01, h - 0.1]} p={[0, h / 2, 0]} c="#6d5640" /><Box s={[0.03, 0.03, 0.3]} p={[-0.1, 1.0, d / 2 + 0.01]} c="#ccc" metal={0.8} /><Box s={[0.03, 0.03, 0.3]} p={[0.1, 1.0, d / 2 + 0.01]} c="#ccc" metal={0.8} /></>
-    case 'desk': return <><Box s={[w, d, 0.04]} p={[0, h, 0]} c={c} /><Box s={[0.04, d - 0.05, h]} p={[-w / 2 + 0.05, h / 2, 0]} c={c} /><Box s={[0.04, d - 0.05, h]} p={[w / 2 - 0.05, h / 2, 0]} c={c} /></>
-    case 'chair': return <><Box s={[w, d, 0.06]} p={[0, 0.45, 0]} c={c} />{[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b], i) => <Box key={i} s={[0.04, 0.04, 0.45]} p={[a * 0.2, 0.225, b * 0.2]} c="#222" />)}<Box s={[0.05, d, 0.45]} p={[-w / 2 + 0.03, 0.7, 0]} c={c} /></>
-    case 'dining-table': return <><Box s={[w, d, 0.05]} p={[0, h, 0]} c={c} />{[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b], i) => <Box key={i} s={[0.07, 0.07, h]} p={[a * (w / 2 - 0.1), h / 2, b * (d / 2 - 0.1)]} c="#3a2c1e" />)}</>
+    case 'bed': return <><Part s={[w, d, 0.3]} p={[0, 0.15, 0]} c="#4a4f5c" /><Part s={[w - 0.08, d - 0.1, 0.22]} p={[0.02, 0.41, 0]} c="#e8ecf3" rough={0.95} /><Part s={[0.12, d, 0.9]} p={[-w / 2 + 0.06, 0.45, 0]} c="#6b5a48" /><Part s={[0.4, 0.55, 0.12]} p={[-w / 2 + 0.4, 0.58, -0.42]} c="#fff" rough={1} /><Part s={[0.4, 0.55, 0.12]} p={[-w / 2 + 0.4, 0.58, 0.42]} c="#fff" rough={1} /></>
+    case 'sofa': return <><Part s={[w, d, 0.4]} p={[0, 0.2, 0]} c={c} rough={0.95} /><Part s={[w, 0.22, 0.45]} p={[0, 0.62, -d / 2 + 0.11]} c={c} rough={0.95} /><Part s={[0.2, d, 0.3]} p={[-w / 2 + 0.1, 0.55, 0]} c={c} rough={0.95} /><Part s={[0.2, d, 0.3]} p={[w / 2 - 0.1, 0.55, 0]} c={c} rough={0.95} /></>
+    case 'coffee-table': return <><Part s={[w, d, 0.05]} p={[0, h, 0]} c={c} />{[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b], i) => <Part key={i} s={[0.05, 0.05, h]} p={[a * (w / 2 - 0.05), h / 2, b * (d / 2 - 0.05)]} c="#2a2a2a" />)}</>
+    case 'tv-unit': return <><Part s={[w, d, 0.45]} p={[0, 0.225, 0]} c={c} /><mesh position={[0, 0.82, 0]} castShadow><boxGeometry args={[w * 0.85, 0.05, 0.55]} /><meshStandardMaterial color="#0b0d12" roughness={0.2} metalness={0.6} /></mesh></>
+    case 'wardrobe': return <><Part s={[w, d, h]} p={[0, h / 2, 0]} c={c} /><Part s={[0.02, d + 0.01, h - 0.1]} p={[0, h / 2, 0]} c="#6d5640" /><Part s={[0.03, 0.03, 0.3]} p={[-0.1, 1.0, d / 2 + 0.01]} c="#ccc" metal={0.8} /><Part s={[0.03, 0.03, 0.3]} p={[0.1, 1.0, d / 2 + 0.01]} c="#ccc" metal={0.8} /></>
+    case 'desk': return <><Part s={[w, d, 0.04]} p={[0, h, 0]} c={c} /><Part s={[0.04, d - 0.05, h]} p={[-w / 2 + 0.05, h / 2, 0]} c={c} /><Part s={[0.04, d - 0.05, h]} p={[w / 2 - 0.05, h / 2, 0]} c={c} /></>
+    case 'chair': return <><Part s={[w, d, 0.06]} p={[0, 0.45, 0]} c={c} />{[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b], i) => <Part key={i} s={[0.04, 0.04, 0.45]} p={[a * 0.2, 0.225, b * 0.2]} c="#222" />)}<Part s={[0.05, d, 0.45]} p={[-w / 2 + 0.03, 0.7, 0]} c={c} /></>
+    case 'dining-table': return <><Part s={[w, d, 0.05]} p={[0, h, 0]} c={c} />{[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([a, b], i) => <Part key={i} s={[0.07, 0.07, h]} p={[a * (w / 2 - 0.1), h / 2, b * (d / 2 - 0.1)]} c="#3a2c1e" />)}</>
     case 'plant': return <><mesh position={[0, 0.2, 0]} castShadow><cylinderGeometry args={[0.2, 0.15, 0.4, 16]} /><meshStandardMaterial color="#8c5a3c" roughness={0.9} /></mesh><mesh position={[0, 0.75, 0]} castShadow><icosahedronGeometry args={[0.38, 1]} /><meshStandardMaterial color={c} roughness={0.9} flatShading /></mesh></>
     case 'rug': return <mesh position={[0, 0.011, 0]} receiveShadow><boxGeometry args={[w, h, d]} /><meshStandardMaterial color={c} roughness={1} /></mesh>
   }

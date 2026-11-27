@@ -7,6 +7,7 @@ import { FH, footprint } from './geometry'
 import { modelDef } from './models'
 import { asphaltTex, concreteTex, facadeSet, lobbySet, paletteFor, type Palette } from './facade'
 import { statusColor, worst, type Catalog, type Equip, type EquipType, type Live, type Project, type Status } from '../data/bms'
+import Cinematic from '../../../shared/three/Cinematic'
 
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n))
 
@@ -304,6 +305,8 @@ function Scene({ night, xray, resetKey, zoom, project, equipment, live, catalog,
         <mesh position={[dragPlane.ox, dragPlane.y, 0]} rotation={[-Math.PI / 2, 0, 0]} onPointerMove={(e) => setDrag((d) => (d ? { ...d, x: clamp(((e.point.x - dragPlane.ox) / dragPlane.w + 0.5) * 100, 2, 98), y: clamp((e.point.z / dragPlane.l + 0.5) * 100, 2, 98) } : d))}>
           <planeGeometry args={[dragPlane.w * 3, dragPlane.l * 3]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>)}
+      {/* glowing windows after dark; daytime keeps the plain renderer, no ambient occlusion at city scale */}
+      {night && <Cinematic bloom={0.55} threshold={0.75} ao={0} />}
       <Rig goal={goal} animKey={`${sel?.towerId ?? ''}:${sel?.level ?? 'all'}:${project.id}:${resetKey}`} minD={sel ? 16 : 45} maxD={sel ? 220 : 800} zoom={zoom} />
     </>
   )

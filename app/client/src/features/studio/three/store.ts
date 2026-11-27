@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type CamMode = 'orbit' | 'top' | 'front' | 'walk' | 'free'
+export type CamMode = 'orbit' | 'top' | 'front' | 'walk' | 'free' | 'play'
 export type Sel = { id: string; kind: 'device' | 'furniture' } | null
 export type Drag = { id: string; kind: 'device' | 'furniture'; height: number } | null
 

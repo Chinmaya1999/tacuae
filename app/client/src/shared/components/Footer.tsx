@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Mail, MapPin, Phone } from 'lucide-react'
 import ClayScene from './ClayScene'
 import { company, products, projects, services, serviceHref } from '../data/content'
@@ -6,13 +6,15 @@ import { company, products, projects, services, serviceHref } from '../data/cont
 const FbIcon = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden><path d="M13.5 22v-8.2h2.8l.5-3.3h-3.3V8.4c0-.9.4-1.7 1.8-1.7h1.6V3.8s-1.4-.3-2.8-.3c-2.7 0-4.4 1.6-4.4 4.6v2.4H6.8v3.3h2.9V22h3.8z" /></svg>
 
 export default function Footer() {
+  const home = useLocation().pathname === '/'
   return (
     <footer className="relative overflow-hidden border-t border-white/10 bg-midnight pt-16 pb-8">
       <svg className="absolute inset-0 h-full w-full opacity-[.12] pointer-events-none" aria-hidden>
         <defs><pattern id="fp" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M80 0H0V80" fill="none" stroke="#8b93ff" strokeWidth=".6" className="draw-line" /></pattern></defs>
         <rect width="100%" height="100%" fill="url(#fp)" />
       </svg>
-      <div className="container-x relative mb-16">
+      {/* the homepage ends with its own enquiry form, so this card would only repeat it */}
+      {!home && <div className="container-x relative mb-16">
         <div className="surface aurora grid items-center gap-6 overflow-hidden p-7 sm:p-10 lg:grid-cols-[1.5fr_1fr]">
           <div>
             <h2 className="max-w-xl text-2xl font-bold sm:text-3xl">Plan your automation project with TAC.</h2>
@@ -26,7 +28,7 @@ export default function Footer() {
           </div>
           <ClayScene className="mx-auto hidden max-w-[320px] lg:block" />
         </div>
-      </div>
+      </div>}
       <div className="container-x relative grid gap-12 md:grid-cols-2 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <img src={company.logoDark} alt="TAC" className="h-12 w-auto" />

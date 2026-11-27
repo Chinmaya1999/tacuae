@@ -22,7 +22,7 @@ export function securityHeaders() {
     res.setHeader('X-Content-Type-Options', 'nosniff')
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
     res.setHeader('X-Frame-Options', 'SAMEORIGIN')
-    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), usb=()')
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(self), geolocation=(), usb=()')
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups') // the Google sign-in popup must reply
     if (isSecure(req)) res.setHeader('Strict-Transport-Security', 'max-age=15552000')
     if (env.demoMode) res.setHeader('X-Robots-Tag', 'noindex, nofollow') // sample data must not appear in search

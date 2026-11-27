@@ -1,0 +1,2 @@
+export const panel = 'rounded-2xl border border-white/12 bg-[#0b1020]/78 shadow-lift backdrop-blur-xl'
+export const chip = (on: boolean) => `flex shrink-0 items-center justify-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition ${on ? 'border-accent/80 bg-primary text-white shadow-md shadow-primary/30' : 'border-white/14 bg-white/[.05] text-silver hover:border-white/40 hover:text-white'}`

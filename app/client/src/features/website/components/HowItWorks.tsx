@@ -1,5 +1,6 @@
 import { ClipboardCheck, Cuboid, ReceiptText, Ruler } from 'lucide-react'
 import { Magnetic, Reveal } from '../../../shared/components/ui'
+import SectionHeader from '../../../shared/components/SectionHeader'
 
 // Mirrors the real quotation journey: configure → indicative price → TAC review and final quote → site survey.
 const STEPS = [
@@ -11,14 +12,11 @@ const STEPS = [
 
 export default function HowItWorks() {
   return (
-    <section aria-labelledby="how" className="relative overflow-hidden bg-midnight py-24 md:py-32">
+    <section aria-labelledby="how" className="section relative overflow-hidden bg-midnight">
       <div aria-hidden className="aurora absolute inset-0" />
       <div className="container-x relative">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <div><span className="eyebrow">How it works</span><h2 id="how" className="h2 mt-5 max-w-2xl">From first idea to site survey.</h2></div>
-          <Magnetic to="/design-my-home">Start your design</Magnetic>
-        </div>
-        <ol className="mt-14 grid gap-x-6 gap-y-10 md:grid-cols-4">
+        <SectionHeader id="how" eyebrow="How it works" title="From first idea to site survey." text="Four simple steps, starting online." action={<Magnetic to="/design-my-home">Start your design</Magnetic>} />
+        <ol className="grid gap-x-6 gap-y-10 md:grid-cols-4">
           {STEPS.map(({ icon: Icon, title, text }, i) => (
             <li key={title} className="relative">
               <Reveal delay={i * 0.08}>

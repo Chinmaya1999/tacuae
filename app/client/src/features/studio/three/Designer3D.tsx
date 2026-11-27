@@ -14,7 +14,7 @@ const Icon = ({ name, size = 18, className = '' }: { name: string; size?: number
 }
 const CAMS: { id: CamMode; label: string; icon: string }[] = [
   { id: 'orbit', label: 'Orbit', icon: 'Orbit' }, { id: 'top', label: 'Top', icon: 'LayoutDashboard' }, { id: 'front', label: 'Front', icon: 'PanelTop' },
-  { id: 'walk', label: 'Walk', icon: 'Footprints' }, { id: 'free', label: 'Free', icon: 'Move3d' },
+  { id: 'walk', label: 'Walk', icon: 'Footprints' }, { id: 'free', label: 'Free', icon: 'Move3d' }, { id: 'play', label: 'Play', icon: 'Gamepad2' },
 ]
 const chip = (on: boolean) => `rounded-full border px-3 py-1 text-xs transition ${on ? 'border-accent bg-accent/15 text-accent' : 'border-white/15 text-silver hover:text-white'}`
 const Slider = ({ label, value, min, max, step = 1, unit = '', onStart, onChange }: { label: string; value: number; min: number; max: number; step?: number; unit?: string; onStart: () => void; onChange: (v: number) => void }) => (
@@ -82,7 +82,7 @@ export default function Designer3D({ design, onChange, readOnly }: Props) {
       if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo() }
       else if (mod && e.key.toLowerCase() === 'y') { e.preventDefault(); redo() }
       else if ((e.key === 'Delete' || e.key === 'Backspace') && sel) { e.preventDefault(); removeSel() }
-      else if (e.key.toLowerCase() === 'r' && selFurn && cam !== 'walk') rotate()
+      else if (e.key.toLowerCase() === 'r' && selFurn && cam !== 'walk' && cam !== 'play') rotate()
     }
     window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k)
   })
@@ -100,7 +100,8 @@ export default function Designer3D({ design, onChange, readOnly }: Props) {
     window.addEventListener('keydown', k)
     return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', k) }
   }, [full])
-  const side = panels && !readOnly
+  const playing = cam === 'play'
+  const side = panels && !readOnly && !playing
   return (
     <div className={full ? 'fixed inset-0 z-50 bg-midnight' : `relative overflow-hidden rounded-3xl border border-white/10 bg-deep ${readOnly ? 'h-[580px]' : 'h-[calc(100vh-170px)] min-h-[640px]'}`}>
       <div className="absolute inset-0 bg-deep" style={{ touchAction: 'none' }} onDoubleClick={(e) => { if (e.target instanceof HTMLCanvasElement) setResetKey((n) => n + 1) }}>
@@ -133,7 +134,7 @@ export default function Designer3D({ design, onChange, readOnly }: Props) {
       </div>
 
       {!readOnly && (
-        <aside className={`absolute bottom-3 left-3 z-20 w-[min(300px,86vw)] space-y-3 overflow-y-auto rounded-2xl border border-white/10 bg-midnight/85 p-3 backdrop-blur ${panels ? '' : 'hidden'}`} style={{ top: 150 }} aria-label="Build tools">
+        <aside className={`absolute bottom-3 left-3 z-20 w-[min(300px,86vw)] space-y-3 overflow-y-auto rounded-2xl border border-white/10 bg-midnight/85 p-3 backdrop-blur ${panels && !playing ? '' : 'hidden'}`} style={{ top: 150 }} aria-label="Build tools">
           <div className="flex gap-1.5">{(['devices', 'furniture', 'room'] as const).map((t) => <button key={t} onClick={() => setTab(t)} className={`flex-1 ${chip(tab === t)} capitalize`}>{t === 'room' ? 'Room style' : t === 'devices' ? 'Smart devices' : 'Furniture'}</button>)}</div>
           {tab === 'devices' && <>
             <div className="flex flex-wrap gap-1.5">{(['all', ...groups.map((g) => g.id)] as const).map((g) => <button key={g} onClick={() => setGroup(g)} className={chip(group === g)}>{g === 'all' ? 'All' : g}</button>)}</div>
@@ -155,14 +156,14 @@ export default function Designer3D({ design, onChange, readOnly }: Props) {
             </div>)}
         </aside>
       )}
-      {!readOnly && <aside className={`absolute bottom-3 right-3 z-20 w-[min(310px,86vw)] overflow-y-auto ${panels ? '' : 'hidden'}`} style={{ top: 64 }} aria-label="Estimate"><CostPanel e={estimate} /></aside>}
+      {!readOnly && <aside className={`absolute bottom-3 right-3 z-20 w-[min(310px,86vw)] overflow-y-auto ${panels && !playing ? '' : 'hidden'}`} style={{ top: 64 }} aria-label="Estimate"><CostPanel e={estimate} /></aside>}
 
-      <div className={`absolute bottom-16 z-20 flex flex-col gap-2 ${side ? 'right-[336px]' : 'right-3'}`} role="group" aria-label="Camera zoom">
+      <div className={`absolute bottom-16 z-20 flex-col gap-2 ${playing ? 'hidden' : 'flex'} ${side ? 'right-[336px]' : 'right-3'}`} role="group" aria-label="Camera zoom">
         {([['Zoom in', L.ZoomIn, () => setZoom((z) => ({ n: z.n + 1, dir: 1 }))], ['Zoom out', L.ZoomOut, () => setZoom((z) => ({ n: z.n + 1, dir: -1 }))], ['Reset view', L.RotateCcw, () => setResetKey((n) => n + 1)]] as const).map(([label, I, fn]) => (
           <button key={label} onClick={fn} aria-label={label} title={label} className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-midnight/80 text-silver backdrop-blur transition hover:border-accent hover:text-accent"><I size={17} /></button>))}
       </div>
 
-      <div className={`pointer-events-none absolute bottom-3 z-20 flex flex-col gap-2 ${side ? 'left-[324px] right-[392px]' : 'left-3 right-16'}`}>
+      <div className={`pointer-events-none absolute bottom-3 z-20 flex flex-col gap-2 ${playing ? 'hidden' : side ? 'left-[324px] right-[392px]' : 'left-3 right-16'}`}>
         <p className="pointer-events-none hidden self-start rounded-lg bg-midnight/80 px-3 py-1.5 text-[0.7rem] text-silver backdrop-blur sm:block">{cam === 'walk' ? 'W A S D / arrows to walk · drag to look around' : readOnly ? 'Drag to orbit · click a device to try it · double-click to reset' : 'Click a device to switch it · drag to move · drag the background to orbit · double-click to reset'}</p>
         {/* inspector */}
         {(selDevice || selFurn) && (

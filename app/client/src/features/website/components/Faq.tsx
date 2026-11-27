@@ -13,7 +13,7 @@ const ITEMS: [string, string][] = [
 
 export default function Faq() {
   return (
-    <section aria-labelledby="faq" className="light-section py-24 md:py-32">
+    <section aria-labelledby="faq" className="light-section section">
       <div className="container-x grid gap-12 lg:grid-cols-12">
         <div className="lg:col-span-4">
           <span className="eyebrow">FAQs</span>

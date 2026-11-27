@@ -6,6 +6,10 @@ import { type Room } from '../../../shared/data/catalog'
 import { DeviceMesh, FurnitureMesh } from './Objects'
 import { clamp, dims, mountFor, mountHeight, snapWall, toPct, type Wall } from './geometry'
 import { useStudioUI } from './store'
+import Player from './Player'
+import PlayHud from './PlayHud'
+import Cinematic from '../../../shared/three/Cinematic'
+import { useCityView, useTexture } from '../../../shared/three/textures'
 
 export type MoveFn = (kind: 'device' | 'furniture', id: string, x: number, y: number) => void
 type Props = { resetKey: number; zoom: { n: number; dir: 1 | -1 }; room: Room; readOnly?: boolean; onBegin: () => void; onMove: MoveFn; onToggle: (id: string) => void; onCapture: (fn: () => string) => void }
@@ -24,9 +28,12 @@ function Lights({ w, l, h }: { w: number; l: number; h: number }) {
 function Shell({ room }: { room: Room }) {
   const { w, l, h } = dims(room), night = useStudioUI((s) => s.night), cam = useStudioUI((s) => s.cam)
   const refs = useRef<Partial<Record<Wall, Group | null>>>({})
+  const inside = cam === 'walk' // in game mode the camera follows from outside, so near walls and the ceiling stay open
+  const kind = room.type === 'bathroom' || room.type === 'lobby' ? 'marble' : room.type === 'kitchen' ? 'tile' : 'wood'
+  const floorMap = useTexture(kind, Math.max(1, Math.round(w / 2.4)), Math.max(1, Math.round(l / 2.4))), plaster = useTexture('plaster', 2, 1), view = useCityView(night)
   const wallColor = room.wall || '#d9dee7', gw = Math.min(2.2, w * 0.45)
   useFrame(({ camera }) => {
-    const c = camera.position, e = 0.15, walk = cam === 'walk'
+    const c = camera.position, e = 0.15, walk = inside
     const hide: Record<Wall, boolean> = { front: !walk && c.z > l / 2 + e, back: !walk && c.z < -l / 2 - e, left: !walk && c.x < -w / 2 - e, right: !walk && c.x > w / 2 + e }
     ;(Object.keys(hide) as Wall[]).forEach((k) => { const g = refs.current[k]; if (g) g.visible = !hide[k] })
   })
@@ -36,15 +43,18 @@ function Shell({ room }: { room: Room }) {
   ]
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[w, l]} /><meshStandardMaterial color={room.floor || '#8a6f55'} roughness={0.55} metalness={0.05} /></mesh>
-      <mesh position={[0, h, 0]} rotation={[Math.PI / 2, 0, 0]} visible={cam === 'walk'} receiveShadow><planeGeometry args={[w, l]} /><meshStandardMaterial color="#eef1f6" roughness={1} /></mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow><planeGeometry args={[w, l]} /><meshStandardMaterial color={room.floor || '#8a6f55'} map={floorMap} roughness={0.28} metalness={0.08} /></mesh>
+      <mesh position={[0, -0.09, 0]} receiveShadow><boxGeometry args={[w + 0.3, 0.16, l + 0.3]} /><meshStandardMaterial color="#2a2d3c" roughness={0.6} /></mesh>
+      <mesh position={[0, h, 0]} rotation={[Math.PI / 2, 0, 0]} visible={inside} receiveShadow><planeGeometry args={[w, l]} /><meshStandardMaterial color="#eef1f6" roughness={1} /></mesh>
       {walls.map(({ k, pos, rot, len }) => (
         <group key={k} ref={(g) => { refs.current[k] = g }} position={pos} rotation={[0, rot, 0]}>
-          <mesh position={[0, 0, -0.06]} receiveShadow castShadow><boxGeometry args={[len + 0.12, h, 0.12]} /><meshStandardMaterial color={wallColor} roughness={0.9} /></mesh>
-          <mesh position={[0, -h / 2 + 0.05, 0.012]}><boxGeometry args={[len, 0.1, 0.02]} /><meshStandardMaterial color="#ffffff" roughness={0.6} /></mesh>
+          <mesh position={[0, 0, -0.06]} receiveShadow castShadow><boxGeometry args={[len + 0.12, h, 0.12]} /><meshStandardMaterial color={wallColor} map={plaster} roughness={0.92} /></mesh>
+          <mesh position={[0, -h / 2 + 0.05, 0.012]}><boxGeometry args={[len, 0.1, 0.02]} /><meshStandardMaterial color="#ffffff" roughness={0.35} /></mesh>
+          {/* hidden cove lighting along the top of each wall */}
+          <mesh position={[0, h / 2 - 0.07, 0.025]}><boxGeometry args={[len, 0.025, 0.03]} /><meshStandardMaterial color="#ffffff" emissive={night ? '#ffbe78' : '#ffffff'} emissiveIntensity={night ? 1.6 : 0.2} /></mesh>
           {k === 'back' && <group position={[0, 1.55 - h / 2, 0]}>
             <mesh position={[0, 0, 0.02]}><boxGeometry args={[gw + 0.12, 1.32, 0.04]} /><meshStandardMaterial color="#cfd5df" /></mesh>
-            <mesh position={[0, 0, 0.045]}><planeGeometry args={[gw, 1.2]} /><meshStandardMaterial color={night ? '#16234a' : '#d5dbff'} emissive={night ? '#16234a' : '#d5dbff'} emissiveIntensity={night ? 0.5 : 1.4} /></mesh>
+            <mesh position={[0, 0, 0.045]}><planeGeometry args={[gw, 1.2]} /><meshBasicMaterial map={view} toneMapped={false} /></mesh>
           </group>}
           {k === 'right' && <mesh position={[0, 1.025 - h / 2, 0.03]} castShadow><boxGeometry args={[0.95, 2.05, 0.06]} /><meshStandardMaterial color="#6b5543" roughness={0.7} /></mesh>}
         </group>
@@ -59,7 +69,7 @@ function Rig({ room, flat, resetKey, zoom }: { room: Room; flat: boolean; resetK
   const { w, l, h } = dims(room), keys = useRef<Record<string, boolean>>({})
 
   useEffect(() => {
-    const c = controls.current; if (!c) return
+    const c = controls.current; if (!c || cam === 'play') return
     const d = Math.max(w, l) * 1.05 + 1
     const set = (p: [number, number, number], t: [number, number, number]) => { camera.position.set(...p); c.target.set(...t); c.update() }
     if (cam === 'orbit' || cam === 'free') set([d * 0.75, d * 0.75, d * 0.95], [0, h * 0.3, 0])
@@ -70,7 +80,7 @@ function Rig({ room, flat, resetKey, zoom }: { room: Room; flat: boolean; resetK
 
   useEffect(() => { // zoom buttons: dolly along the line to the target (not while walking)
     const c = controls.current
-    if (!c || !zoom.n || cam === 'walk') return
+    if (!c || !zoom.n || cam === 'walk' || cam === 'play') return
     const off = camera.position.clone().sub(c.target), len = Math.min(60, Math.max(2.5, off.length() * (zoom.dir > 0 ? 0.78 : 1.3)))
     camera.position.copy(c.target).add(off.setLength(len)); c.update()
   }, [zoom.n]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -95,6 +105,7 @@ function Rig({ room, flat, resetKey, zoom }: { room: Room; flat: boolean; resetK
   })
 
   const walk = cam === 'walk'
+  if (cam === 'play') return null
   return <OrbitControls ref={controls} makeDefault enabled={!drag} enableRotate={cam !== 'top' && cam !== 'front'} enablePan={!walk && !flat} screenSpacePanning enableZoom={!walk}
     rotateSpeed={walk ? -0.35 : 0.8} minDistance={walk ? 0.01 : 1.5} maxDistance={walk ? 0.05 : 60} maxPolarAngle={walk || cam === 'free' ? Math.PI : Math.PI / 2.02} enableDamping dampingFactor={0.08} />
 }
@@ -107,6 +118,7 @@ function Capture({ onCapture }: { onCapture: (fn: () => string) => void }) {
 
 export default function RoomScene({ resetKey, zoom, room, readOnly, onBegin, onMove, onToggle, onCapture }: Props) {
   const { sel, drag, select, setDrag } = useStudioUI()
+  const cam = useStudioUI((s) => s.cam), night = useStudioUI((s) => s.night)
   const { w, l } = dims(room), info = useRef<{ kind: 'device' | 'furniture'; id: string; moved: boolean; sx: number; sz: number } | null>(null)
 
   const down = (kind: 'device' | 'furniture', id: string, height: number) => (e: ThreeEvent<PointerEvent>) => {
@@ -133,6 +145,7 @@ export default function RoomScene({ resetKey, zoom, room, readOnly, onBegin, onM
   }, [drag, setDrag, onToggle])
 
   return (
+    <div className="relative h-full w-full">
     <Canvas shadows="percentage" dpr={[1, 1.75]} camera={{ fov: 50, near: 0.05, far: 200, position: [8, 7, 9] }} gl={{ preserveDrawingBuffer: true, antialias: true }} onPointerMissed={() => select(null)}>
       <color attach="background" args={['#0a1220']} />
       <Lights w={w} l={l} h={room.h ?? 2.8} />
@@ -141,7 +154,11 @@ export default function RoomScene({ resetKey, zoom, room, readOnly, onBegin, onM
       {room.devices.map((d) => <DeviceMesh key={d.id} d={d} room={room} selected={sel?.id === d.id} onDown={down('device', d.id, Math.max(0.05, mountHeight(mountFor(d.cat), room.h ?? 2.8) - (mountFor(d.cat) === 'ceiling' ? 0.1 : 0)))} />)}
       {drag && <mesh position={[0, drag.height, 0]} rotation={[-Math.PI / 2, 0, 0]} onPointerMove={move}><planeGeometry args={[80, 80]} /><meshBasicMaterial transparent opacity={0} depthWrite={false} /></mesh>}
       <Rig room={room} flat={false} resetKey={resetKey} zoom={zoom} />
+      {cam === 'play' && <Player room={room} onToggle={onToggle} />}
+      <Cinematic environment={night ? 0.12 : 0.38} bloom={night ? 0.26 : 0.1} threshold={night ? 0.95 : 1.2} ao={0.45} />
       <Capture onCapture={onCapture} />
     </Canvas>
+    {cam === 'play' && <PlayHud />}
+    </div>
   )
 }
